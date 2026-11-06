@@ -14,7 +14,7 @@ Languages: **C**, **C++**, **Python**, **Java**, **C#**, **JavaScript** (Node.js
 This plugin is also the core of the CodeLab plugins. The filter and the question type use its editor, its runner and its
 Jobe client.
 
-> Status: **alpha** (0.6.1), under development.
+> Status: **stable** (1.0.0).
 
 ## Features
 

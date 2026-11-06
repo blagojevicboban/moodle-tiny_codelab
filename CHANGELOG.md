@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.0 (2026-11-06)
+
+- First stable release. No change in the code since 0.6.1; filter_codelab and qtype_codelab 1.0.0 need this version.
+
 ## 0.6.1 (2026-11-06)
 
 - C and C++ programs written in Visual Studio run on Jobe: scanf_s, fscanf_s, sscanf_s, printf_s and fprintf_s are
