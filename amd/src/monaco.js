@@ -97,6 +97,7 @@ const NO_ASSIST = {
  * @param {number} [options.maxLines]
  * @param {string} [options.label] accessible name of the editor
  * @param {function(): void} [options.onRun] called on Ctrl+Enter
+ * @param {string} [options.pyodide] address of Pyodide: Python typing help from Jedi (level 2); '' for level 1
  * @returns {Promise<CodeEditor>}
  */
 export const createEditor = async(container, options = {}) => {
@@ -117,7 +118,7 @@ export const createEditor = async(container, options = {}) => {
     const win = await ready;
     const monaco = win.monaco;
     if (!options.noassist) {
-        registerAssist(monaco);
+        registerAssist(monaco, options.pyodide || '');
     }
     const lang = Object.prototype.hasOwnProperty.call(languages, options.lang) ? options.lang : defaultLanguage;
     const editor = monaco.editor.create(win.document.getElementById('editor'), Object.assign({

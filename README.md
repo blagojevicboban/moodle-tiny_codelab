@@ -14,7 +14,7 @@ Languages: **C**, **C++**, **Python**, **Java**, **C#**, **JavaScript** (Node.js
 This plugin is also the core of the CodeLab plugins. The filter and the question type use its editor, its runner and its
 Jobe client.
 
-> Status: **alpha** (0.4.0), under development.
+> Status: **alpha** (0.5.0), under development.
 
 ## Features
 
@@ -26,6 +26,12 @@ Jobe client.
   - members of strings, lists and `Scanner`.
 
   It can be turned off for a single example (for tests).
+- **Python typing help from [Jedi](https://jedi.readthedocs.io)**, when Python in the browser is on:
+  - completion of everything Python knows, also the methods of the reader's own variables;
+  - the parameters of the reader's own functions while a call is typed;
+  - syntax errors marked in the editor.
+
+  Jedi runs in Pyodide in its own worker and loads when the reader first types. Until then, the help above is used.
 - **Run** from the dialog with an input field. Programs are compiled and run on a
   [Jobe](https://github.com/trampgeek/jobe) server.
 - **Python in the browser** ([Pyodide](https://pyodide.org)):
@@ -94,8 +100,8 @@ is the jsDelivr CDN. The browser does not send the program or its input there.
 
 - [Monaco Editor](https://github.com/microsoft/monaco-editor) 0.57.0, MIT. It is bundled in `thirdparty/monaco`, with
   the CodeLab languages only. Build it with `devtools/codelab-monaco/build.sh`.
-- [Pyodide](https://pyodide.org) 314.0.7, MPL 2.0. It is not bundled: the browser loads it from the address in the
-  settings.
+- [Pyodide](https://pyodide.org) 314.0.7, MPL 2.0, with its Jedi package (MIT). They are not bundled: the browser
+  loads them from the address in the settings.
 
 ## License
 

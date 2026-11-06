@@ -107,6 +107,7 @@ export const openDialog = async(editor) => {
         maxLines: 24,
         label: await getString('editorlabel', component),
         onRun: doRun,
+        pyodide,
     });
     code.focus();
 

@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.5.0 (2026-11-06)
+
+- Python typing help from Jedi (level 2), in Pyodide in its own Web Worker: completion of everything Python knows,
+  also the methods of the reader's own variables, the parameters of the reader's own functions, and syntax errors
+  marked in the editor. It loads when the reader first types; until then the typing help of level 1 is used. On when
+  Python in the browser is on.
+
 ## 0.4.0 (2026-11-06)
 
 - New languages: JavaScript (Node.js), Pascal and PHP, as offered by Jobe. Node.js gets a 1000 MB memory limit on

@@ -23,6 +23,7 @@
  */
 import libraries from './libraries';
 import {languages} from './common';
+import * as Jedi from './jedi';
 
 /**
  * Parse 'name(a, b)' or 'NAME' into a name and its parameters (null for a property).
@@ -212,11 +213,157 @@ export const completionItems = (monaco, library, line, code, range) => {
 };
 
 /**
- * Register the typing help for the CodeLab languages in a Monaco instance (once per frame).
+ * Range of the word being typed.
+ *
+ * @param {Object} model
+ * @param {Object} position
+ * @returns {Object}
+ */
+const wordRange = (model, position) => {
+    const word = model.getWordUntilPosition(position);
+    return {
+        startLineNumber: position.lineNumber, endLineNumber: position.lineNumber,
+        startColumn: word.startColumn, endColumn: word.endColumn,
+    };
+};
+
+/**
+ * Signature help of level 1 (the library of the language).
+ *
+ * @param {Object} library
+ * @param {Object} model
+ * @param {Object} position
+ * @returns {?Object}
+ */
+const librarySignatureHelp = (library, model, position) => {
+    const before = model.getValueInRange({
+        startLineNumber: Math.max(1, position.lineNumber - 20), startColumn: 1,
+        endLineNumber: position.lineNumber, endColumn: position.column,
+    });
+    const call = callAt(before);
+    const signatures = call ? signaturesOf(library, call, model.getValue()) : [];
+    if (!signatures.length) {
+        return null;
+    }
+    return {
+        value: {
+            signatures: signatures.map((s) => ({
+                label: s.signature,
+                documentation: s.group,
+                parameters: s.params.map((p) => ({label: p})),
+            })),
+            activeSignature: 0,
+            activeParameter: Math.min(call.param, signatures[0].params.length - 1),
+        },
+        dispose: () => null,
+    };
+};
+
+/** Monaco completion kinds of Jedi's types. */
+const JEDI_KINDS = {
+    module: 'Module', 'class': 'Class', instance: 'Variable', 'function': 'Function', param: 'Variable',
+    path: 'File', keyword: 'Keyword', property: 'Property', statement: 'Variable',
+};
+
+/**
+ * Python completions from Jedi, with the snippets of level 1; null when Jedi has no answer.
+ *
+ * @param {Object} monaco
+ * @param {Object} library
+ * @param {Object} model
+ * @param {Object} position
+ * @returns {Promise<?Object[]>}
+ */
+const jediCompletions = async(monaco, library, model, position) => {
+    const found = await Jedi.complete(model.getValue(), position.lineNumber, position.column - 1);
+    if (!found) {
+        return null;
+    }
+    const kinds = monaco.languages.CompletionItemKind;
+    const range = wordRange(model, position);
+    const items = found.map((c) => ({
+        label: c.name, kind: kinds[JEDI_KINDS[c.type] || 'Text'], detail: c.description, insertText: c.name, range,
+    }));
+    const member = /\.\w*$/.test(model.getLineContent(position.lineNumber).slice(0, position.column - 1));
+    if (!member) {
+        library.snippets.forEach(([label, body]) => items.push({
+            label, kind: kinds.Snippet, insertText: body,
+            insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet, detail: body.split('\n')[0], range,
+        }));
+    }
+    return items;
+};
+
+/**
+ * Python signature help from Jedi; null when Jedi has no answer.
+ *
+ * @param {Object} model
+ * @param {Object} position
+ * @returns {Promise<?Object>}
+ */
+const jediSignatureHelp = async(model, position) => {
+    const found = await Jedi.signatures(model.getValue(), position.lineNumber, position.column - 1);
+    if (!found || !found.length) {
+        return null;
+    }
+    return {
+        value: {
+            signatures: found.map((s) => ({
+                label: s.label,
+                documentation: s.doc,
+                parameters: s.params.map((p) => ({label: p})),
+            })),
+            activeSignature: 0,
+            activeParameter: Math.max(0, Math.min(found[0].index, found[0].params.length - 1)),
+        },
+        dispose: () => null,
+    };
+};
+
+/**
+ * Mark the syntax errors Jedi finds in Python code, a moment after the reader stops typing.
  *
  * @param {Object} monaco
  */
-export const registerAssist = (monaco) => {
+const markPythonErrors = (monaco) => {
+    const owner = 'codelab-jedi';
+    monaco.editor.onDidCreateModel((model) => {
+        let timer = null;
+        const check = async() => {
+            if (model.isDisposed()) {
+                return;
+            }
+            if (model.getLanguageId() !== 'python' || !Jedi.enabled()) {
+                monaco.editor.setModelMarkers(model, owner, []);
+                return;
+            }
+            const version = model.getVersionId();
+            const found = await Jedi.errors(model.getValue());
+            if (found && !model.isDisposed() && model.getVersionId() === version) {
+                monaco.editor.setModelMarkers(model, owner, found.map((e) => ({
+                    severity: monaco.MarkerSeverity.Error, message: e.message,
+                    startLineNumber: e.line, startColumn: e.column + 1,
+                    endLineNumber: e.until_line, endColumn: Math.max(e.until_column + 1, e.column + 2),
+                })));
+            }
+        };
+        model.onDidChangeContent(() => {
+            clearTimeout(timer);
+            timer = setTimeout(check, 700);
+        });
+        model.onDidChangeLanguage(check);
+    });
+};
+
+/**
+ * Register the typing help for the CodeLab languages in a Monaco instance (once per frame). Python uses Jedi when the
+ * address of Pyodide is known (Python in the browser is on), and level 1 until Jedi answers.
+ *
+ * @param {Object} monaco
+ * @param {string} [pyodide] address of Pyodide, or '' for level 1 only
+ */
+export const registerAssist = (monaco, pyodide = '') => {
+    Jedi.setBase(pyodide);
     if (monaco.codelabAssist) {
         return;
     }
@@ -228,45 +375,27 @@ export const registerAssist = (monaco) => {
     });
 
     Object.entries(ids).forEach(([id, library]) => {
+        const python = id === 'python';
         monaco.languages.registerCompletionItemProvider(id, {
             triggerCharacters: ['.', '<'],
-            provideCompletionItems: (model, position) => {
-                const word = model.getWordUntilPosition(position);
-                const range = {
-                    startLineNumber: position.lineNumber, endLineNumber: position.lineNumber,
-                    startColumn: word.startColumn, endColumn: word.endColumn,
-                };
+            provideCompletionItems: async(model, position) => {
+                const items = python && Jedi.enabled() ? await jediCompletions(monaco, library, model, position) : null;
+                if (items) {
+                    return {suggestions: items};
+                }
                 const line = model.getLineContent(position.lineNumber).slice(0, position.column - 1);
-                return {suggestions: completionItems(monaco, library, line, model.getValue(), range)};
+                return {suggestions: completionItems(monaco, library, line, model.getValue(), wordRange(model, position))};
             },
         });
 
         monaco.languages.registerSignatureHelpProvider(id, {
             signatureHelpTriggerCharacters: ['(', ','],
             signatureHelpRetriggerCharacters: [','],
-            provideSignatureHelp: (model, position) => {
-                const before = model.getValueInRange({
-                    startLineNumber: Math.max(1, position.lineNumber - 20), startColumn: 1,
-                    endLineNumber: position.lineNumber, endColumn: position.column,
-                });
-                const call = callAt(before);
-                const signatures = call ? signaturesOf(library, call, model.getValue()) : [];
-                if (!signatures.length) {
-                    return null;
-                }
-                return {
-                    value: {
-                        signatures: signatures.map((s) => ({
-                            label: s.signature,
-                            documentation: s.group,
-                            parameters: s.params.map((p) => ({label: p})),
-                        })),
-                        activeSignature: 0,
-                        activeParameter: Math.min(call.param, signatures[0].params.length - 1),
-                    },
-                    dispose: () => null,
-                };
+            provideSignatureHelp: async(model, position) => {
+                const help = python && Jedi.enabled() ? await jediSignatureHelp(model, position) : null;
+                return help || librarySignatureHelp(library, model, position);
             },
         });
     });
+    markPythonErrors(monaco);
 };
