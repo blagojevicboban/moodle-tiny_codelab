@@ -43,10 +43,16 @@ class jobe {
      * message as a compilation error, so a student's unused variable would stop the program: warnings are turned off
      * (-w), as the CodeRunner examples of the lessons did, and the maths library is linked (math.h, cmath). Node.js
      * reserves more virtual memory at start than Jobe's default limit allows, so it gets 1000 MB.
+     *
+     * Programs written in Visual Studio use its "safe" functions (scanf_s...), which gcc does not have: they are
+     * mapped to the standard ones. The extra size arguments of scanf_s are ignored by scanf, as by any variadic
+     * function, so scanf_s("%c", &c, 1) works too.
      */
     const PARAMETERS = [
-        'c' => ['compileargs' => ['-std=c11', '-D_GNU_SOURCE', '-w'], 'linkargs' => ['-lm']],
-        'cpp' => ['compileargs' => ['-std=c++17', '-w'], 'linkargs' => ['-lm']],
+        'c' => ['compileargs' => ['-std=c11', '-D_GNU_SOURCE', '-w', '-Dscanf_s=scanf', '-Dfscanf_s=fscanf',
+            '-Dsscanf_s=sscanf', '-Dprintf_s=printf', '-Dfprintf_s=fprintf'], 'linkargs' => ['-lm']],
+        'cpp' => ['compileargs' => ['-std=c++17', '-w', '-Dscanf_s=scanf', '-Dfscanf_s=fscanf', '-Dsscanf_s=sscanf',
+            '-Dprintf_s=printf', '-Dfprintf_s=fprintf'], 'linkargs' => ['-lm']],
         'javascript' => ['memorylimit' => 1000],
     ];
 

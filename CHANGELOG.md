@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.6.1 (2026-11-06)
+
+- C and C++ programs written in Visual Studio run on Jobe: scanf_s, fscanf_s, sscanf_s, printf_s and fprintf_s are
+  mapped to the standard functions.
+
 ## 0.6.0 (2026-11-06)
 
 - The settings page shows the state of the Jobe server: whether it answers, its languages and their versions, and

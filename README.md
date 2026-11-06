@@ -14,7 +14,7 @@ Languages: **C**, **C++**, **Python**, **Java**, **C#**, **JavaScript** (Node.js
 This plugin is also the core of the CodeLab plugins. The filter and the question type use its editor, its runner and its
 Jobe client.
 
-> Status: **alpha** (0.6.0), under development.
+> Status: **alpha** (0.6.1), under development.
 
 ## Features
 
@@ -74,7 +74,8 @@ An example is a `pre` element whose settings are class names, because Moodle's H
 | Address of Pyodide | (empty: jsDelivr) | Folder with a copy of Pyodide on your own server |
 | Runs per minute | 20 | Rate limit of runs per user |
 
-C and C++ are compiled without warnings as errors (`-w`) and with the maths library (`-lm`).
+C and C++ are compiled without warnings as errors (`-w`) and with the maths library (`-lm`). The Visual Studio functions
+`scanf_s`, `fscanf_s`, `sscanf_s`, `printf_s` and `fprintf_s` are mapped to the standard ones.
 
 ## Installation
 

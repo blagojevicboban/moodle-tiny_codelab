@@ -53,6 +53,8 @@ final class jobe_test extends \advanced_testcase {
         // C: warnings do not stop the program (Jobe takes any compiler message as an error), math.h is linked.
         $c = (new jobe('https://jobe.example.org'))->run_spec('c', 'int main(void) { return 0; }')['run_spec'];
         $this->assertContains('-w', $c['parameters']['compileargs']);
+        // Visual Studio's scanf_s is mapped to scanf.
+        $this->assertContains('-Dscanf_s=scanf', $c['parameters']['compileargs']);
         $this->assertSame(['-lm'], $c['parameters']['linkargs']);
 
         // Node.js on Jobe: the id is nodejs, and V8 needs more memory than Jobe's default limit.
