@@ -28,16 +28,25 @@ class runtime {
     const PYODIDE_URL = 'https://cdn.jsdelivr.net/pyodide/v314.0.7/full/';
 
     /**
+     * Address of the Pyodide files.
+     *
+     * @return string ending with /, or '' when Python runs only on Jobe
+     */
+    public static function pyodide(): string {
+        if (get_config('tiny_codelab', 'browserpython') === '0') {
+            return '';
+        }
+        $url = trim((string) get_config('tiny_codelab', 'pyodideurl')) ?: self::PYODIDE_URL;
+        return rtrim($url, '/') . '/';
+    }
+
+    /**
      * Settings for JavaScript.
      *
-     * @return array ['pyodide' => address of the Pyodide files ending with /, or '' when Python runs only on Jobe]
+     * @return array ['pyodide' => address of the Pyodide files ending with /, or '' when Python runs only on Jobe,
+     *     'interactive' => languages that run on the interactive server]
      */
     public static function config(): array {
-        $pyodide = '';
-        if (get_config('tiny_codelab', 'browserpython') !== '0') {
-            $url = trim((string) get_config('tiny_codelab', 'pyodideurl')) ?: self::PYODIDE_URL;
-            $pyodide = rtrim($url, '/') . '/';
-        }
-        return ['pyodide' => $pyodide];
+        return ['pyodide' => self::pyodide(), 'interactive' => interactive::languages()];
     }
 }

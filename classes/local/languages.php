@@ -140,7 +140,7 @@ class languages {
      */
     public static function offered(?string $current = null): array {
         $info = self::server();
-        $browser = runtime::config()['pyodide'] !== '';
+        $browser = runtime::pyodide() !== '';
         $offered = [];
         foreach (self::enabled() as $lang) {
             if (!$info['ok'] || isset($info['versions'][$lang]) || ($lang === 'python' && $browser)) {

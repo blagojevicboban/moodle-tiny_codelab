@@ -83,4 +83,29 @@ if ($ADMIN->fulltree) {
         20,
         PARAM_INT
     ));
+
+    // The interactive server beside Jobe (CodeLab runner): optional.
+    $settings->add(new admin_setting_heading(
+        'tiny_codelab/runnerheading',
+        get_string('runner', 'tiny_codelab'),
+        get_string('runner_desc', 'tiny_codelab')
+    ));
+    $settings->add(new admin_setting_configtext(
+        'tiny_codelab/runnerurl',
+        get_string('runnerurl', 'tiny_codelab'),
+        get_string('runnerurl_desc', 'tiny_codelab'),
+        '',
+        PARAM_RAW_TRIMMED
+    ));
+    $settings->add(new admin_setting_configpasswordunmask(
+        'tiny_codelab/runnersecret',
+        get_string('runnersecret', 'tiny_codelab'),
+        get_string('runnersecret_desc', 'tiny_codelab'),
+        ''
+    ));
+    $settings->add(new admin_setting_description(
+        'tiny_codelab/runnerstatus',
+        get_string('runnerstatus', 'tiny_codelab'),
+        $refresh ? \tiny_codelab\local\interactive::status_html() : ''
+    ));
 }

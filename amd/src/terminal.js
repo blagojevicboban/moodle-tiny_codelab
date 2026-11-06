@@ -81,9 +81,10 @@ export class Terminal {
     /**
      * Ask the reader for one line of input, typed at the end of the output.
      *
-     * @returns {Promise<string>} the line (it is also echoed to the output)
+     * @param {string} [eofLabel] when given, Ctrl+D or a button with this text ends the input (the promise gives null)
+     * @returns {Promise<string|null>} the line (it is also echoed to the output), or null at the end of the input
      */
-    ask() {
+    ask(eofLabel = '') {
         this.cancelAsk();
         return new Promise((resolve) => {
             const field = document.createElement('input');
@@ -92,18 +93,33 @@ export class Terminal {
             field.setAttribute('aria-label', this.inputLabel);
             field.autocomplete = 'off';
             field.spellcheck = false;
+            const done = (value) => {
+                this.cancelAsk();
+                if (value !== null) {
+                    this.write(value + '\n');
+                }
+                resolve(value);
+            };
             field.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter') {
                     e.preventDefault();
-                    const text = field.value;
-                    field.remove();
-                    this.field = null;
-                    this.write(text + '\n');
-                    resolve(text);
+                    done(field.value);
+                } else if (eofLabel && e.ctrlKey && (e.key === 'd' || e.key === 'D')) {
+                    e.preventDefault();
+                    done(null);
                 }
             });
             this.field = field;
             this.output.append(field);
+            if (eofLabel) {
+                const eof = document.createElement('button');
+                eof.type = 'button';
+                eof.className = 'btn btn-link btn-sm tiny_codelab-terminal-eof';
+                eof.textContent = eofLabel;
+                eof.addEventListener('click', () => done(null));
+                this.eofButton = eof;
+                this.output.append(eof);
+            }
             field.focus({preventScroll: true});
             this.panel.scrollTop = this.panel.scrollHeight;
         });
@@ -116,6 +132,10 @@ export class Terminal {
         if (this.field) {
             this.field.remove();
             this.field = null;
+        }
+        if (this.eofButton) {
+            this.eofButton.remove();
+            this.eofButton = null;
         }
     }
 }

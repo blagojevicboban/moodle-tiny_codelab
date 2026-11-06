@@ -25,6 +25,7 @@ import {pluginName} from './common';
 
 const pyodideName = getPluginOptionName(pluginName, 'pyodide');
 const languagesName = getPluginOptionName(pluginName, 'languages');
+const interactiveName = getPluginOptionName(pluginName, 'interactive');
 
 /**
  * Register the options of the plugin with the editor.
@@ -34,6 +35,7 @@ const languagesName = getPluginOptionName(pluginName, 'languages');
 export const register = (editor) => {
     editor.options.register(pyodideName, {processor: 'string', 'default': ''});
     editor.options.register(languagesName, {processor: 'array', 'default': []});
+    editor.options.register(interactiveName, {processor: 'array', 'default': []});
 };
 
 /**
@@ -43,6 +45,14 @@ export const register = (editor) => {
  * @returns {string[]}
  */
 export const getLanguages = (editor) => editor.options.get(languagesName);
+
+/**
+ * Languages that run on the interactive server (the input is typed while the program runs).
+ *
+ * @param {TinyMCE} editor
+ * @returns {string[]}
+ */
+export const getInteractive = (editor) => editor.options.get(interactiveName);
 
 /**
  * Address of Pyodide for Python in the browser, or '' when it is turned off.

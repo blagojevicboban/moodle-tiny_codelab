@@ -30,9 +30,10 @@ import {readBlock, blockHtml, isBlock, stdinOf} from './embed';
 import {createEditor} from './monaco';
 import {run} from './runner';
 import {showRunning, showResult, showError} from './console';
-import {getPyodide, getLanguages} from './options';
+import {getPyodide, getLanguages, getInteractive} from './options';
 import {available as pythonAvailable} from './python';
 import {PythonSession} from './session';
+import {RemoteSession, runsInteractively} from './remote';
 
 let counter = 0;
 
@@ -82,7 +83,11 @@ export const openDialog = async(editor) => {
     // Python runs in the browser when it can: input() asks while the program runs, Step goes line by line.
     const pyodide = getPyodide(editor);
     const browser = () => langSelect.value === 'python' && pyodide !== '' && pythonAvailable();
+    // C, C++, Java and C# run on the interactive server when the site has one: the input is typed while they run.
+    const interactive = getInteractive(editor);
+    const remote = () => runsInteractively(interactive, langSelect.value);
     let session = null;
+    let remoteSession = null;
 
     let code = null;
     const doRun = async() => {
@@ -92,6 +97,10 @@ export const openDialog = async(editor) => {
             } else if (session.state === 'idle') {
                 await session.start(false, region('stdin').value);
             }
+            return;
+        }
+        if (remote()) {
+            await remoteSession.start(region('stdin').value);
             return;
         }
         await showRunning(panel);
@@ -113,17 +122,25 @@ export const openDialog = async(editor) => {
     });
     code.focus();
 
+    const onState = (state) => {
+        runButton.disabled = state === 'running';
+        stepButton.disabled = state === 'running';
+        stopButton.hidden = state === 'idle';
+        langSelect.disabled = state !== 'idle';
+    };
     session = new PythonSession({
         base: pyodide,
         editor: code,
         panel,
         vars: region('vars'),
-        onState: (state) => {
-            runButton.disabled = state === 'running';
-            stepButton.disabled = state === 'running';
-            stopButton.hidden = state === 'idle';
-            langSelect.disabled = state !== 'idle';
-        },
+        onState,
+    });
+    remoteSession = new RemoteSession({
+        lang: () => langSelect.value,
+        program: () => code.getValue(),
+        panel,
+        onState,
+        contextid: getContextId(editor),
     });
     const showPythonButtons = () => {
         stepButton.hidden = !browser();
@@ -145,9 +162,13 @@ export const openDialog = async(editor) => {
             session.start(true, region('stdin').value);
         }
     });
-    stopButton.addEventListener('click', () => session.stop());
+    stopButton.addEventListener('click', () => {
+        session.stop();
+        remoteSession.stop();
+    });
     modal.getRoot().on(ModalEvents.hidden, () => {
         session.stop();
+        remoteSession.stop();
         code.dispose();
     });
     modal.getRoot().on(ModalEvents.save, () => {

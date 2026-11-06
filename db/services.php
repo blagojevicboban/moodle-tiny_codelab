@@ -33,4 +33,12 @@ $functions = [
         'loginrequired' => true,
         'capabilities' => 'tiny/codelab:run',
     ],
+    'tiny_codelab_session' => [
+        'classname' => 'tiny_codelab\external\session',
+        'description' => 'A token for running a program interactively on the CodeLab runner.',
+        'type' => 'write',
+        'ajax' => true,
+        'loginrequired' => true,
+        'capabilities' => 'tiny/codelab:run',
+    ],
 ];

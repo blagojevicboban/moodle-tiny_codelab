@@ -14,7 +14,7 @@ Languages: **C**, **C++**, **Python**, **Java**, **C#**, **JavaScript** (Node.js
 This plugin is also the core of the CodeLab plugins. The filter and the question type use its editor, its runner and its
 Jobe client.
 
-> Status: **stable** (1.0.0).
+> Status: **stable** (1.1.0).
 
 ## Features
 
@@ -73,9 +73,23 @@ An example is a `pre` element whose settings are class names, because Moodle's H
 | Python in the browser | on | Run Python with Pyodide in the reader's browser |
 | Address of Pyodide | (empty: jsDelivr) | Folder with a copy of Pyodide on your own server |
 | Runs per minute | 20 | Rate limit of runs per user |
+| Address of the interactive server | (empty) | WebSocket address of a [CodeLab runner](https://github.com/blagojevicboban/codelab-runner), for example `wss://runner.example.org` |
+| Secret of the interactive server | (empty) | The secret shared with the runner (`CODELAB_SECRET`) |
+| State of the interactive server | | Shows whether the runner answers and its languages |
 
 C and C++ are compiled without warnings as errors (`-w`) and with the maths library (`-lm`). The Visual Studio functions
 `scanf_s`, `fscanf_s`, `sscanf_s`, `printf_s` and `fprintf_s` are mapped to the standard ones.
+
+## Interactive programs (optional)
+
+Jobe gets the whole input before the run and returns the output at the end, so a program cannot ask for its input while
+it runs. With a [CodeLab runner](https://github.com/blagojevicboban/codelab-runner) beside Jobe, **Run** of C, C++, Java and C# programs keeps the
+program running: the prompts appear in the console and the reader types the input line by line, as in a terminal
+(*End of input* or Ctrl+D closes it). This works in the editor dialog, in examples (filter_codelab) and in the attempt of a
+question (qtype_codelab). The text in the input field is sent first. Grading and *Run the tests* stay on Jobe.
+
+The runner is a small Node.js server that runs each program in a bubblewrap sandbox; see its README for the
+installation. Moodle gives the browser a signed token for one session, valid for 60 seconds.
 
 ## Installation
 

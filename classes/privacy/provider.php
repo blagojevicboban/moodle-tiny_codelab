@@ -51,6 +51,12 @@ class provider implements
             'code' => 'privacy:metadata:jobe:code',
             'stdin' => 'privacy:metadata:jobe:stdin',
         ], 'privacy:metadata:jobe');
+        // The interactive server, when the site has one: the browser sends the program and the typed input.
+        $collection->add_external_location_link('runner', [
+            'userid' => 'privacy:metadata:runner:userid',
+            'code' => 'privacy:metadata:runner:code',
+            'stdin' => 'privacy:metadata:runner:stdin',
+        ], 'privacy:metadata:runner');
         // Python in the browser: the reader's browser loads Pyodide from the address in the settings (jsDelivr by default).
         $collection->add_external_location_link('pyodide', [
             'ipaddress' => 'privacy:metadata:pyodide:ipaddress',

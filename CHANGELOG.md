@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.1.0 (2026-11-06)
+
+- Interactive programs: with a CodeLab runner beside Jobe (new settings), Run of C, C++, Java and C# keeps the
+  program running and the reader types its input in the console while it runs. Web service tiny_codelab_session gives a
+  signed token for one session. Without the runner nothing changes.
+
 ## 1.0.0 (2026-11-06)
 
 - First stable release. No change in the code since 0.6.1; filter_codelab and qtype_codelab 1.0.0 need this version.
