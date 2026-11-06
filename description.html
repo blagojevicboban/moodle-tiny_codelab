@@ -1,0 +1,53 @@
+<div>
+  <p><strong>CodeLab: Runnable Program Examples in the VS Code Editor</strong></p>
+  <p><em>Insert program examples in C, C++, Python, Java, C#, JavaScript, Pascal and PHP into any Moodle text, write them in the code editor of VS Code and run them on a Jobe server or in the browser.</em></p>
+  <div>
+    <a href="https://github.com/blagojevicboban/moodle-tiny_codelab/actions/workflows/ci.yml" target="_blank" rel="noreferrer noopener"><img src="https://github.com/blagojevicboban/moodle-tiny_codelab/actions/workflows/ci.yml/badge.svg" alt="Moodle Plugin CI"></a>
+    <a href="https://moodle.org" target="_blank" rel="noreferrer noopener"><img src="https://img.shields.io/badge/Moodle-4.5%20to%205.3-orange.svg" alt="Moodle 4.5 to 5.3"></a>
+    <a href="https://github.com/blagojevicboban/moodle-tiny_codelab" target="_blank" rel="noreferrer noopener"><img src="https://img.shields.io/badge/License-GPL%20v3-blue.svg" alt="License GPL v3"></a>
+  </div>
+
+  <hr>
+  <p><strong>What's New in v0.4.0</strong></p>
+  <ul>
+    <li><strong>Three more languages:</strong> JavaScript on Node.js, Pascal and PHP, with syntax highlighting and typing help.</li>
+    <li><strong>Python in the browser in the dialog:</strong> Step through the program line by line with its variables, and Stop it.</li>
+  </ul>
+
+  <hr>
+  <p><strong>Core features</strong></p>
+  <ul>
+    <li><strong>The code editor of VS Code:</strong> Monaco, with syntax highlighting, line numbers, bracket matching and search.</li>
+    <li><strong>Typing help for every language:</strong> keywords, snippets, library functions with their parameters, and members of strings, lists and Scanner. Teachers can turn it off for a single example.</li>
+    <li><strong>Run on Jobe:</strong> programs are compiled and run on your Jobe server, with an input field. There is a rate limit per user and a size limit.</li>
+    <li><strong>Python in the browser:</strong> with Pyodide, input asks for the input while the program runs. Step goes line by line with the variables, and Stop also ends an endless loop.</li>
+    <li><strong>Default input:</strong> saved with the example, so readers start from it.</li>
+    <li><strong>Simple markup:</strong> an example is a pre element with class names, which survive Moodle's HTML cleaning.</li>
+  </ul>
+
+  <hr>
+  <p><strong>The CodeLab plugins</strong></p>
+  <ul>
+    <li><strong><a href="https://marketplace.moodle.com/plugins/tiny_codelab" target="_blank" rel="noreferrer noopener">CodeLab (code editor)</a></strong> (this plugin): inserts examples in the TinyMCE editor. The other two plugins use its editor and runner.</li>
+    <li><strong><a href="https://marketplace.moodle.com/plugins/filter_codelab" target="_blank" rel="noreferrer noopener">CodeLab viewer (Run / Step)</a></strong>: turns examples into code editors that readers can edit and run.</li>
+    <li><strong><a href="https://marketplace.moodle.com/plugins/qtype_codelab" target="_blank" rel="noreferrer noopener">CodeLab question type</a></strong>: programming questions graded on Jobe with tests.</li>
+  </ul>
+
+  <hr>
+  <p><strong>Requirements</strong></p>
+  <ul>
+    <li><strong>Moodle:</strong> 4.5 LTS to 5.3 (PHP as required by your Moodle version).</li>
+    <li><strong>Jobe server:</strong> for running programs. Set its address and API key in the plugin settings. Python in the browser works without it.</li>
+    <li><strong>Python in the browser:</strong> Chrome or Edge 137 or newer. Other browsers run Python on Jobe.</li>
+  </ul>
+
+  <hr>
+  <p><strong>Privacy</strong></p>
+  <p>Programs and their input are sent to the Jobe server set by the administrator to be compiled and run. Nothing is stored in Moodle. When Python runs in the browser, the browser downloads Pyodide from the address in the settings, by default the jsDelivr CDN. It does not send the program or its input there. The plugin implements the Moodle Privacy API.</p>
+
+  <hr>
+  <p>Developed by <strong>Boban Blagojevi&#263;</strong>. Languages: English and Serbian (Latin and Cyrillic). It bundles Monaco Editor (MIT).<br>
+    Source, documentation and issue tracker:
+    <a href="https://github.com/blagojevicboban/moodle-tiny_codelab" target="_blank" rel="noreferrer noopener">github.com/blagojevicboban/moodle-tiny_codelab</a><br>
+    Licensed under the GNU GPL v3 or later.</p>
+</div>
