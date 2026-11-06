@@ -16,7 +16,8 @@
 /**
  * A run on the interactive server (CodeLab runner) tied to a console: the program keeps running while the reader types
  * its input line by line, as in a terminal. Moodle gives a token for one session (tiny_codelab_session); the program
- * is sent over a WebSocket. Has the same state, start() and stop() as tiny_codelab/session for Python.
+ * is sent over a WebSocket. Has the same state, start(), step(), resume() and stop() as tiny_codelab/session for Python:
+ * C and C++ also run step by step (gdb on the server), with the line that runs next marked and the variables shown.
  *
  * @module     tiny_codelab/remote
  * @copyright  2026 Boban Blagojević
@@ -26,10 +27,14 @@ import Ajax from 'core/ajax';
 import {getStrings} from 'core/str';
 import {component} from './common';
 import {Terminal} from './terminal';
+import {showVariables} from './session';
 
 const KEYS = ['compiling', 'running_server', 'inputline', 'endinput', 'status_ok', 'status_runtime', 'status_time',
     'status_memory', 'status_toolong', 'status_stopped', 'status_compile', 'status_error', 'status_notconfigured',
-    'status_nolanguage', 'status_ratelimit', 'status_busy', 'status_disconnected'];
+    'status_nolanguage', 'status_ratelimit', 'status_busy', 'status_disconnected', 'paused', 'variables', 'novariables'];
+
+/** Languages that run step by step on the interactive server. */
+const STEP_LANGUAGES = ['c', 'cpp'];
 let strings = null;
 
 /**
@@ -55,6 +60,15 @@ const loadStrings = async() => {
 export const runsInteractively = (languages, lang) => Array.isArray(languages) && languages.includes(lang) &&
     typeof WebSocket !== 'undefined';
 
+/**
+ * Whether a language runs step by step on the interactive server of the site.
+ *
+ * @param {string[]|undefined} languages the interactive languages of runtime::config()
+ * @param {string} lang
+ * @returns {boolean}
+ */
+export const stepsInteractively = (languages, lang) => runsInteractively(languages, lang) && STEP_LANGUAGES.includes(lang);
+
 export class RemoteSession {
     /**
      * A session.
@@ -63,10 +77,17 @@ export class RemoteSession {
      * @param {string|function(): string} options.lang language, or a function giving the current one
      * @param {function(): string} options.program the whole program
      * @param {HTMLElement} options.panel console panel
-     * @param {function(string): void} options.onState idle or running
+     * @param {function(string): void} options.onState idle, running or paused
      * @param {number} [options.contextid] context of the page
+     * @param {import('./monaco').CodeEditor} [options.editor] editor whose lines Step marks
+     * @param {HTMLElement} [options.vars] variables panel of Step
+     * @param {number} [options.offset] lines of hidden code before the editor's code; Step passes over hidden lines
      */
-    constructor({lang, program, panel, onState, contextid = M.cfg.contextid}) {
+    constructor({lang, program, panel, onState, contextid = M.cfg.contextid, editor = null, vars = null, offset = 0}) {
+        this.editor = editor;
+        this.vars = vars;
+        this.offset = offset;
+        this.previous = {};
         this.lang = typeof lang === 'function' ? lang : () => lang;
         this.program = program;
         this.panel = panel;
@@ -90,13 +111,19 @@ export class RemoteSession {
     /**
      * Compile and run the program.
      *
+     * @param {boolean} step stop before each line (C and C++)
      * @param {string} [stdin] input given before the start (sent at once; the rest is typed)
      */
-    async start(stdin = '') {
+    async start(step, stdin = '') {
         if (this.state !== 'idle') {
             return;
         }
-        const s = await loadStrings();
+        const s = this.strings = await loadStrings();
+        this.previous = {};
+        if (this.vars) {
+            this.vars.hidden = true;
+            this.vars.replaceChildren();
+        }
         this.setState('running');
         this.terminal = new Terminal(this.panel, s.inputline);
         this.terminal.setStatus(s.compiling, 'running');
@@ -114,7 +141,8 @@ export class RemoteSession {
         }
         const ws = this.ws = new WebSocket(`${grant.url}?token=${encodeURIComponent(grant.token)}`);
         let finished = false;
-        ws.onopen = () => ws.send(JSON.stringify({type: 'start', lang: this.lang(), code: this.program(), stdin}));
+        ws.onopen = () => ws.send(JSON.stringify({type: 'start', lang: this.lang(), code: this.program(), stdin,
+            debug: step && STEP_LANGUAGES.includes(this.lang())}));
         ws.onmessage = (event) => {
             const message = JSON.parse(event.data);
             switch (message.type) {
@@ -140,6 +168,9 @@ export class RemoteSession {
                             this.terminal.output.append(this.terminal.eofButton);
                         }
                     }
+                    break;
+                case 'paused':
+                    this.paused(message);
                     break;
                 case 'exit':
                     finished = true;
@@ -170,9 +201,10 @@ export class RemoteSession {
      * @param {string} eofLabel
      */
     async typeLines(eofLabel) {
-        while (this.state === 'running' && this.ws?.readyState === WebSocket.OPEN) {
+        // Also while paused in Step mode: a line typed then is read when the program gets to its input.
+        while (this.state !== 'idle' && this.ws?.readyState === WebSocket.OPEN) {
             const line = await this.terminal.ask(eofLabel);
-            if (this.state !== 'running' || this.ws?.readyState !== WebSocket.OPEN) {
+            if (this.state === 'idle' || this.ws?.readyState !== WebSocket.OPEN) {
                 return;
             }
             if (line === null) {
@@ -180,6 +212,63 @@ export class RemoteSession {
                 return;
             }
             this.ws.send(JSON.stringify({type: 'stdin', data: `${line}\n`}));
+        }
+    }
+
+    /**
+     * The program stopped before a line (Step): mark it and show the variables; lines of the hidden code are passed.
+     *
+     * @param {Object} message of the server
+     * @param {number} message.line line of the whole program that runs next
+     * @param {string} message.func function of that line
+     * @param {Array<{name: string, value: string}>} message.vars variables of the function
+     */
+    paused({line, func, vars}) {
+        const s = this.strings;
+        const shown = line - this.offset;
+        if (!this.editor || shown < 1 || shown > this.editor.getValue().split('\n').length) {
+            this.send({type: 'step'});
+            return;
+        }
+        this.terminal.setStatus(s.paused.replace('{$a}', shown), 'running');
+        this.editor.highlightLine(shown);
+        if (this.vars) {
+            const values = Object.fromEntries(vars.map((v) => [v.name, v.value]));
+            showVariables(this.vars, values, this.previous, `${s.variables}: ${func}()`, s.novariables);
+            this.previous = values;
+        }
+        this.setState('paused');
+    }
+
+    /**
+     * Send a message to the server, if the session is open.
+     *
+     * @param {Object} message
+     */
+    send(message) {
+        if (this.ws?.readyState === WebSocket.OPEN) {
+            this.ws.send(JSON.stringify(message));
+        }
+    }
+
+    /**
+     * Run the next line (paused in Step mode).
+     */
+    step() {
+        if (this.state === 'paused') {
+            this.setState('running');
+            this.send({type: 'step'});
+        }
+    }
+
+    /**
+     * Run on without stopping (paused in Step mode).
+     */
+    resume() {
+        if (this.state === 'paused') {
+            this.setState('running');
+            this.editor?.highlightLine(null);
+            this.send({type: 'continue'});
         }
     }
 
@@ -201,6 +290,7 @@ export class RemoteSession {
      * @param {string} kind ok or error
      */
     end(text, kind) {
+        this.editor?.highlightLine(null);
         this.terminal?.cancelAsk();
         this.terminal?.setStatus(text, kind);
         if (this.ws && this.ws.readyState <= WebSocket.OPEN) {

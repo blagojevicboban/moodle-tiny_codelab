@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.0 (2026-11-06)
+
+- Step for C and C++ on the CodeLab runner (gdb on the server): the line that runs next is marked in the editor
+  and the variables of the function are shown, as for Python in the browser; the input is typed when the program
+  asks for it. Needs CodeLab runner 0.2.0 with gdb.
+
 ## 1.1.0 (2026-11-06)
 
 - Interactive programs: with a CodeLab runner beside Jobe (new settings), Run of C, C++, Java and C# keeps the

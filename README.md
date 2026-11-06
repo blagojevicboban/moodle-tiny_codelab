@@ -14,7 +14,7 @@ Languages: **C**, **C++**, **Python**, **Java**, **C#**, **JavaScript** (Node.js
 This plugin is also the core of the CodeLab plugins. The filter and the question type use its editor, its runner and its
 Jobe client.
 
-> Status: **stable** (1.1.0).
+> Status: **stable** (1.2.0).
 
 ## Features
 
@@ -85,7 +85,8 @@ C and C++ are compiled without warnings as errors (`-w`) and with the maths libr
 Jobe gets the whole input before the run and returns the output at the end, so a program cannot ask for its input while
 it runs. With a [CodeLab runner](https://github.com/blagojevicboban/codelab-runner) beside Jobe, **Run** of C, C++, Java and C# programs keeps the
 program running: the prompts appear in the console and the reader types the input line by line, as in a terminal
-(*End of input* or Ctrl+D closes it). This works in the editor dialog, in examples (filter_codelab) and in the attempt of a
+(*End of input* or Ctrl+D closes it). **Step** runs C and C++ line by line there (gdb on the runner): the line that
+runs next is marked and the variables of the function are shown, as for Python. This works in the editor dialog, in examples (filter_codelab) and in the attempt of a
 question (qtype_codelab). The text in the input field is sent first. Grading and *Run the tests* stay on Jobe.
 
 The runner is a small Node.js server that runs each program in a bubblewrap sandbox; see its README for the

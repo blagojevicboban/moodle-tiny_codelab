@@ -43,6 +43,41 @@ const loadStrings = async() => {
     return strings;
 };
 
+/**
+ * Show variables in a panel; values changed since the last step are marked.
+ *
+ * @param {HTMLElement} panel
+ * @param {Object<string, string>} vars name => value
+ * @param {Object<string, string>} previous the variables of the last step
+ * @param {string} title
+ * @param {string} empty text when there are none
+ */
+export const showVariables = (panel, vars, previous, title, empty) => {
+    const names = Object.keys(vars);
+    panel.replaceChildren();
+    const heading = document.createElement('div');
+    heading.className = 'tiny_codelab-vars-title';
+    heading.textContent = title;
+    panel.append(heading);
+    if (!names.length) {
+        const none = document.createElement('div');
+        none.className = 'tiny_codelab-vars-empty';
+        none.textContent = empty;
+        panel.append(none);
+    } else {
+        const table = document.createElement('table');
+        table.className = 'tiny_codelab-vars-table';
+        names.forEach((name) => {
+            const row = table.insertRow();
+            row.className = previous[name] !== vars[name] ? 'tiny_codelab-vars-changed' : '';
+            row.insertCell().textContent = name;
+            row.insertCell().textContent = vars[name];
+        });
+        panel.append(table);
+    }
+    panel.hidden = false;
+};
+
 export class PythonSession {
     /**
      * A session.
@@ -178,30 +213,8 @@ export class PythonSession {
      * @param {Object<string, string>} s strings
      */
     showVars(vars, scope, s) {
-        const names = Object.keys(vars);
-        this.vars.replaceChildren();
-        const title = document.createElement('div');
-        title.className = 'tiny_codelab-vars-title';
-        title.textContent = scope && scope !== '<module>' ? `${s.variables}: ${scope}()` : s.variables;
-        this.vars.append(title);
-        if (!names.length) {
-            const empty = document.createElement('div');
-            empty.className = 'tiny_codelab-vars-empty';
-            empty.textContent = s.novariables;
-            this.vars.append(empty);
-        } else {
-            const table = document.createElement('table');
-            table.className = 'tiny_codelab-vars-table';
-            names.forEach((name) => {
-                const row = table.insertRow();
-                const changed = this.previous[name] !== vars[name];
-                row.className = changed ? 'tiny_codelab-vars-changed' : '';
-                row.insertCell().textContent = name;
-                row.insertCell().textContent = vars[name];
-            });
-            this.vars.append(table);
-        }
-        this.vars.hidden = false;
+        const title = scope && scope !== '<module>' ? `${s.variables}: ${scope}()` : s.variables;
+        showVariables(this.vars, vars, this.previous, title, s.novariables);
         this.previous = vars;
     }
 }

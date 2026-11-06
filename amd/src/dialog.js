@@ -33,7 +33,7 @@ import {showRunning, showResult, showError} from './console';
 import {getPyodide, getLanguages, getInteractive} from './options';
 import {available as pythonAvailable} from './python';
 import {PythonSession} from './session';
-import {RemoteSession, runsInteractively} from './remote';
+import {RemoteSession, runsInteractively, stepsInteractively} from './remote';
 
 let counter = 0;
 
@@ -86,6 +86,8 @@ export const openDialog = async(editor) => {
     // C, C++, Java and C# run on the interactive server when the site has one: the input is typed while they run.
     const interactive = getInteractive(editor);
     const remote = () => runsInteractively(interactive, langSelect.value);
+    // C and C++ also run step by step there (gdb).
+    const remoteStep = () => stepsInteractively(interactive, langSelect.value);
     let session = null;
     let remoteSession = null;
 
@@ -100,7 +102,11 @@ export const openDialog = async(editor) => {
             return;
         }
         if (remote()) {
-            await remoteSession.start(region('stdin').value);
+            if (remoteSession.state === 'paused') {
+                remoteSession.resume();
+            } else if (remoteSession.state === 'idle') {
+                await remoteSession.start(false, region('stdin').value);
+            }
             return;
         }
         await showRunning(panel);
@@ -141,10 +147,12 @@ export const openDialog = async(editor) => {
         panel,
         onState,
         contextid: getContextId(editor),
+        editor: code,
+        vars: region('vars'),
     });
     const showPythonButtons = () => {
-        stepButton.hidden = !browser();
-        if (!browser()) {
+        stepButton.hidden = !browser() && !remoteStep();
+        if (stepButton.hidden) {
             region('vars').hidden = true;
         }
     };
@@ -156,7 +164,13 @@ export const openDialog = async(editor) => {
     });
     runButton.addEventListener('click', doRun);
     stepButton.addEventListener('click', () => {
-        if (session.state === 'paused') {
+        if (!browser()) {
+            if (remoteSession.state === 'paused') {
+                remoteSession.step();
+            } else if (remoteSession.state === 'idle') {
+                remoteSession.start(true, region('stdin').value);
+            }
+        } else if (session.state === 'paused') {
             session.step();
         } else if (session.state === 'idle') {
             session.start(true, region('stdin').value);
