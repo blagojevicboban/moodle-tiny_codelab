@@ -29,12 +29,15 @@ import {component} from './common';
 import {Terminal} from './terminal';
 import {showVariables} from './session';
 
-const KEYS = ['compiling', 'running_server', 'inputline', 'endinput', 'status_ok', 'status_runtime', 'status_time',
+const KEYS = ['compiling', 'running', 'running_server', 'inputline', 'endinput', 'status_ok', 'status_runtime', 'status_time',
     'status_memory', 'status_toolong', 'status_stopped', 'status_compile', 'status_error', 'status_notconfigured',
     'status_nolanguage', 'status_ratelimit', 'status_busy', 'status_disconnected', 'paused', 'variables', 'novariables'];
 
 /** Languages that run step by step on the interactive server. */
 const STEP_LANGUAGES = ['c', 'cpp'];
+
+/** Languages that read no input (SQL): the script runs to its end. */
+const NO_INPUT = ['mysql'];
 let strings = null;
 
 /**
@@ -82,8 +85,11 @@ export class RemoteSession {
      * @param {import('./monaco').CodeEditor} [options.editor] editor whose lines Step marks
      * @param {HTMLElement} [options.vars] variables panel of Step
      * @param {number} [options.offset] lines of hidden code before the editor's code; Step passes over hidden lines
+     * @param {function(): string} [options.setup] SQL run before the program without showing its output
      */
-    constructor({lang, program, panel, onState, contextid = M.cfg.contextid, editor = null, vars = null, offset = 0}) {
+    constructor({lang, program, panel, onState, contextid = M.cfg.contextid, editor = null, vars = null, offset = 0,
+            setup = () => ''}) {
+        this.setup = setup;
         this.editor = editor;
         this.vars = vars;
         this.offset = offset;
@@ -142,7 +148,7 @@ export class RemoteSession {
         const ws = this.ws = new WebSocket(`${grant.url}?token=${encodeURIComponent(grant.token)}`);
         let finished = false;
         ws.onopen = () => ws.send(JSON.stringify({type: 'start', lang: this.lang(), code: this.program(), stdin,
-            debug: step && STEP_LANGUAGES.includes(this.lang())}));
+            debug: step && STEP_LANGUAGES.includes(this.lang()), setup: this.setup()}));
         ws.onmessage = (event) => {
             const message = JSON.parse(event.data);
             switch (message.type) {
@@ -155,8 +161,12 @@ export class RemoteSession {
                     this.end(s.status_compile, 'error');
                     break;
                 case 'running':
-                    this.terminal.setStatus(s.running_server, 'running');
-                    this.typeLines(s.endinput);
+                    if (NO_INPUT.includes(this.lang())) {
+                        this.terminal.setStatus(s.running, 'running');
+                    } else {
+                        this.terminal.setStatus(s.running_server, 'running');
+                        this.typeLines(s.endinput);
+                    }
                     break;
                 case 'out':
                 case 'err':

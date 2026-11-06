@@ -14,7 +14,7 @@ Languages: **C**, **C++**, **Python**, **Java**, **C#**, **JavaScript** (Node.js
 This plugin is also the core of the CodeLab plugins. The filter and the question type use its editor, its runner and its
 Jobe client.
 
-> Status: **stable** (1.2.0).
+> Status: **stable** (1.3.0).
 
 ## Features
 
@@ -91,6 +91,12 @@ question (qtype_codelab). The text in the input field is sent first. Grading and
 
 The runner is a small Node.js server that runs each program in a bubblewrap sandbox; see its README for the
 installation. Moodle gives the browser a signed token for one session, valid for 60 seconds.
+
+## SQL (optional)
+
+With a CodeLab runner that has MariaDB, the language **MySQL (MariaDB)** is offered. An SQL example has a hidden
+*setup* (the tables and data, a field of the dialog) that runs before the reader's SQL; the result is shown as by the
+mysql client. Every run gets a fresh database with the same data. qtype_codelab grades SQL questions on the runner.
 
 ## Installation
 

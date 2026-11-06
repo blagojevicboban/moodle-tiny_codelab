@@ -33,6 +33,8 @@ export const runClass = 'codelab-run';
 export const noAssistClass = 'codelab-noassist';
 /** Input readers start from: <pre class="codelab-stdin"> right after the block. */
 export const stdinClass = 'codelab-stdin';
+/** Hidden code run before the block (the tables and data of SQL): <pre class="codelab-setup"> right after the block. */
+export const setupClass = 'codelab-setup';
 
 /** Languages in the order they are offered: class suffix => Monaco language id. */
 export const languages = {
@@ -44,7 +46,12 @@ export const languages = {
     javascript: 'javascript',
     pascal: 'pascal',
     php: 'php',
+    // Only on the interactive server (CodeLab runner with MariaDB).
+    mysql: 'mysql',
 };
+
+/** Languages that have a hidden setup (tables and data) and no input. */
+export const setupLanguages = ['mysql'];
 export const defaultLanguage = 'c';
 
 export const iconSvg =

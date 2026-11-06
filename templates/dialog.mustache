@@ -51,6 +51,10 @@
         </div>
     </div>
     <div class="tiny_codelab-editor border rounded mb-2" data-region="editor"></div>
+    <div class="mb-2" data-region="setupfield" hidden>
+        <label for="{{uniqid}}-setup" class="form-label mb-1">{{#str}}setup, tiny_codelab{{/str}}</label>
+        <textarea id="{{uniqid}}-setup" class="form-control font-monospace" rows="5" spellcheck="false" data-region="setup"></textarea>
+    </div>
     <div class="row g-2 align-items-start">
         <div class="col-md-4">
             <label for="{{uniqid}}-stdin" class="form-label mb-1">{{#str}}input, tiny_codelab{{/str}}</label>

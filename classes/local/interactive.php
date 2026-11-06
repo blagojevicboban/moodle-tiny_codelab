@@ -26,7 +26,10 @@ namespace tiny_codelab\local;
  */
 class interactive {
     /** Languages the interactive server runs (Python runs in the browser). */
-    const LANGUAGES = ['c', 'cpp', 'java', 'csharp'];
+    const LANGUAGES = ['c', 'cpp', 'java', 'csharp', 'mysql'];
+
+    /** Languages that run only on the interactive server, not on Jobe: SQL on MariaDB. */
+    const ONLY = ['mysql'];
 
     /** Seconds a token may wait before the browser opens the session. */
     const TOKEN_SECONDS = 60;

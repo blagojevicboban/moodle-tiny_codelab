@@ -20,7 +20,9 @@ use core_external\external_api;
 use core_external\external_function_parameters;
 use core_external\external_single_structure;
 use core_external\external_value;
+use tiny_codelab\local\interactive;
 use tiny_codelab\local\jobe;
+use tiny_codelab\local\runner_client;
 
 /**
  * Web service tiny_codelab_run: runs a program on the Jobe server for the Run button of editors and examples.
@@ -63,7 +65,12 @@ class run extends external_api {
         self::validate_context($context);
         require_capability('tiny/codelab:run', $context);
 
-        if (!isset(jobe::LANGUAGES[$params['lang']])) {
+        // SQL runs only on the interactive server (CodeLab runner); without one it is not available.
+        $runner = in_array($params['lang'], interactive::ONLY, true);
+        if ($runner && !in_array($params['lang'], interactive::languages(), true)) {
+            return self::result(['status' => 'nolanguage']);
+        }
+        if (!$runner && !isset(jobe::LANGUAGES[$params['lang']])) {
             throw new \invalid_parameter_exception('Unknown language');
         }
         if (strlen($params['code']) > jobe::MAX_SIZE || strlen($params['stdin']) > jobe::MAX_SIZE) {
@@ -72,7 +79,8 @@ class run extends external_api {
         if (!self::allow_run((int) $USER->id)) {
             return self::result(['status' => 'ratelimit']);
         }
-        return self::result((new jobe())->run($params['lang'], $params['code'], $params['stdin']));
+        $client = $runner ? new runner_client() : new jobe();
+        return self::result($client->run($params['lang'], $params['code'], $params['stdin']));
     }
 
     /**

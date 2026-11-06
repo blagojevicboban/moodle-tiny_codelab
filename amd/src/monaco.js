@@ -79,6 +79,7 @@ const NO_ASSIST = {
  * @property {function(function(string): void): void} onChange
  * @property {function(?number): void} highlightLine mark the line that runs next (null: none)
  * @property {function(): void} focus
+ * @property {function(?number): void} setFixedHeight a fixed height in pixels (full screen), or null to grow with the code
  * @property {function(): void} dispose
  * @property {HTMLIFrameElement} frame
  */
@@ -148,12 +149,20 @@ export const createEditor = async(container, options = {}) => {
         // eslint-disable-next-line no-bitwise
         editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, options.onRun);
     }
-    if (options.autoHeight !== false) {
-        const resize = () => {
+    let fixedHeight = null;
+    let normalHeight = frame.style.height;
+    const resize = () => {
+        if (fixedHeight !== null) {
+            frame.style.height = `${fixedHeight}px`;
+        } else if (options.autoHeight !== false) {
             const height = Math.min(Math.max(editor.getContentHeight(), minLines * LINE_HEIGHT + PADDING),
                 maxLines * LINE_HEIGHT + PADDING);
             frame.style.height = `${height}px`;
-        };
+        } else {
+            frame.style.height = normalHeight;
+        }
+    };
+    if (options.autoHeight !== false) {
         editor.onDidContentSizeChange(resize);
         resize();
     }
@@ -176,6 +185,13 @@ export const createEditor = async(container, options = {}) => {
         setReadOnly: (value) => editor.updateOptions({readOnly: !!value}),
         onChange: (callback) => editor.onDidChangeModelContent(() => callback(editor.getValue())),
         focus: () => editor.focus(),
+        setFixedHeight: (height) => {
+            if (fixedHeight === null) {
+                normalHeight = frame.style.height;
+            }
+            fixedHeight = height;
+            resize();
+        },
         dispose: () => {
             editor.dispose();
             frame.remove();

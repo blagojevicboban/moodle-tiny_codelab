@@ -46,7 +46,7 @@ if ($ADMIN->fulltree) {
         \tiny_codelab\local\languages::status_html($refresh)
     ));
     $names = [];
-    foreach (array_keys(\tiny_codelab\local\jobe::LANGUAGES) as $lang) {
+    foreach (\tiny_codelab\local\languages::all() as $lang) {
         $names[$lang] = get_string('lang_' . $lang, 'tiny_codelab');
     }
     $settings->add(new admin_setting_configmulticheckbox(

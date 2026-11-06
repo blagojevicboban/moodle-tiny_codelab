@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.3.0 (2026-11-06)
+
+- SQL (MySQL / MariaDB) examples on the CodeLab runner 0.4.0: a hidden setup with the tables and data (a new field
+  of the dialog), the reader's SQL shown as by the mysql client. Each run starts from the same data.
+- Run of SQL through the web service goes to the runner (Moodle's server signs the request), for Run the tests.
+- Full screen for the editor with its buttons and console (examples and question attempts), as in the algorithm plugins.
+- Monaco bundle with MySQL and SQL highlighting.
+
 ## 1.2.0 (2026-11-06)
 
 - Step for C and C++ on the CodeLab runner (gdb on the server): the line that runs next is marked in the editor

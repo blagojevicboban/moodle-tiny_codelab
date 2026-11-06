@@ -119,6 +119,15 @@ class languages {
     }
 
     /**
+     * Every language of CodeLab: those of Jobe, then those that run only on the interactive server (SQL).
+     *
+     * @return string[]
+     */
+    public static function all(): array {
+        return array_merge(array_keys(jobe::LANGUAGES), interactive::ONLY);
+    }
+
+    /**
      * Languages the administrator turned on (all when the setting has not been saved).
      *
      * @return string[]
@@ -126,10 +135,10 @@ class languages {
     public static function enabled(): array {
         $setting = get_config('tiny_codelab', 'languages');
         if ($setting === false || $setting === null) {
-            return array_keys(jobe::LANGUAGES);
+            return self::all();
         }
         $chosen = array_filter(explode(',', (string) $setting));
-        return array_values(array_intersect(array_keys(jobe::LANGUAGES), $chosen));
+        return array_values(array_intersect(self::all(), $chosen));
     }
 
     /**
@@ -142,12 +151,18 @@ class languages {
         $info = self::server();
         $browser = runtime::pyodide() !== '';
         $offered = [];
+        $runner = interactive::url() !== '';
         foreach (self::enabled() as $lang) {
-            if (!$info['ok'] || isset($info['versions'][$lang]) || ($lang === 'python' && $browser)) {
+            if (in_array($lang, interactive::ONLY, true)) {
+                // SQL runs only on the interactive server.
+                if ($runner) {
+                    $offered[] = $lang;
+                }
+            } else if (!$info['ok'] || isset($info['versions'][$lang]) || ($lang === 'python' && $browser)) {
                 $offered[] = $lang;
             }
         }
-        if ($current !== null && isset(jobe::LANGUAGES[$current]) && !in_array($current, $offered, true)) {
+        if ($current !== null && in_array($current, self::all(), true) && !in_array($current, $offered, true)) {
             $offered[] = $current;
         }
         return $offered;

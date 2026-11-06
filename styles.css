@@ -82,3 +82,14 @@
 .tiny_codelab-vars-table tr.tiny_codelab-vars-changed td {
     background: #fff3b0;
 }
+
+/* Full screen of an editor with its console (tiny_codelab/fullscreen), when the browser cannot do it itself. */
+.tiny_codelab-fullscreen {
+    position: fixed;
+    inset: 0;
+    z-index: 1100;
+    margin: 0;
+    padding: .75rem;
+    overflow: auto;
+    background: #fff;
+}

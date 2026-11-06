@@ -72,7 +72,7 @@ final class session_test extends \advanced_testcase {
         set_config('runnerurl', 'wss://runner.example.org/', 'tiny_codelab');
         set_config('runnersecret', self::SECRET, 'tiny_codelab');
         $context = $this->student_context();
-        $this->assertSame(['c', 'cpp', 'java', 'csharp'], interactive::languages());
+        $this->assertSame(['c', 'cpp', 'java', 'csharp', 'mysql'], interactive::languages());
 
         $result = $this->ask($context, 'cpp');
         $this->assertSame('ok', $result['status']);
@@ -90,6 +90,21 @@ final class session_test extends \advanced_testcase {
 
         // Python runs in the browser, not on the interactive server.
         $this->assertSame('nolanguage', $this->ask($context, 'python')['status']);
+    }
+
+    public function test_runner_client(): void {
+        $this->resetAfterTest();
+        $client = new \tiny_codelab\local\runner_client();
+        $this->assertSame('notconfigured', $client->run('mysql', 'SELECT 1;')['status']);
+        set_config('runnerurl', 'ws://localhost:8090', 'tiny_codelab');
+        set_config('runnersecret', self::SECRET, 'tiny_codelab');
+        $this->assertTrue($client->is_configured());
+        $this->assertContains('mysql', interactive::languages());
+        // The signature the runner checks: HMAC-SHA256 of the time, a new line and the body.
+        $headers = \tiny_codelab\local\runner_client::signature_headers('{"lang":"mysql"}', 1800000000);
+        $mac = interactive::base64url(hash_hmac('sha256', "1800000000\n{\"lang\":\"mysql\"}", self::SECRET, true));
+        $this->assertContains('X-CodeLab-Time: 1800000000', $headers);
+        $this->assertContains('X-CodeLab-Signature: ' . $mac, $headers);
     }
 
     public function test_rate_limit(): void {

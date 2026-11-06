@@ -25,8 +25,8 @@ import ModalEvents from 'core/modal_events';
 import Templates from 'core/templates';
 import {getString, getStrings} from 'core/str';
 import {getContextId} from 'editor_tiny/options';
-import {component, languages, defaultLanguage} from './common';
-import {readBlock, blockHtml, isBlock, stdinOf} from './embed';
+import {component, languages, defaultLanguage, setupLanguages} from './common';
+import {readBlock, blockHtml, isBlock, stdinOf, setupOf} from './embed';
 import {createEditor} from './monaco';
 import {run} from './runner';
 import {showRunning, showResult, showError} from './console';
@@ -76,6 +76,12 @@ export const openDialog = async(editor) => {
     panel.hidden = true;
     // The input is saved with the block: readers start from it.
     region('stdin').value = block.stdin || '';
+    // SQL: the tables and data, run before the reader's code and not shown to readers.
+    region('setup').value = block.setup || '';
+    const showSetup = () => {
+        region('setupfield').hidden = !setupLanguages.includes(langSelect.value) && region('setup').value === '';
+    };
+    showSetup();
 
     const runButton = root.querySelector('[data-action="run"]');
     const stepButton = root.querySelector('[data-action="step"]');
@@ -149,6 +155,7 @@ export const openDialog = async(editor) => {
         contextid: getContextId(editor),
         editor: code,
         vars: region('vars'),
+        setup: () => (setupLanguages.includes(langSelect.value) ? region('setup').value : ''),
     });
     const showPythonButtons = () => {
         stepButton.hidden = !browser() && !remoteStep();
@@ -161,6 +168,7 @@ export const openDialog = async(editor) => {
     langSelect.addEventListener('change', () => {
         code.setLanguage(langSelect.value);
         showPythonButtons();
+        showSetup();
     });
     runButton.addEventListener('click', doRun);
     stepButton.addEventListener('click', () => {
@@ -192,11 +200,13 @@ export const openDialog = async(editor) => {
             noassist: region('noassist').checked,
             code: code.getValue(),
             stdin: region('stdin').value,
+            setup: setupLanguages.includes(langSelect.value) ? region('setup').value : '',
         });
         if (existing) {
-            const oldStdin = stdinOf(existing);
-            if (oldStdin) {
-                editor.dom.remove(oldStdin);
+            for (const old of [stdinOf(existing), setupOf(existing)]) {
+                if (old) {
+                    editor.dom.remove(old);
+                }
             }
             editor.dom.setOuterHTML(existing, html);
         } else {
