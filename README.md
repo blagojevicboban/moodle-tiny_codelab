@@ -74,6 +74,13 @@ An example is a `pre` element whose settings are class names, because Moodle's H
 
 C and C++ are compiled without warnings as errors (`-w`) and with the maths library (`-lm`).
 
+## Installation
+
+1. Install **tiny_codelab** first, then **filter_codelab** and **qtype_codelab**.
+2. In the settings of tiny_codelab, set the address and the API key of your Jobe server.
+3. **Important: switch the filter on.** Go to *Site administration → Plugins → Filters → Manage filters* and set
+   **CodeLab** to **On**. Until the filter is on, readers see the examples as plain code: they cannot edit or run them.
+
 ## Requirements
 
 - Moodle 4.5 to 5.3
