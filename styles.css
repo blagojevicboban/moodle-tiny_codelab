@@ -1,0 +1,78 @@
+.tiny_codelab-console {
+    min-height: 3rem;
+    max-height: 20rem;
+    overflow: auto;
+    border: 1px solid #dee2e6;
+    border-radius: .25rem;
+    background: #f8f9fa;
+    padding: .25rem .5rem;
+}
+
+.tiny_codelab-console pre {
+    margin: 0;
+    white-space: pre-wrap;
+    word-break: break-word;
+    font-size: .875rem;
+}
+
+.tiny_codelab-console-status {
+    font-weight: bold;
+    margin-bottom: .25rem;
+}
+
+.tiny_codelab-console-status:not(.tiny_codelab-status-ok):not(.tiny_codelab-status-running) {
+    color: #a3191f;
+}
+
+.tiny_codelab-console-status.tiny_codelab-status-ok {
+    color: #0f6e2f;
+}
+
+.tiny_codelab-console-compile,
+.tiny_codelab-console-error {
+    color: #a3191f;
+}
+
+.tiny_codelab-console-empty {
+    color: #6a737b;
+    font-style: italic;
+}
+
+.tiny_codelab-console-output.tiny_codelab-terminal {
+    min-height: 1.5rem;
+}
+
+.tiny_codelab-terminal-input {
+    border: 0;
+    border-bottom: 1px solid #0f6cbf;
+    outline: none;
+    background: transparent;
+    font: inherit;
+    min-width: 10rem;
+    padding: 0;
+}
+
+.tiny_codelab-vars {
+    margin: .5rem;
+    font-size: .875rem;
+}
+
+.tiny_codelab-vars-title {
+    font-weight: bold;
+    margin-bottom: .25rem;
+}
+
+.tiny_codelab-vars-empty {
+    color: #6a737b;
+    font-style: italic;
+}
+
+.tiny_codelab-vars-table td {
+    padding: .125rem .75rem .125rem 0;
+    font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    vertical-align: top;
+}
+
+.tiny_codelab-vars-table tr.tiny_codelab-vars-changed td {
+    background: #fff3b0;
+}

@@ -1,0 +1,68 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template tiny_codelab/dialog
+
+    Body of the CodeLab dialog in TinyMCE: language, options, code editor, input, Run and the output.
+
+    Context variables required for this template:
+    * uniqid - unique id for the elements of this dialog
+    * languages - list of {value, name, selected}
+    * run - the block has a Run button
+    * noassist - typing help is off
+
+    Example context (json):
+    {
+        "uniqid": "codelab1",
+        "languages": [{"value": "c", "name": "C", "selected": true}, {"value": "python", "name": "Python"}],
+        "run": true,
+        "noassist": false
+    }
+}}
+<div class="tiny_codelab-dialog">
+    <div class="d-flex flex-wrap align-items-center gap-3 mb-2">
+        <label for="{{uniqid}}-lang" class="mb-0">{{#str}}language, tiny_codelab{{/str}}</label>
+        <select id="{{uniqid}}-lang" class="form-select w-auto" data-region="lang">
+            {{#languages}}
+            <option value="{{value}}"{{#selected}} selected{{/selected}}>{{name}}</option>
+            {{/languages}}
+        </select>
+        <div class="form-check mb-0">
+            <input type="checkbox" class="form-check-input" id="{{uniqid}}-run" data-region="run"{{#run}} checked{{/run}}>
+            <label class="form-check-label" for="{{uniqid}}-run">{{#str}}runnable, tiny_codelab{{/str}}</label>
+        </div>
+        <div class="form-check mb-0">
+            <input type="checkbox" class="form-check-input" id="{{uniqid}}-noassist" data-region="noassist"{{#noassist}} checked{{/noassist}}>
+            <label class="form-check-label" for="{{uniqid}}-noassist">{{#str}}noassist, tiny_codelab{{/str}}</label>
+        </div>
+    </div>
+    <div class="tiny_codelab-editor border rounded mb-2" data-region="editor"></div>
+    <div class="row g-2 align-items-start">
+        <div class="col-md-4">
+            <label for="{{uniqid}}-stdin" class="form-label mb-1">{{#str}}input, tiny_codelab{{/str}}</label>
+            <textarea id="{{uniqid}}-stdin" class="form-control font-monospace" rows="3" spellcheck="false" data-region="stdin"></textarea>
+            <button type="button" class="btn btn-secondary mt-2" data-action="run">{{#str}}run, tiny_codelab{{/str}}</button>
+            <button type="button" class="btn btn-secondary mt-2" data-action="step" hidden>{{#str}}step, tiny_codelab{{/str}}</button>
+            <button type="button" class="btn btn-danger mt-2" data-action="stop" hidden>{{#str}}stop, tiny_codelab{{/str}}</button>
+        </div>
+        <div class="col-md-8">
+            <div class="form-label mb-1" id="{{uniqid}}-output">{{#str}}output, tiny_codelab{{/str}}</div>
+            <div class="tiny_codelab-console" role="status" aria-labelledby="{{uniqid}}-output" data-region="console"></div>
+            <div class="tiny_codelab-vars mt-2" data-region="vars" hidden></div>
+        </div>
+    </div>
+</div>

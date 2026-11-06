@@ -1,0 +1,94 @@
+<?php
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
+/**
+ * Strings for component 'tiny_codelab', language 'sr_lt'.
+ *
+ * @package    tiny_codelab
+ * @copyright  2026 Boban Blagojević
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
+defined('MOODLE_INTERNAL') || die();
+
+$string['browserpython'] = 'Python u pregledaču';
+$string['browserpython_desc'] = 'Python programi primera izvršavaju se u pregledaču čitaoca (Pyodide): input() traži ulaz dok program radi, a Korak prikazuje program red po red sa promenljivim. Ocene u kvizu i dalje daje Jobe server. Potreban je pregledač sa JavaScript Promise Integration (Chrome, Edge 137+); ostali pregledači koriste Jobe server.';
+$string['button'] = 'CodeLab';
+$string['cachedef_runs'] = 'Nedavna pokretanja svakog korisnika (za ograničenje po minutu)';
+$string['codelab:run'] = 'Pokretanje programa na Jobe serveru';
+$string['codelab:viewplugin'] = 'Korišćenje dodatka CodeLab u editoru';
+$string['copied'] = 'Kopirano';
+$string['copy'] = 'Kopiraj';
+$string['cputime'] = 'Ograničenje procesorskog vremena (sekunde)';
+$string['cputime_desc'] = 'Najduže vreme izvršavanja programa, od 1 do 30 sekundi.';
+$string['dialogtitle'] = 'CodeLab program';
+$string['editedcopy'] = 'Vaše izmene se čuvaju u ovom pregledaču.';
+$string['editorlabel'] = 'Kod programa';
+$string['input'] = 'Ulaz';
+$string['inputline'] = 'Ulaz za program';
+$string['insert'] = 'Ubaci';
+$string['jobeapikey'] = 'Jobe API ključ';
+$string['jobeapikey_desc'] = 'Ključ koji se šalje u zaglavlju X-API-KEY, ako ga Jobe server traži.';
+$string['jobeserver'] = 'Jobe server';
+$string['jobeserver_desc'] = 'Adresa Jobe servera koji prevodi i izvršava programe, na primer https://jobe.example.org (bez /jobe/index.php/restapi). Prazno: programi ne mogu da se pokreću.';
+$string['lang_c'] = 'C';
+$string['lang_cpp'] = 'C++';
+$string['lang_csharp'] = 'C#';
+$string['lang_java'] = 'Java';
+$string['lang_javascript'] = 'JavaScript (Node.js)';
+$string['lang_pascal'] = 'Pascal';
+$string['lang_php'] = 'PHP';
+$string['lang_python'] = 'Python';
+$string['language'] = 'Jezik';
+$string['loadingpython'] = 'Učitava se Python… (prvi put traje nekoliko sekundi)';
+$string['menuitem'] = 'CodeLab program';
+$string['noassist'] = 'Bez pomoći pri kucanju (za kontrolne)';
+$string['nooutput'] = '(program nije ništa ispisao)';
+$string['novariables'] = '(još nema promenljivih)';
+$string['output'] = 'Izlaz';
+$string['paused'] = 'Zaustavljeno pre reda {$a}';
+$string['pluginname'] = 'CodeLab';
+$string['privacy:metadata:jobe'] = 'Programi se šalju Jobe serveru koji je podesio administrator, da se prevedu i izvrše. Server vraća izlaz; u Moodle-u se ništa ne čuva.';
+$string['privacy:metadata:jobe:code'] = 'Program koji korisnik pokreće';
+$string['privacy:metadata:jobe:stdin'] = 'Ulaz koji korisnik daje programu';
+$string['privacy:metadata:pyodide'] = 'Kad Python radi u pregledaču, pregledač korisnika učitava Pyodide (Python interpreter) sa adrese koju je podesio administrator, podrazumevano sa jsDelivr CDN-a. Program i ulaz se ne šalju.';
+$string['privacy:metadata:pyodide:ipaddress'] = 'IP adresa pregledača korisnika, kao pri svakom preuzimanju';
+$string['pyodideurl'] = 'Adresa Pyodide-a';
+$string['pyodideurl_desc'] = 'Folder sa Pyodide fajlovima (pyodide.mjs i ostali). Prazno: {$a} (jsDelivr; pregledač čitaoca ih tada učitava odande). Kopija na vašem serveru čuva pregledače čitalaca od drugih servera.';
+$string['ratelimit'] = 'Pokretanja u minuti';
+$string['ratelimit_desc'] = 'Koliko puta jedan korisnik može da pokrene programe u minuti (0: bez ograničenja).';
+$string['reset'] = 'Vrati original';
+$string['run'] = 'Pokreni';
+$string['runnable'] = 'Čitaoci mogu da ga pokrenu';
+$string['running'] = 'Izvršava se…';
+$string['running_browser'] = 'Izvršava se u vašem pregledaču…';
+$string['status_busy'] = 'Server je zauzet. Pokušajte ponovo za trenutak.';
+$string['status_compile'] = 'Greška pri prevođenju';
+$string['status_error'] = 'Program nije mogao da se pokrene.';
+$string['status_illegal'] = 'Program je pokušao nešto što nije dozvoljeno.';
+$string['status_memory'] = 'Program je zauzeo previše memorije.';
+$string['status_notconfigured'] = 'Pokretanje programa nije podešeno na ovom sajtu (Jobe server).';
+$string['status_ok'] = 'Završeno';
+$string['status_ratelimit'] = 'Previše pokretanja u minuti. Sačekajte malo i pokušajte ponovo.';
+$string['status_runtime'] = 'Greška pri izvršavanju';
+$string['status_stopped'] = 'Zaustavljeno';
+$string['status_time'] = 'Prekoračeno vreme (beskonačna petlja?)';
+$string['status_toolarge'] = 'Program ili ulaz je prevelik.';
+$string['status_toolong'] = 'Previše ispisa: program je zaustavljen.';
+$string['step'] = 'Korak';
+$string['stop'] = 'Zaustavi';
+$string['variables'] = 'Promenljive';
+$string['viewerlabel'] = 'Program ({$a})';

@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<libraries>
+  <library>
+    <location>thirdparty/monaco</location>
+    <name>Monaco Editor</name>
+    <description>The code editor of Visual Studio Code, bundled with only the C, C++, Python, Java and C# languages (devtools/codelab-monaco/build.sh).</description>
+    <version>0.57.0</version>
+    <license>MIT</license>
+    <licenseversion></licenseversion>
+    <repository>https://github.com/microsoft/monaco-editor</repository>
+    <copyrights>
+      <copyright>Microsoft Corporation</copyright>
+    </copyrights>
+  </library>
+</libraries>
