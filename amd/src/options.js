@@ -24,6 +24,7 @@ import {getPluginOptionName} from 'editor_tiny/options';
 import {pluginName} from './common';
 
 const pyodideName = getPluginOptionName(pluginName, 'pyodide');
+const languagesName = getPluginOptionName(pluginName, 'languages');
 
 /**
  * Register the options of the plugin with the editor.
@@ -32,7 +33,16 @@ const pyodideName = getPluginOptionName(pluginName, 'pyodide');
  */
 export const register = (editor) => {
     editor.options.register(pyodideName, {processor: 'string', 'default': ''});
+    editor.options.register(languagesName, {processor: 'array', 'default': []});
 };
+
+/**
+ * Languages teachers can choose (languages::offered() of tiny_codelab); empty when not known.
+ *
+ * @param {TinyMCE} editor
+ * @returns {string[]}
+ */
+export const getLanguages = (editor) => editor.options.get(languagesName);
 
 /**
  * Address of Pyodide for Python in the browser, or '' when it is turned off.

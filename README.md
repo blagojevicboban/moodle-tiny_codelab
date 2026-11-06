@@ -14,7 +14,7 @@ Languages: **C**, **C++**, **Python**, **Java**, **C#**, **JavaScript** (Node.js
 This plugin is also the core of the CodeLab plugins. The filter and the question type use its editor, its runner and its
 Jobe client.
 
-> Status: **alpha** (0.5.0), under development.
+> Status: **alpha** (0.6.0), under development.
 
 ## Features
 
@@ -67,6 +67,8 @@ An example is a `pre` element whose settings are class names, because Moodle's H
 |---|---|---|
 | Jobe server | (empty) | Address of the Jobe server, for example `https://jobe.example.org` |
 | Jobe API key | (empty) | Key sent in the `X-API-KEY` header |
+| State of the Jobe server | | Shows whether the server answers, its languages, and whether a test program is accepted |
+| Languages | all | Languages teachers can choose; those the Jobe server does not have are left out (Python not, when it runs in the browser) |
 | CPU time | 5 s | Time limit of one run |
 | Python in the browser | on | Run Python with Pyodide in the reader's browser |
 | Address of Pyodide | (empty: jsDelivr) | Folder with a copy of Pyodide on your own server |

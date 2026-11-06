@@ -30,7 +30,7 @@ import {readBlock, blockHtml, isBlock, stdinOf} from './embed';
 import {createEditor} from './monaco';
 import {run} from './runner';
 import {showRunning, showResult, showError} from './console';
-import {getPyodide} from './options';
+import {getPyodide, getLanguages} from './options';
 import {available as pythonAvailable} from './python';
 import {PythonSession} from './session';
 
@@ -48,7 +48,9 @@ export const openDialog = async(editor) => {
         : {lang: defaultLanguage, run: true, noassist: false, stdin: '',
             code: editor.selection.getContent({format: 'text'}) || ''};
 
-    const langs = Object.keys(languages);
+    // Only the languages that can run here, and the language of the example being edited.
+    const offered = getLanguages(editor);
+    const langs = Object.keys(languages).filter((lang) => !offered.length || offered.includes(lang) || lang === block.lang);
     const names = await getStrings(langs.map((lang) => ({key: `lang_${lang}`, component})));
     const uniqid = `tiny_codelab_${++counter}`;
     const body = Templates.render('tiny_codelab/dialog', {

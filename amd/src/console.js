@@ -23,8 +23,8 @@
 import {getStrings} from 'core/str';
 import {component} from './common';
 
-const STATUSES = ['ok', 'compile', 'runtime', 'time', 'memory', 'illegal', 'busy', 'error', 'notconfigured', 'toolarge',
-    'ratelimit'];
+const STATUSES = ['ok', 'compile', 'runtime', 'time', 'memory', 'illegal', 'busy', 'error', 'notconfigured', 'nolanguage',
+    'toolarge', 'ratelimit'];
 
 let strings = null;
 

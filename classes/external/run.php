@@ -115,7 +115,7 @@ class run extends external_api {
     public static function execute_returns(): external_single_structure {
         return new external_single_structure([
             'status' => new external_value(PARAM_ALPHA, 'ok, compile, runtime, time, memory, illegal, busy, error, ' .
-                'notconfigured, toolarge or ratelimit'),
+                'notconfigured, nolanguage, toolarge or ratelimit'),
             'outcome' => new external_value(PARAM_INT, 'Jobe outcome code, 0 when Jobe was not asked'),
             'cmpinfo' => new external_value(PARAM_RAW, 'Compiler messages'),
             'stdout' => new external_value(PARAM_RAW, 'Standard output'),

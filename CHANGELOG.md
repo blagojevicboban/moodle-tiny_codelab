@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.6.0 (2026-11-06)
+
+- The settings page shows the state of the Jobe server: whether it answers, its languages and their versions, and
+  whether a test program is accepted (a wrong API key is found).
+- New setting Languages. Teachers are offered only the languages turned on that the Jobe server has; Python also when it
+  runs in the browser. Examples and questions keep their language.
+- A run in a language the server does not have ends with a clear message.
+
 ## 0.5.0 (2026-11-06)
 
 - Python typing help from Jedi (level 2), in Pyodide in its own Web Worker: completion of everything Python knows,

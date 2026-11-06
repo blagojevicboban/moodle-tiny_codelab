@@ -85,13 +85,92 @@ class jobe {
     }
 
     /**
+     * A key for what is cached about this server: it changes with the address and the API key.
+     *
+     * @return string
+     */
+    public function cache_key(): string {
+        return sha1($this->server . "\n" . $this->apikey);
+    }
+
+    /**
      * URL of the runs resource. Like CodeRunner, the setting holds only the server; the REST path is added here.
      *
      * @return string
      */
     public function runs_url(): string {
+        return $this->rest_url('runs');
+    }
+
+    /**
+     * URL of a resource of Jobe's REST API.
+     *
+     * @param string $resource runs or languages
+     * @return string
+     */
+    protected function rest_url(string $resource): string {
         $server = preg_match('~^https?://~i', $this->server) ? $this->server : 'http://' . $this->server;
-        return $server . '/jobe/index.php/restapi/runs';
+        return $server . '/jobe/index.php/restapi/' . $resource;
+    }
+
+    /**
+     * Headers of a request, with the API key when there is one.
+     *
+     * @return string[]
+     */
+    protected function headers(): array {
+        $headers = ['Content-Type: application/json; charset=utf-8', 'Accept: application/json'];
+        if ($this->apikey !== '') {
+            $headers[] = 'X-API-KEY: ' . $this->apikey;
+        }
+        return $headers;
+    }
+
+    /**
+     * Ask the server which languages it has.
+     *
+     * @return array ok (bool), versions (CodeLab language => version, only the languages CodeLab knows), error (text)
+     */
+    public function languages(): array {
+        if (!$this->is_configured()) {
+            return ['ok' => false, 'versions' => [], 'error' => ''];
+        }
+        global $CFG;
+        require_once($CFG->libdir . '/filelib.php');
+        $curl = new \curl();
+        $curl->setHeader($this->headers());
+        $body = $curl->get($this->rest_url('languages'), [], ['CURLOPT_TIMEOUT' => 10, 'CURLOPT_CONNECTTIMEOUT' => 5]);
+        if ($curl->get_errno()) {
+            return ['ok' => false, 'versions' => [], 'error' => $curl->error];
+        }
+        return self::parse_languages((int) ($curl->get_info()['http_code'] ?? 0), (string) $body);
+    }
+
+    /**
+     * Turn Jobe's list of languages ([["c", "13.3.0"], ...]) into the CodeLab languages it covers.
+     *
+     * @param int $httpcode
+     * @param string $body
+     * @return array ok, versions, error
+     */
+    public static function parse_languages(int $httpcode, string $body): array {
+        $list = json_decode($body, true);
+        if ($httpcode !== 200 || !is_array($list)) {
+            return ['ok' => false, 'versions' => [], 'error' => 'HTTP ' . $httpcode];
+        }
+        $jobe = [];
+        foreach ($list as $item) {
+            if (is_array($item) && isset($item[0])) {
+                $jobe[(string) $item[0]] = (string) ($item[1] ?? '');
+            }
+        }
+        $versions = [];
+        foreach (self::LANGUAGES as $lang => $id) {
+            if (isset($jobe[$id])) {
+                $versions[$lang] = $jobe[$id];
+            }
+        }
+        return ['ok' => true, 'versions' => $versions, 'error' => ''];
     }
 
     /**
@@ -155,8 +234,8 @@ class jobe {
      * @param string $lang c, cpp, python, java, csharp, javascript, pascal or php
      * @param string $code
      * @param string $stdin
-     * @return array status (ok, compile, runtime, time, memory, illegal, busy, error, notconfigured), outcome, cmpinfo,
-     *     stdout, stderr
+     * @return array status (ok, compile, runtime, time, memory, illegal, busy, error, notconfigured, nolanguage),
+     *     outcome, cmpinfo, stdout, stderr
      */
     public function run(string $lang, string $code, string $stdin = ''): array {
         if (!isset(self::LANGUAGES[$lang])) {
@@ -165,14 +244,13 @@ class jobe {
         if (!$this->is_configured()) {
             return ['status' => 'notconfigured', 'outcome' => 0, 'cmpinfo' => '', 'stdout' => '', 'stderr' => ''];
         }
+        if (!languages::on_server($lang, $this)) {
+            return ['status' => 'nolanguage', 'outcome' => 0, 'cmpinfo' => '', 'stdout' => '', 'stderr' => ''];
+        }
         global $CFG;
         require_once($CFG->libdir . '/filelib.php');
-        $headers = ['Content-Type: application/json; charset=utf-8', 'Accept: application/json'];
-        if ($this->apikey !== '') {
-            $headers[] = 'X-API-KEY: ' . $this->apikey;
-        }
         $curl = new \curl();
-        $curl->setHeader($headers);
+        $curl->setHeader($this->headers());
         $body = $curl->post($this->runs_url(), json_encode($this->run_spec($lang, $code, $stdin)), [
             'CURLOPT_TIMEOUT' => $this->cputime + 30,
             'CURLOPT_CONNECTTIMEOUT' => 10,

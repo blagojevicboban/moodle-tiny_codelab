@@ -30,6 +30,7 @@ use editor_tiny\plugin;
 use editor_tiny\plugin_with_buttons;
 use editor_tiny\plugin_with_configuration;
 use editor_tiny\plugin_with_menuitems;
+use tiny_codelab\local\languages;
 use tiny_codelab\local\runtime;
 
 /**
@@ -72,7 +73,8 @@ class plugininfo extends plugin implements plugin_with_buttons, plugin_with_conf
     }
 
     /**
-     * Settings for the dialog: the address of Pyodide, for Python in the browser ('' when it is turned off).
+     * Settings for the dialog: the address of Pyodide, for Python in the browser ('' when it is turned off), and the
+     * languages offered.
      *
      * @param context $context
      * @param array $options
@@ -86,6 +88,10 @@ class plugininfo extends plugin implements plugin_with_buttons, plugin_with_conf
         array $fpoptions,
         ?editor $editor = null
     ): array {
-        return ['pyodide' => runtime::config()['pyodide']];
+        return [
+            'pyodide' => runtime::config()['pyodide'],
+            // Languages teachers can choose (the dialog keeps the language of the example being edited).
+            'languages' => languages::offered(),
+        ];
     }
 }

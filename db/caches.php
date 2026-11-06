@@ -32,4 +32,10 @@ $definitions = [
         'simpledata' => true,
         'ttl' => 120,
     ],
+    // The languages the Jobe server has, by server and API key (asked once an hour).
+    'languages' => [
+        'mode' => cache_store::MODE_APPLICATION,
+        'simplekeys' => true,
+        'ttl' => 3600,
+    ],
 ];

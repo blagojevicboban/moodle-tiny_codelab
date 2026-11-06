@@ -38,6 +38,24 @@ if ($ADMIN->fulltree) {
         get_string('jobeapikey_desc', 'tiny_codelab'),
         ''
     ));
+    // What the Jobe server answers: asked again when this settings page is opened, otherwise taken from the cache.
+    $refresh = optional_param('section', '', PARAM_ALPHANUMEXT) === $settings->name;
+    $settings->add(new admin_setting_description(
+        'tiny_codelab/jobestatus',
+        get_string('jobestatus', 'tiny_codelab'),
+        \tiny_codelab\local\languages::status_html($refresh)
+    ));
+    $names = [];
+    foreach (array_keys(\tiny_codelab\local\jobe::LANGUAGES) as $lang) {
+        $names[$lang] = get_string('lang_' . $lang, 'tiny_codelab');
+    }
+    $settings->add(new admin_setting_configmulticheckbox(
+        'tiny_codelab/languages',
+        get_string('languages', 'tiny_codelab'),
+        get_string('languages_desc', 'tiny_codelab'),
+        array_fill_keys(array_keys($names), 1),
+        $names
+    ));
     $settings->add(new admin_setting_configtext(
         'tiny_codelab/cputime',
         get_string('cputime', 'tiny_codelab'),
