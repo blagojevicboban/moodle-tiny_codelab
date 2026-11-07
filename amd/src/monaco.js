@@ -80,6 +80,8 @@ const NO_ASSIST = {
  * @property {function(?number): void} highlightLine mark the line that runs next (null: none)
  * @property {function(): void} focus
  * @property {function(?number): void} setFixedHeight a fixed height in pixels (full screen), or null to grow with the code
+ * @property {function(): number[]} getBreakpoints lines with a breakpoint (options.breakpoints)
+ * @property {function(function(number[]): void): void} onBreakpointsChange called when a breakpoint is set or removed
  * @property {function(): void} dispose
  * @property {HTMLIFrameElement} frame
  */
@@ -99,6 +101,7 @@ const NO_ASSIST = {
  * @param {string} [options.label] accessible name of the editor
  * @param {function(): void} [options.onRun] called on Ctrl+Enter
  * @param {string} [options.pyodide] address of Pyodide: Python typing help from Jedi (level 2); '' for level 1
+ * @param {boolean} [options.breakpoints] a click left of the line numbers sets or removes a breakpoint (Step)
  * @returns {Promise<CodeEditor>}
  */
 export const createEditor = async(container, options = {}) => {
@@ -132,6 +135,7 @@ export const createEditor = async(container, options = {}) => {
         fontSize: 14,
         lineHeight: LINE_HEIGHT,
         lineNumbersMinChars: 3,
+        glyphMargin: !!options.breakpoints,
         tabSize: 4,
         insertSpaces: true,
         renderLineHighlight: 'line',
@@ -169,6 +173,27 @@ export const createEditor = async(container, options = {}) => {
 
     const current = editor.createDecorationsCollection();
 
+    // Breakpoints: decorations, so that they move with their lines when the code changes.
+    const breakpoints = editor.createDecorationsCollection();
+    const breakpointListeners = [];
+    const breakpointLines = () => [...new Set(breakpoints.getRanges().map((r) => r.startLineNumber))].sort((a, b) => a - b);
+    if (options.breakpoints) {
+        editor.onMouseDown((e) => {
+            const type = e.target.type;
+            if (type !== monaco.editor.MouseTargetType.GUTTER_GLYPH_MARGIN || !e.target.position) {
+                return;
+            }
+            const line = e.target.position.lineNumber;
+            const lines = breakpointLines();
+            const next = lines.includes(line) ? lines.filter((l) => l !== line) : [...lines, line];
+            breakpoints.set(next.map((l) => ({
+                range: new monaco.Range(l, 1, l, 1),
+                options: {isWholeLine: false, glyphMarginClassName: 'codelab-breakpoint', stickiness: 1},
+            })));
+            breakpointListeners.forEach((listener) => listener(breakpointLines()));
+        });
+    }
+
     return {
         getValue: () => editor.getValue(),
         highlightLine: (line) => {
@@ -185,6 +210,8 @@ export const createEditor = async(container, options = {}) => {
         setReadOnly: (value) => editor.updateOptions({readOnly: !!value}),
         onChange: (callback) => editor.onDidChangeModelContent(() => callback(editor.getValue())),
         focus: () => editor.focus(),
+        getBreakpoints: breakpointLines,
+        onBreakpointsChange: (listener) => breakpointListeners.push(listener),
         setFixedHeight: (height) => {
             if (fixedHeight === null) {
                 normalHeight = frame.style.height;

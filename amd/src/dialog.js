@@ -131,6 +131,8 @@ export const openDialog = async(editor) => {
         label: await getString('editorlabel', component),
         onRun: doRun,
         pyodide,
+        // Breakpoints where Step exists: Python in the browser, C and C++ on the interactive server.
+        breakpoints: pyodide !== '' || interactive.some((lang) => lang === 'c' || lang === 'cpp'),
     });
     code.focus();
 

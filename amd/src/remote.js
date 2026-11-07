@@ -27,11 +27,12 @@ import Ajax from 'core/ajax';
 import {getStrings} from 'core/str';
 import {component} from './common';
 import {Terminal} from './terminal';
-import {showVariables} from './session';
+import {DebugPanel} from './debugpanel';
+import {editorStack} from './session';
 
 const KEYS = ['compiling', 'running', 'running_server', 'inputline', 'endinput', 'status_ok', 'status_runtime', 'status_time',
     'status_memory', 'status_toolong', 'status_stopped', 'status_compile', 'status_error', 'status_notconfigured',
-    'status_nolanguage', 'status_ratelimit', 'status_busy', 'status_disconnected', 'paused', 'variables', 'novariables'];
+    'status_nolanguage', 'status_ratelimit', 'status_busy', 'status_disconnected', 'status_unreachable', 'paused'];
 
 /** Languages that run step by step on the interactive server. */
 const STEP_LANGUAGES = ['c', 'cpp'];
@@ -93,7 +94,11 @@ export class RemoteSession {
         this.editor = editor;
         this.vars = vars;
         this.offset = offset;
-        this.previous = {};
+        this.mode = 'step';
+        this.debug = vars ? new DebugPanel(vars, {step: () => this.step(), next: () => this.next(), out: () => this.out()})
+            : null;
+        // Breakpoints set or removed while the program runs.
+        editor?.onBreakpointsChange?.((lines) => this.send({type: 'breakpoints', lines: lines.map((l) => l + this.offset)}));
         this.lang = typeof lang === 'function' ? lang : () => lang;
         this.program = program;
         this.panel = panel;
@@ -125,11 +130,11 @@ export class RemoteSession {
             return;
         }
         const s = this.strings = await loadStrings();
-        this.previous = {};
-        if (this.vars) {
-            this.vars.hidden = true;
-            this.vars.replaceChildren();
-        }
+        this.debug?.reset();
+        this.mode = step ? 'step' : 'continue';
+        const breakpoints = (this.editor?.getBreakpoints?.() || []).map((l) => l + this.offset);
+        // Under gdb when stepping, or when Run has breakpoints to stop at.
+        const debug = STEP_LANGUAGES.includes(this.lang()) && (step || breakpoints.length > 0);
         this.setState('running');
         this.terminal = new Terminal(this.panel, s.inputline);
         this.terminal.setStatus(s.compiling, 'running');
@@ -148,7 +153,7 @@ export class RemoteSession {
         const ws = this.ws = new WebSocket(`${grant.url}?token=${encodeURIComponent(grant.token)}`);
         let finished = false;
         ws.onopen = () => ws.send(JSON.stringify({type: 'start', lang: this.lang(), code: this.program(), stdin,
-            debug: step && STEP_LANGUAGES.includes(this.lang()), setup: this.setup()}));
+            debug, step, breakpoints, setup: this.setup()}));
         ws.onmessage = (event) => {
             const message = JSON.parse(event.data);
             switch (message.type) {
@@ -200,7 +205,8 @@ export class RemoteSession {
         ws.onerror = () => {
             if (!finished && this.state === 'running') {
                 finished = true;
-                this.end(s.status_busy, 'error');
+                // The server refused the connection (origin, secret) or cannot be reached.
+                this.end(s.status_unreachable, 'error');
             }
         };
     }
@@ -232,21 +238,20 @@ export class RemoteSession {
      * @param {number} message.line line of the whole program that runs next
      * @param {string} message.func function of that line
      * @param {Array<{name: string, value: string}>} message.vars variables of the function
+     * @param {Array<{func: string, line: number, vars: Array}>} [message.stack] the program's frames, innermost first
      */
-    paused({line, func, vars}) {
+    paused({line, func, vars, stack}) {
         const s = this.strings;
         const shown = line - this.offset;
-        if (!this.editor || shown < 1 || shown > this.editor.getValue().split('\n').length) {
-            this.send({type: 'step'});
+        const lines = this.editor ? this.editor.getValue().split('\n').length : 0;
+        if (!this.editor || shown < 1 || shown > lines) {
+            // A line of the hidden code: go on as asked.
+            this.send({type: this.mode === 'continue' ? 'continue' : 'step'});
             return;
         }
         this.terminal.setStatus(s.paused.replace('{$a}', shown), 'running');
         this.editor.highlightLine(shown);
-        if (this.vars) {
-            const values = Object.fromEntries(vars.map((v) => [v.name, v.value]));
-            showVariables(this.vars, values, this.previous, `${s.variables}: ${func}()`, s.novariables);
-            this.previous = values;
-        }
+        this.debug?.show({line: shown, stack: editorStack(stack || [{func, line, vars}], this.offset, lines)});
         this.setState('paused');
     }
 
@@ -262,30 +267,56 @@ export class RemoteSession {
     }
 
     /**
-     * Run the next line (paused in Step mode).
+     * Go on while paused.
+     *
+     * @param {string} mode step (one line, into calls), next (over calls), out (out of the function) or continue
      */
-    step() {
+    go(mode) {
         if (this.state === 'paused') {
+            this.mode = mode;
             this.setState('running');
-            this.send({type: 'step'});
+            this.debug?.running();
+            if (mode === 'continue') {
+                this.editor?.highlightLine(null);
+            }
+            this.send({type: mode});
         }
     }
 
     /**
-     * Run on without stopping (paused in Step mode).
+     * Run the next line (paused).
+     */
+    step() {
+        this.go('step');
+    }
+
+    /**
+     * Run the next line without stopping in the functions it calls (paused).
+     */
+    next() {
+        this.go('next');
+    }
+
+    /**
+     * Run to the end of the current function (paused).
+     */
+    out() {
+        this.go('out');
+    }
+
+    /**
+     * Run on to the next breakpoint or the end (paused).
      */
     resume() {
-        if (this.state === 'paused') {
-            this.setState('running');
-            this.editor?.highlightLine(null);
-            this.send({type: 'continue'});
-        }
+        this.debug?.stopAuto();
+        this.go('continue');
     }
 
     /**
      * Stop the program.
      */
     stop() {
+        this.debug?.stopAuto();
         if (this.ws?.readyState === WebSocket.OPEN) {
             this.ws.send(JSON.stringify({type: 'stop'}));
         } else if (this.state === 'running') {
@@ -300,6 +331,7 @@ export class RemoteSession {
      * @param {string} kind ok or error
      */
     end(text, kind) {
+        this.debug?.stopAuto();
         this.editor?.highlightLine(null);
         this.terminal?.cancelAsk();
         this.terminal?.setStatus(text, kind);

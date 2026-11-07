@@ -14,7 +14,7 @@ Languages: **C**, **C++**, **Python**, **Java**, **C#**, **JavaScript** (Node.js
 This plugin is also the core of the CodeLab plugins. The filter and the question type use its editor, its runner and its
 Jobe client.
 
-> Status: **stable** (1.3.0).
+> Status: **stable** (1.4.0).
 
 ## Features
 
@@ -97,6 +97,19 @@ installation. Moodle gives the browser a signed token for one session, valid for
 With a CodeLab runner that has MariaDB, the language **MySQL (MariaDB)** is offered. An SQL example has a hidden
 *setup* (the tables and data, a field of the dialog) that runs before the reader's SQL; the result is shown as by the
 mysql client. Every run gets a fresh database with the same data. qtype_codelab grades SQL questions on the runner.
+
+## Step and the debugger
+
+**Step** runs a program line by line: Python in the browser, C and C++ on the CodeLab runner (gdb). The line that runs
+next is marked in the editor, and the debugger panel below the console shows:
+
+- **Step over** (a call runs without stopping in it), **Step out** (to the end of the current function) and
+  **Auto step** with a speed slider; **Run** while paused goes on to the next breakpoint or the end;
+- the **call stack**, innermost call first: a click on a call shows its variables (useful for recursion);
+- the **variables** of the function, the changed ones marked;
+- the **trace table**: the line and the values after each step.
+
+A click left of a line number sets or removes a **breakpoint** (a red dot); Run then stops there, also without Step.
 
 ## Installation
 

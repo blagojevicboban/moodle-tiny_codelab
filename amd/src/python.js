@@ -52,21 +52,57 @@ const HARNESS = [
     '        out[k] = r if len(r) <= 200 else r[:197] + "..."',
     '    return json.dumps(out)',
     '',
+    'def __codelab_depth(frame):',
+    '    depth = 0',
+    '    while frame is not None:',
+    '        if frame.f_code.co_filename == "<program>":',
+    '            depth += 1',
+    '        frame = frame.f_back',
+    '    return depth',
+    '',
+    'def __codelab_stack(frame):',
+    '    stack = []',
+    '    while frame is not None and len(stack) < 30:',
+    '        if frame.f_code.co_filename == "<program>":',
+    '            stack.append({"func": frame.f_code.co_name, "line": frame.f_lineno,',
+    '                          "vars": json.loads(__codelab_vars(frame))})',
+    '        frame = frame.f_back',
+    '    return json.dumps(stack)',
+    '',
     'def __codelab_trace(frame, event, arg):',
     '    if frame.f_code.co_filename != "<program>":',
     '        return None',
-    '    if event == "line" and js.codelab.stepping:',
-    '        run_sync(js.codelab.step(frame.f_lineno, frame.f_code.co_name, __codelab_vars(frame)))',
+    '    if event == "line":',
+    '        c = js.codelab',
+    '        mode = c.mode',
+    '        stop = c.isBreakpoint(frame.f_lineno)',
+    '        depth = 0',
+    '        if not stop and mode != "continue":',
+    '            depth = __codelab_depth(frame)',
+    '            stop = mode == "step" or (mode == "next" and depth <= c.refDepth) or (mode == "out" and depth < c.refDepth)',
+    '        if stop:',
+    '            depth = depth or __codelab_depth(frame)',
+    '            run_sync(c.step(frame.f_lineno, frame.f_code.co_name, __codelab_vars(frame), __codelab_stack(frame), depth))',
+    '    elif event == "return":',
+    '        # The caller goes on in the middle of its line, without a line event: stop there when the function that',
+    '        # returns is the one of the last stop (Step, Step over or Step out).',
+    '        c = js.codelab',
+    '        caller = frame.f_back',
+    '        if c.mode != "continue" and caller is not None and caller.f_code.co_filename == "<program>":',
+    '            depth = __codelab_depth(frame)',
+    '            if depth == c.refDepth or (c.mode != "out" and depth < c.refDepth):',
+    '                run_sync(c.step(caller.f_lineno, caller.f_code.co_name, __codelab_vars(caller),',
+    '                                __codelab_stack(caller), depth - 1))',
     '    return __codelab_trace',
     '',
-    'def __codelab_run(code, step):',
+    'def __codelab_run(code, trace):',
     '    builtins.input = __codelab_input',
     '    try:',
     '        compiled = compile(code, "<program>", "exec")',
     '    except SyntaxError as e:',
     '        sys.stderr.write("".join(traceback.format_exception_only(type(e), e)))',
     '        return "error"',
-    '    if step:',
+    '    if trace:',
     '        sys.settrace(__codelab_trace)',
     '    try:',
     '        exec(compiled, {"__name__": "__main__", "__builtins__": builtins})',
@@ -98,15 +134,21 @@ let pendingLine = null;
 let pendingStep = null;
 let written = 0;
 const decoder = new TextDecoder();
+// Step by step: mode step (every line), next (not deeper than refDepth), out (above refDepth), continue (only at
+// breakpoints).
+let breakpoints = new Set();
 self.codelab = {
-    stepping: false,
+    mode: 'continue',
+    refDepth: 0,
+    isBreakpoint: (line) => breakpoints.has(line),
     readLine: () => new Promise((resolve) => {
         pendingLine = resolve;
         postMessage({type: 'input'});
     }),
-    step: (line, scope, vars) => new Promise((resolve) => {
+    step: (line, scope, vars, stack, depth) => new Promise((resolve) => {
+        self.codelab.refDepth = depth;
         pendingStep = resolve;
-        postMessage({type: 'line', line, scope, vars});
+        postMessage({type: 'line', line, scope, vars, stack});
     }),
 };
 const writer = (stream) => ({
@@ -127,8 +169,10 @@ onmessage = async(e) => {
         const resolve = pendingLine;
         pendingLine = null;
         resolve(m.text);
+    } else if (m.type === 'breakpoints') {
+        breakpoints = new Set(m.lines);
     } else if (m.type === 'resume' && pendingStep) {
-        self.codelab.stepping = m.step;
+        self.codelab.mode = m.mode;
         const resolve = pendingStep;
         pendingStep = null;
         resolve();
@@ -141,9 +185,11 @@ onmessage = async(e) => {
                 pyodide.setStderr(writer('err'));
             }
             written = 0;
-            self.codelab.stepping = m.step;
+            breakpoints = new Set(m.breakpoints || []);
+            self.codelab.mode = m.step ? 'step' : 'continue';
             pyodide.globals.set('__codelab_code', m.code);
-            pyodide.globals.set('__codelab_step', m.step);
+            // The tracer slows the program down: only when it may stop.
+            pyodide.globals.set('__codelab_step', m.step || breakpoints.size > 0);
             postMessage({type: 'started'});
             const status = await pyodide.runPythonAsync(HARNESS + '\\n__codelab_run(__codelab_code, __codelab_step)');
             postMessage({type: 'done', status: status === undefined ? 'ok' : String(status)});
@@ -188,7 +234,8 @@ const stopWorker = () => {
  * @property {function(): void} [onStarted] the program has started
  * @property {function(string, string): void} onOutput text and stream (out or err)
  * @property {function(): void} onInput the program waits for a line (answer with sendInput)
- * @property {function(number, string, Object<string, string>): void} [onLine] Step: line, function and variables
+ * @property {function(number, string, Object<string, string>, Array): void} [onLine] Step: line, function, variables and
+ *     the call stack (frames of the program, innermost first: func, line, vars)
  * @property {function({status: string, message?: string}): void} onDone status ok, error, stopped or toolong
  */
 
@@ -199,9 +246,11 @@ const stopWorker = () => {
  * @param {string} code
  * @param {PythonHandlers} handlers
  * @param {boolean} step stop before the first line
- * @returns {{sendInput: function(string): void, resume: function(boolean): void, stop: function(): void}}
+ * @param {number[]} [breakpoints] lines to stop at
+ * @returns {{sendInput: function(string): void, resume: function(string): void, setBreakpoints: function(number[]): void,
+ *     stop: function(): void}} resume with step, next, out or continue
  */
-export const runPython = (base, code, handlers, step = false) => {
+export const runPython = (base, code, handlers, step = false, breakpoints = []) => {
     // A program still running is stopped; an idle worker keeps Pyodide loaded for the next run.
     if (current) {
         stopWorker();
@@ -234,7 +283,7 @@ export const runPython = (base, code, handlers, step = false) => {
         } else if (m.type === 'input') {
             handlers.onInput();
         } else if (m.type === 'line' && handlers.onLine) {
-            handlers.onLine(m.line, m.scope, JSON.parse(m.vars));
+            handlers.onLine(m.line, m.scope, JSON.parse(m.vars), JSON.parse(m.stack));
         } else if (m.type === 'toolong') {
             toolong = true;
         } else if (m.type === 'done') {
@@ -242,10 +291,11 @@ export const runPython = (base, code, handlers, step = false) => {
             handlers.onDone(toolong ? {status: 'toolong'} : {status: m.status, message: m.message});
         }
     };
-    own.postMessage({type: 'run', code, step});
+    own.postMessage({type: 'run', code, step, breakpoints});
     return {
         sendInput: (text) => own.postMessage({type: 'line', text}),
-        resume: (stepAgain) => own.postMessage({type: 'resume', step: stepAgain}),
+        resume: (mode) => own.postMessage({type: 'resume', mode}),
+        setBreakpoints: (lines) => own.postMessage({type: 'breakpoints', lines}),
         stop: () => {
             if (current === handlers) {
                 stopWorker();

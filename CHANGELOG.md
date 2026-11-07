@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.4.0 (2026-11-07)
+
+- Debugger of Step, as in the algorithm plugins, for Python in the browser and C and C++ on the CodeLab runner
+  0.5.0: breakpoints (a click left of the line number; Run stops there), Step over, Step out, automatic steps with a
+  speed, the call stack (a frame shows its variables) and a trace table of the values after each step.
+- A clear message when the interactive server cannot be reached (instead of "the server is busy").
+
 ## 1.3.0 (2026-11-06)
 
 - SQL (MySQL / MariaDB) examples on the CodeLab runner 0.4.0: a hidden setup with the tables and data (a new field

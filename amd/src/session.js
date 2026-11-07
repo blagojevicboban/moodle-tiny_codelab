@@ -14,8 +14,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * A run of a Python program in the browser tied to an editor, a console and a variables panel: output and input in the
- * console, and in Step mode the line that runs next marked in the editor and the variables shown.
+ * A run of a Python program in the browser tied to an editor, a console and a debugger panel: output and input in the
+ * console; in Step mode, or at a breakpoint, the line that runs next marked in the editor, with the call stack, the
+ * variables and a trace table (tiny_codelab/debugpanel); Step, Step over, Step out and Continue.
  *
  * @module     tiny_codelab/session
  * @copyright  2026 Boban Blagojević
@@ -25,9 +26,10 @@ import {getStrings} from 'core/str';
 import {component} from './common';
 import {runPython} from './python';
 import {Terminal} from './terminal';
+import {DebugPanel} from './debugpanel';
 
 const KEYS = ['loadingpython', 'running_browser', 'paused', 'status_ok', 'status_runtime', 'status_stopped',
-    'status_toolong', 'inputline', 'variables', 'novariables'];
+    'status_toolong', 'inputline'];
 let strings = null;
 
 /**
@@ -44,39 +46,18 @@ const loadStrings = async() => {
 };
 
 /**
- * Show variables in a panel; values changed since the last step are marked.
+ * The lines of a call stack in the editor: a line of the hidden code becomes 0.
  *
- * @param {HTMLElement} panel
- * @param {Object<string, string>} vars name => value
- * @param {Object<string, string>} previous the variables of the last step
- * @param {string} title
- * @param {string} empty text when there are none
+ * @param {Array<{func: string, line: number, vars: Object|Array}>} stack frames of the whole program
+ * @param {number} offset lines of hidden code before the editor's code
+ * @param {number} lines lines of the editor
+ * @returns {Array<{func: string, line: number, vars: Object<string, string>}>}
  */
-export const showVariables = (panel, vars, previous, title, empty) => {
-    const names = Object.keys(vars);
-    panel.replaceChildren();
-    const heading = document.createElement('div');
-    heading.className = 'tiny_codelab-vars-title';
-    heading.textContent = title;
-    panel.append(heading);
-    if (!names.length) {
-        const none = document.createElement('div');
-        none.className = 'tiny_codelab-vars-empty';
-        none.textContent = empty;
-        panel.append(none);
-    } else {
-        const table = document.createElement('table');
-        table.className = 'tiny_codelab-vars-table';
-        names.forEach((name) => {
-            const row = table.insertRow();
-            row.className = previous[name] !== vars[name] ? 'tiny_codelab-vars-changed' : '';
-            row.insertCell().textContent = name;
-            row.insertCell().textContent = vars[name];
-        });
-        panel.append(table);
-    }
-    panel.hidden = false;
-};
+export const editorStack = (stack, offset, lines) => stack.map((frame) => {
+    const line = frame.line - offset;
+    const vars = Array.isArray(frame.vars) ? Object.fromEntries(frame.vars.map((v) => [v.name, v.value])) : frame.vars;
+    return {func: frame.func === '<module>' ? '' : frame.func, line: line >= 1 && line <= lines ? line : 0, vars};
+});
 
 export class PythonSession {
     /**
@@ -86,7 +67,7 @@ export class PythonSession {
      * @param {string} options.base address of the Pyodide files
      * @param {import('./monaco').CodeEditor} options.editor
      * @param {HTMLElement} options.panel console panel
-     * @param {HTMLElement} options.vars variables panel
+     * @param {HTMLElement} options.vars debugger panel
      * @param {function(string): void} options.onState idle, running or paused
      * @param {function(): string} [options.program] the whole program (default: the code of the editor)
      * @param {number} [options.offset] lines of hidden code before the editor's code in the program; Step passes over
@@ -102,8 +83,11 @@ export class PythonSession {
         this.onState = onState;
         this.run = null;
         this.terminal = null;
-        this.previous = {};
         this.state = 'idle';
+        this.mode = 'step';
+        this.debug = new DebugPanel(vars, {step: () => this.step(), next: () => this.next(), out: () => this.out()});
+        // Breakpoints set or removed while the program runs.
+        this.editor.onBreakpointsChange?.((lines) => this.run?.setBreakpoints(lines.map((l) => l + this.offset)));
     }
 
     /**
@@ -127,12 +111,12 @@ export class PythonSession {
         const queue = stdin === '' ? [] : stdin.replace(/\r\n?/g, '\n').replace(/\n$/, '').split('\n');
         this.terminal = new Terminal(this.panel, s.inputline);
         this.terminal.setStatus(s.running_browser, 'running');
-        this.previous = {};
-        this.vars.hidden = !step;
-        this.vars.replaceChildren();
+        this.debug.reset();
         this.editor.highlightLine(null);
+        this.mode = step ? 'step' : 'continue';
         this.setState('running');
         const terminal = this.terminal;
+        const breakpoints = (this.editor.getBreakpoints?.() || []).map((l) => l + this.offset);
         this.run = runPython(this.base, this.program(), {
             onLoading: () => terminal.setStatus(s.loadingpython, 'running'),
             onStarted: () => terminal.setStatus(s.running_browser, 'running'),
@@ -149,16 +133,17 @@ export class PythonSession {
                     this.run.sendInput(line);
                 }
             },
-            onLine: (programLine, scope, vars) => {
+            onLine: (programLine, scope, vars, stack) => {
+                const lines = this.editor.getValue().split('\n').length;
                 const line = programLine - this.offset;
-                if (line < 1 || line > this.editor.getValue().split('\n').length) {
-                    // A line of the hidden code: go on to the next line.
-                    this.run.resume(true);
+                if (line < 1 || line > lines) {
+                    // A line of the hidden code: go on as asked.
+                    this.run.resume(this.mode === 'continue' ? 'continue' : 'step');
                     return;
                 }
                 terminal.setStatus(s.paused.replace('{$a}', line), 'running');
                 this.editor.highlightLine(line);
-                this.showVars(vars, scope, s);
+                this.debug.show({line, stack: editorStack(stack, this.offset, lines)});
                 this.setState('paused');
             },
             onDone: ({status, message}) => {
@@ -169,52 +154,66 @@ export class PythonSession {
                 const text = {ok: s.status_ok, stopped: s.status_stopped, toolong: s.status_toolong}[status] || s.status_runtime;
                 terminal.setStatus(text, status === 'ok' ? 'ok' : 'error');
                 this.editor.highlightLine(null);
+                this.debug.stopAuto();
                 this.run = null;
                 this.setState('idle');
             },
-        }, step);
+        }, step, breakpoints);
     }
 
     /**
-     * Run the next line (paused in Step mode).
+     * Go on while paused.
+     *
+     * @param {string} mode step (one line, into calls), next (over calls), out (out of the function) or continue
+     */
+    go(mode) {
+        if (this.run && this.state === 'paused') {
+            this.mode = mode;
+            this.setState('running');
+            this.debug.running();
+            if (mode === 'continue') {
+                this.editor.highlightLine(null);
+            }
+            this.run.resume(mode);
+        }
+    }
+
+    /**
+     * Run the next line (paused).
      */
     step() {
-        if (this.run && this.state === 'paused') {
-            this.setState('running');
-            this.run.resume(true);
-        }
+        this.go('step');
     }
 
     /**
-     * Run on without stopping (paused in Step mode).
+     * Run the next line without stopping in the functions it calls (paused).
+     */
+    next() {
+        this.go('next');
+    }
+
+    /**
+     * Run to the end of the current function (paused).
+     */
+    out() {
+        this.go('out');
+    }
+
+    /**
+     * Run on to the next breakpoint or the end (paused).
      */
     resume() {
-        if (this.run && this.state === 'paused') {
-            this.setState('running');
-            this.editor.highlightLine(null);
-            this.run.resume(false);
-        }
+        this.debug.stopAuto();
+        this.go('continue');
     }
 
     /**
      * Stop the program.
      */
     stop() {
+        this.debug.stopAuto();
         if (this.run) {
             this.run.stop();
         }
-    }
-
-    /**
-     * Show the variables; values changed since the last step are marked.
-     *
-     * @param {Object<string, string>} vars
-     * @param {string} scope name of the function (<module> for the main program)
-     * @param {Object<string, string>} s strings
-     */
-    showVars(vars, scope, s) {
-        const title = scope && scope !== '<module>' ? `${s.variables}: ${scope}()` : s.variables;
-        showVariables(this.vars, vars, this.previous, title, s.novariables);
-        this.previous = vars;
     }
 }
