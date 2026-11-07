@@ -16,6 +16,8 @@ Jobe client.
 
 > Status: **stable** (1.4.0).
 
+> 🌐 **Live demo:** [codelab.tsp.edu.rs](https://codelab.tsp.edu.rs) (look around as a guest, or use `teacher` / `student` with password `Demo-2026`; reset every night)
+
 ## Features
 
 - **Code editor** with syntax highlighting, line numbers, brackets and search, as in VS Code.
