@@ -111,6 +111,11 @@ next is marked in the editor, and the debugger panel below the console shows:
 
 A click left of a line number sets or removes a **breakpoint** (a red dot); Run then stops there, also without Step.
 
+## Manual
+
+The [CodeLab manual](docs/MANUAL.md) covers the three plugins for teachers, students and administrators:
+examples, quiz questions, Step and the debugger, settings, the CodeLab runner and the error messages.
+
 ## Installation
 
 1. Install **tiny_codelab** first, then **filter_codelab** and **qtype_codelab**.
