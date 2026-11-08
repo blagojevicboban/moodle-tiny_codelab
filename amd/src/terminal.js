@@ -28,10 +28,12 @@ export class Terminal {
      *
      * @param {HTMLElement} panel
      * @param {string} inputLabel accessible name of the input line
+     * @param {string} [okLabel] name of the button that sends the line (phone keyboards often have no Enter key)
      */
-    constructor(panel, inputLabel) {
+    constructor(panel, inputLabel, okLabel = '') {
         this.panel = panel;
         this.inputLabel = inputLabel;
+        this.okLabel = okLabel;
         this.field = null;
         this.clear();
     }
@@ -93,6 +95,19 @@ export class Terminal {
             field.setAttribute('aria-label', this.inputLabel);
             field.autocomplete = 'off';
             field.spellcheck = false;
+            field.setAttribute('enterkeyhint', 'send');
+            field.setAttribute('autocapitalize', 'off');
+            field.setAttribute('autocorrect', 'off');
+            // In a small form, so the Go / Send key of a phone keyboard sends the line (it often sends no Enter key);
+            // the submit never reaches a form around the console (a quiz page).
+            const form = document.createElement('form');
+            form.className = 'tiny_codelab-terminal-form';
+            form.noValidate = true;
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                done(field.value);
+            });
             const done = (value) => {
                 this.cancelAsk();
                 if (value !== null) {
@@ -101,7 +116,7 @@ export class Terminal {
                 resolve(value);
             };
             field.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') {
+                if (e.key === 'Enter' || e.keyCode === 13) {
                     e.preventDefault();
                     done(field.value);
                 } else if (eofLabel && e.ctrlKey && (e.key === 'd' || e.key === 'D')) {
@@ -110,7 +125,18 @@ export class Terminal {
                 }
             });
             this.field = field;
-            this.output.append(field);
+            this.form = form;
+            form.append(field);
+            if (this.okLabel) {
+                const ok = document.createElement('button');
+                ok.type = 'submit';
+                ok.className = 'btn btn-primary btn-sm tiny_codelab-terminal-ok';
+                ok.textContent = '✓';
+                ok.title = this.okLabel;
+                ok.setAttribute('aria-label', this.okLabel);
+                form.append(ok);
+            }
+            this.output.append(form);
             if (eofLabel) {
                 const eof = document.createElement('button');
                 eof.type = 'button';
@@ -129,10 +155,11 @@ export class Terminal {
      * Remove a pending input line (the program was stopped).
      */
     cancelAsk() {
-        if (this.field) {
-            this.field.remove();
-            this.field = null;
+        if (this.form) {
+            this.form.remove();
+            this.form = null;
         }
+        this.field = null;
         if (this.eofButton) {
             this.eofButton.remove();
             this.eofButton = null;

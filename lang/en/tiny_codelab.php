@@ -47,6 +47,7 @@ $string['exitfullscreen'] = 'Exit full screen';
 $string['fullscreen'] = 'Full screen';
 $string['input'] = 'Input';
 $string['inputline'] = 'Input for the program';
+$string['inputok'] = 'Send the line';
 $string['insert'] = 'Insert';
 $string['jobeapikey'] = 'Jobe API key';
 $string['jobeapikey_desc'] = 'Key sent in the X-API-KEY header, when the Jobe server requires one.';

@@ -52,6 +52,42 @@
     padding: 0;
 }
 
+/* The input line and its ✓ button (phone keyboards often have no Enter key). */
+.tiny_codelab-terminal-form {
+    display: inline-flex;
+    align-items: center;
+    gap: .375rem;
+    margin: 0;
+    max-width: 100%;
+    vertical-align: baseline;
+}
+
+.tiny_codelab-terminal-form .tiny_codelab-terminal-input {
+    flex: 1 1 10rem;
+    min-width: 6rem;
+}
+
+.tiny_codelab-terminal-ok {
+    font-family: system-ui, sans-serif;
+    padding: 0 .5rem;
+    line-height: 1.4;
+}
+
+/* Tool buttons with an icon (full screen, restore, copy, theme). */
+.tiny_codelab-icon-button.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.75rem;
+    padding-left: .375rem;
+    padding-right: .375rem;
+    align-self: stretch;
+}
+
+.tiny_codelab-icon-button svg {
+    display: block;
+}
+
 .tiny_codelab-terminal-eof {
     font-family: system-ui, sans-serif;
     padding: 0 .5rem;
@@ -81,6 +117,11 @@
 
 .tiny_codelab-vars-table tr.tiny_codelab-vars-changed td {
     background: #fff3b0;
+}
+
+html.tiny_codelab-noscroll,
+html.tiny_codelab-noscroll body {
+    overflow: hidden;
 }
 
 /* Full screen of an editor with its console (tiny_codelab/fullscreen), when the browser cannot do it itself. */

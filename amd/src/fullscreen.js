@@ -22,6 +22,8 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+import {setIcon} from './icons';
+
 const ON = 'tiny_codelab-fullscreen';
 
 /**
@@ -30,8 +32,8 @@ const ON = 'tiny_codelab-fullscreen';
  * @param {Object} options
  * @param {HTMLElement} options.root the element shown on the whole screen
  * @param {import('./monaco').CodeEditor} options.editor its editor, which then takes most of the height
- * @param {string} options.label text of the button
- * @param {string} options.exitLabel text of the button on the whole screen
+ * @param {string} options.label name of the button (its title; the button shows an icon)
+ * @param {string} options.exitLabel name of the button on the whole screen
  * @param {string} [options.className] classes of the button
  * @returns {HTMLButtonElement}
  */
@@ -41,11 +43,12 @@ export const fullscreenButton = ({root, editor, label, exitLabel, className = 'b
     button.className = `${className} tiny_codelab-fullscreen-button`;
     button.dataset.action = 'fullscreen';
     button.setAttribute('aria-pressed', 'false');
-    button.textContent = label;
+    setIcon(button, 'fullscreen', label);
 
     const apply = (on) => {
         root.classList.toggle(ON, on);
-        button.textContent = on ? exitLabel : label;
+        document.documentElement.classList.toggle('tiny_codelab-noscroll', on);
+        setIcon(button, on ? 'exitfullscreen' : 'fullscreen', on ? exitLabel : label);
         button.setAttribute('aria-pressed', on ? 'true' : 'false');
         // On the whole screen the editor gets most of the height; the console stays below it.
         editor.setFixedHeight(on ? Math.max(200, Math.round(window.innerHeight * 0.6)) : null);

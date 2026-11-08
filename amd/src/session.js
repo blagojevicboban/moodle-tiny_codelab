@@ -29,7 +29,7 @@ import {Terminal} from './terminal';
 import {DebugPanel} from './debugpanel';
 
 const KEYS = ['loadingpython', 'running_browser', 'paused', 'status_ok', 'status_runtime', 'status_stopped',
-    'status_toolong', 'inputline'];
+    'status_toolong', 'inputline', 'inputok'];
 let strings = null;
 
 /**
@@ -109,7 +109,7 @@ export class PythonSession {
     async start(step, stdin = '') {
         const s = await loadStrings();
         const queue = stdin === '' ? [] : stdin.replace(/\r\n?/g, '\n').replace(/\n$/, '').split('\n');
-        this.terminal = new Terminal(this.panel, s.inputline);
+        this.terminal = new Terminal(this.panel, s.inputline, s.inputok);
         this.terminal.setStatus(s.running_browser, 'running');
         this.debug.reset();
         this.editor.highlightLine(null);

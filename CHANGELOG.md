@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.5.1 (2026-11-08)
+
+- Input on phones: the line where a running program reads its input has a check button, and the Go / Send key of a
+  phone keyboard sends the line (phone keyboards often send no Enter key). It never submits a quiz page around it.
+- Full screen button shows an icon (its name is the title), and the page behind it no longer scrolls on phones.
+- New module tiny_codelab/icons for the tool buttons of the viewer (restore, copy, theme, full screen).
+- A failed session request shows the real error message instead of a general error.
+
 ## 1.5.0 (2026-11-08)
 
 - Support for VS Code themes: Visual Studio Light (`vs`), Visual Studio Dark (`vs-dark`), and High Contrast Dark (`hc-black`).

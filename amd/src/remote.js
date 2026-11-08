@@ -30,8 +30,8 @@ import {Terminal} from './terminal';
 import {DebugPanel} from './debugpanel';
 import {editorStack} from './session';
 
-const KEYS = ['compiling', 'running', 'running_server', 'inputline', 'endinput', 'status_ok', 'status_runtime', 'status_time',
-    'status_memory', 'status_toolong', 'status_stopped', 'status_compile', 'status_error', 'status_notconfigured',
+const KEYS = ['compiling', 'running', 'running_server', 'inputline', 'inputok', 'endinput', 'status_ok', 'status_runtime',
+    'status_time', 'status_memory', 'status_toolong', 'status_stopped', 'status_compile', 'status_error', 'status_notconfigured',
     'status_nolanguage', 'status_ratelimit', 'status_busy', 'status_disconnected', 'status_unreachable', 'paused'];
 
 /** Languages that run step by step on the interactive server. */
@@ -136,14 +136,15 @@ export class RemoteSession {
         // Under gdb when stepping, or when Run has breakpoints to stop at.
         const debug = STEP_LANGUAGES.includes(this.lang()) && (step || breakpoints.length > 0);
         this.setState('running');
-        this.terminal = new Terminal(this.panel, s.inputline);
+        this.terminal = new Terminal(this.panel, s.inputline, s.inputok);
         this.terminal.setStatus(s.compiling, 'running');
         let grant;
         try {
             const args = {contextid: this.contextid, lang: this.lang()};
             grant = await Ajax.call([{methodname: 'tiny_codelab_session', args}])[0];
         } catch (e) {
-            this.end(s.status_error, 'error');
+            const message = e?.message || e?.error || s.status_error;
+            this.end(message, 'error');
             return;
         }
         if (grant.status !== 'ok') {

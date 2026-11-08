@@ -47,6 +47,7 @@ $string['exitfullscreen'] = 'Izađi iz celog ekrana';
 $string['fullscreen'] = 'Ceo ekran';
 $string['input'] = 'Ulaz';
 $string['inputline'] = 'Ulaz za program';
+$string['inputok'] = 'Pošalji red';
 $string['insert'] = 'Ubaci';
 $string['jobeapikey'] = 'Jobe API ključ';
 $string['jobeapikey_desc'] = 'Ključ koji se šalje u zaglavlju X-API-KEY, ako ga Jobe server traži.';
