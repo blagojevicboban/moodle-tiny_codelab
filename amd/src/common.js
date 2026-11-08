@@ -29,12 +29,22 @@ export const icon = `${component}_icon`;
 /** Class of every CodeLab block; the settings are classes too, because Moodle's HTML cleaning removes data-* attributes. */
 export const blockClass = 'codelab';
 export const langPrefix = 'codelab-lang-';
+export const themePrefix = 'codelab-theme-';
 export const runClass = 'codelab-run';
 export const noAssistClass = 'codelab-noassist';
 /** Input readers start from: <pre class="codelab-stdin"> right after the block. */
 export const stdinClass = 'codelab-stdin';
 /** Hidden code run before the block (the tables and data of SQL): <pre class="codelab-setup"> right after the block. */
 export const setupClass = 'codelab-setup';
+
+/** Supported Monaco themes. */
+export const themes = {
+    auto: 'auto',
+    vs: 'vs',
+    'vs-dark': 'vs-dark',
+    'hc-black': 'hc-black',
+};
+export const defaultTheme = 'auto';
 
 /** Languages in the order they are offered: class suffix => Monaco language id. */
 export const languages = {

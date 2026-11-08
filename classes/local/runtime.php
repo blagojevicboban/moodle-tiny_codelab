@@ -44,9 +44,14 @@ class runtime {
      * Settings for JavaScript.
      *
      * @return array ['pyodide' => address of the Pyodide files ending with /, or '' when Python runs only on Jobe,
-     *     'interactive' => languages that run on the interactive server]
+     *     'interactive' => languages that run on the interactive server, 'theme' => default editor theme]
      */
     public static function config(): array {
-        return ['pyodide' => self::pyodide(), 'interactive' => interactive::languages()];
+        $theme = (string) get_config('tiny_codelab', 'theme');
+        return [
+            'pyodide' => self::pyodide(),
+            'interactive' => interactive::languages(),
+            'theme' => $theme !== '' ? $theme : 'auto',
+        ];
     }
 }

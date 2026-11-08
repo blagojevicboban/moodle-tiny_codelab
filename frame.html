@@ -29,7 +29,12 @@ with Moodle's RequireJS and theme, so it runs here; tiny_codelab/monaco creates 
 <link rel="stylesheet" href="thirdparty/monaco/editor.css">
 <style>
 html, body, #editor { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #fff; }
+body.theme-vs-dark, body.theme-vs-dark #editor { background: #1e1e1e; }
+body.theme-hc-black, body.theme-hc-black #editor { background: #000000; }
+body.theme-vs, body.theme-vs #editor { background: #ffffff; }
 .codelab-current-line { background: #fff3b0; }
+body.theme-vs-dark .codelab-current-line { background: #3b3a32; }
+body.theme-hc-black .codelab-current-line { background: #264f78; }
 .codelab-current-mark { background: #f0ad00; width: 4px !important; margin-left: 3px; }
 .codelab-breakpoint { background: #d9534f; border-radius: 50%; width: 10px !important; height: 10px !important;
     margin: 5px 0 0 6px; }

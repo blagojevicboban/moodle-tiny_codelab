@@ -26,6 +26,7 @@ import {pluginName} from './common';
 const pyodideName = getPluginOptionName(pluginName, 'pyodide');
 const languagesName = getPluginOptionName(pluginName, 'languages');
 const interactiveName = getPluginOptionName(pluginName, 'interactive');
+const themeName = getPluginOptionName(pluginName, 'theme');
 
 /**
  * Register the options of the plugin with the editor.
@@ -36,6 +37,7 @@ export const register = (editor) => {
     editor.options.register(pyodideName, {processor: 'string', 'default': ''});
     editor.options.register(languagesName, {processor: 'array', 'default': []});
     editor.options.register(interactiveName, {processor: 'array', 'default': []});
+    editor.options.register(themeName, {processor: 'string', 'default': 'auto'});
 };
 
 /**
@@ -61,3 +63,11 @@ export const getInteractive = (editor) => editor.options.get(interactiveName);
  * @returns {string}
  */
 export const getPyodide = (editor) => editor.options.get(pyodideName);
+
+/**
+ * Default theme for code blocks: 'auto', 'vs', 'vs-dark' or 'hc-black'.
+ *
+ * @param {TinyMCE} editor
+ * @returns {string}
+ */
+export const getTheme = (editor) => editor.options.get(themeName);

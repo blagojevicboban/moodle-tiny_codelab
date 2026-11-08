@@ -54,6 +54,41 @@ const frameReady = (frame) => new Promise((resolve, reject) => {
 });
 
 /**
+ * Detect whether dark mode is currently active on the page or in the browser.
+ *
+ * @returns {boolean}
+ */
+export const isDarkMode = () => {
+    try {
+        const doc = document.documentElement;
+        const body = document.body;
+        if (doc && doc.getAttribute('data-bs-theme') === 'dark') {
+            return true;
+        }
+        if (body && (body.getAttribute('data-bs-theme') === 'dark' ||
+            body.classList.contains('theme-dark') || body.classList.contains('dark-mode'))) {
+            return true;
+        }
+        return !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    } catch (e) {
+        return false;
+    }
+};
+
+/**
+ * Resolve a theme name ('auto', 'vs', 'vs-dark', 'hc-black') to a concrete Monaco theme ('vs', 'vs-dark', 'hc-black').
+ *
+ * @param {string} theme
+ * @returns {string}
+ */
+export const resolveTheme = (theme) => {
+    if (theme === 'vs-dark' || theme === 'hc-black' || theme === 'vs') {
+        return theme;
+    }
+    return isDarkMode() ? 'vs-dark' : 'vs';
+};
+
+/**
  * Editor options that turn typing help off (for tests).
  *
  * @type {Object}
@@ -75,6 +110,7 @@ const NO_ASSIST = {
  * @property {function(): string} getValue
  * @property {function(string): void} setValue
  * @property {function(string): void} setLanguage
+ * @property {function(string): void} setTheme
  * @property {function(boolean): void} setReadOnly
  * @property {function(function(string): void): void} onChange
  * @property {function(?number): void} highlightLine mark the line that runs next (null: none)
@@ -125,9 +161,12 @@ export const createEditor = async(container, options = {}) => {
         registerAssist(monaco, options.pyodide || '');
     }
     const lang = Object.prototype.hasOwnProperty.call(languages, options.lang) ? options.lang : defaultLanguage;
+    const theme = resolveTheme(options.theme || 'auto');
+    win.document.body.className = `theme-${theme}`;
     const editor = monaco.editor.create(win.document.getElementById('editor'), Object.assign({
         value: options.value || '',
         language: languages[lang],
+        theme,
         readOnly: !!options.readOnly,
         automaticLayout: true,
         minimap: {enabled: false},
@@ -207,6 +246,11 @@ export const createEditor = async(container, options = {}) => {
         },
         setValue: (value) => editor.setValue(value),
         setLanguage: (value) => monaco.editor.setModelLanguage(editor.getModel(), languages[value] || languages[defaultLanguage]),
+        setTheme: (value) => {
+            const actual = resolveTheme(value);
+            win.document.body.className = `theme-${actual}`;
+            monaco.editor.setTheme(actual);
+        },
         setReadOnly: (value) => editor.updateOptions({readOnly: !!value}),
         onChange: (callback) => editor.onDidChangeModelContent(() => callback(editor.getValue())),
         focus: () => editor.focus(),

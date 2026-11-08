@@ -41,6 +41,12 @@
             <option value="{{value}}"{{#selected}} selected{{/selected}}>{{name}}</option>
             {{/languages}}
         </select>
+        <label for="{{uniqid}}-theme" class="mb-0">{{#str}}theme, tiny_codelab{{/str}}</label>
+        <select id="{{uniqid}}-theme" class="form-select w-auto" data-region="theme">
+            {{#themes}}
+            <option value="{{value}}"{{#selected}} selected{{/selected}}>{{name}}</option>
+            {{/themes}}
+        </select>
         <div class="form-check mb-0">
             <input type="checkbox" class="form-check-input" id="{{uniqid}}-run" data-region="run"{{#run}} checked{{/run}}>
             <label class="form-check-label" for="{{uniqid}}-run">{{#str}}runnable, tiny_codelab{{/str}}</label>

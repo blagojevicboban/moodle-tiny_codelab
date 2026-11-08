@@ -25,12 +25,12 @@ import ModalEvents from 'core/modal_events';
 import Templates from 'core/templates';
 import {getString, getStrings} from 'core/str';
 import {getContextId} from 'editor_tiny/options';
-import {component, languages, defaultLanguage, setupLanguages} from './common';
+import {component, languages, defaultLanguage, setupLanguages, defaultTheme} from './common';
 import {readBlock, blockHtml, isBlock, stdinOf, setupOf} from './embed';
 import {createEditor} from './monaco';
 import {run} from './runner';
 import {showRunning, showResult, showError} from './console';
-import {getPyodide, getLanguages, getInteractive} from './options';
+import {getPyodide, getLanguages, getInteractive, getTheme} from './options';
 import {available as pythonAvailable} from './python';
 import {PythonSession} from './session';
 import {RemoteSession, runsInteractively, stepsInteractively} from './remote';
@@ -45,18 +45,25 @@ let counter = 0;
 export const openDialog = async(editor) => {
     const node = editor.selection.getNode();
     const existing = isBlock(node) ? node : null;
+    const defaultThemeVal = getTheme(editor) || defaultTheme;
     const block = existing ? readBlock(existing)
-        : {lang: defaultLanguage, run: true, noassist: false, stdin: '',
+        : {lang: defaultLanguage, theme: defaultThemeVal, run: true, noassist: false, stdin: '',
             code: editor.selection.getContent({format: 'text'}) || ''};
 
     // Only the languages that can run here, and the language of the example being edited.
     const offered = getLanguages(editor);
     const langs = Object.keys(languages).filter((lang) => !offered.length || offered.includes(lang) || lang === block.lang);
     const names = await getStrings(langs.map((lang) => ({key: `lang_${lang}`, component})));
+
+    const themeKeys = ['auto', 'vs', 'vs-dark', 'hc-black'];
+    const themeNames = await getStrings(themeKeys.map((k) => ({key: `theme_${k.replace('-', '_')}`, component})));
+    const selectedTheme = block.theme || defaultThemeVal;
+
     const uniqid = `tiny_codelab_${++counter}`;
     const body = Templates.render('tiny_codelab/dialog', {
         uniqid,
         languages: langs.map((value, i) => ({value, name: names[i], selected: value === block.lang})),
+        themes: themeKeys.map((value, i) => ({value, name: themeNames[i], selected: value === selectedTheme})),
         run: block.run,
         noassist: block.noassist,
     });
@@ -72,6 +79,7 @@ export const openDialog = async(editor) => {
     await modal.getBodyPromise();
     const region = (name) => root.querySelector(`[data-region="${name}"]`);
     const langSelect = region('lang');
+    const themeSelect = region('theme');
     const panel = region('console');
     panel.hidden = true;
     // The input is saved with the block: readers start from it.
@@ -126,6 +134,7 @@ export const openDialog = async(editor) => {
     code = await createEditor(region('editor'), {
         value: block.code,
         lang: block.lang,
+        theme: selectedTheme,
         minLines: 12,
         maxLines: 24,
         label: await getString('editorlabel', component),
@@ -172,6 +181,9 @@ export const openDialog = async(editor) => {
         showPythonButtons();
         showSetup();
     });
+    themeSelect.addEventListener('change', () => {
+        code.setTheme(themeSelect.value);
+    });
     runButton.addEventListener('click', doRun);
     stepButton.addEventListener('click', () => {
         if (!browser()) {
@@ -198,6 +210,7 @@ export const openDialog = async(editor) => {
     modal.getRoot().on(ModalEvents.save, () => {
         const html = blockHtml({
             lang: langSelect.value,
+            theme: themeSelect.value,
             run: region('run').checked,
             noassist: region('noassist').checked,
             code: code.getValue(),

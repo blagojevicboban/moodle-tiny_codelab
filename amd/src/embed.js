@@ -20,7 +20,8 @@
  * @copyright  2026 Boban Blagojević
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-import {blockClass, langPrefix, runClass, noAssistClass, stdinClass, setupClass, languages, defaultLanguage} from './common';
+import {blockClass, langPrefix, themePrefix, runClass, noAssistClass, stdinClass, setupClass, languages, defaultLanguage,
+    themes, defaultTheme} from './common';
 
 /**
  * A companion of a CodeLab block among the two elements right after it: <pre class="codelab-setup"> and
@@ -66,8 +67,11 @@ export const setupOf = (pre) => companionOf(pre, setupClass);
 export const readBlock = (pre) => {
     const langClass = [...pre.classList].find((c) => c.startsWith(langPrefix));
     const lang = langClass ? langClass.slice(langPrefix.length) : '';
+    const themeClass = [...pre.classList].find((c) => c.startsWith(themePrefix));
+    const theme = themeClass ? themeClass.slice(themePrefix.length) : '';
     return {
         lang: Object.prototype.hasOwnProperty.call(languages, lang) ? lang : defaultLanguage,
+        theme: Object.prototype.hasOwnProperty.call(themes, theme) ? theme : defaultTheme,
         run: pre.classList.contains(runClass),
         noassist: pre.classList.contains(noAssistClass),
         // A block ends with a new line (so the closing tag is on its own line in the HTML source); the editor does not need it.
@@ -80,11 +84,14 @@ export const readBlock = (pre) => {
 /**
  * HTML of a CodeLab block, followed by its setup and its input block when it has them.
  *
- * @param {{lang: string, run: boolean, noassist: boolean, code: string, stdin?: string, setup?: string}} block
+ * @param {{lang: string, theme?: string, run: boolean, noassist: boolean, code: string, stdin?: string, setup?: string}} block
  * @returns {string}
  */
 export const blockHtml = (block) => {
     const classes = [blockClass, langPrefix + block.lang];
+    if (block.theme && block.theme !== defaultTheme) {
+        classes.push(themePrefix + block.theme);
+    }
     if (block.run) {
         classes.push(runClass);
     }

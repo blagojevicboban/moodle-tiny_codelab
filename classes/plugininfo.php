@@ -93,6 +93,7 @@ class plugininfo extends plugin implements plugin_with_buttons, plugin_with_conf
             // Languages teachers can choose (the dialog keeps the language of the example being edited).
             'languages' => languages::offered(),
             'interactive' => runtime::config()['interactive'],
+            'theme' => runtime::config()['theme'],
         ];
     }
 }

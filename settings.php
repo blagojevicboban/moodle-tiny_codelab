@@ -84,6 +84,19 @@ if ($ADMIN->fulltree) {
         PARAM_INT
     ));
 
+    $settings->add(new admin_setting_configselect(
+        'tiny_codelab/theme',
+        get_string('theme', 'tiny_codelab'),
+        get_string('theme_desc', 'tiny_codelab'),
+        'auto',
+        [
+            'auto' => get_string('theme_auto', 'tiny_codelab'),
+            'vs' => get_string('theme_vs', 'tiny_codelab'),
+            'vs-dark' => get_string('theme_vs_dark', 'tiny_codelab'),
+            'hc-black' => get_string('theme_hc_black', 'tiny_codelab'),
+        ]
+    ));
+
     // The interactive server beside Jobe (CodeLab runner): optional.
     $settings->add(new admin_setting_heading(
         'tiny_codelab/runnerheading',
