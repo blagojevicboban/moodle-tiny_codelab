@@ -14,13 +14,15 @@ Languages: **C**, **C++**, **Python**, **Java**, **C#**, **JavaScript** (Node.js
 This plugin is also the core of the CodeLab plugins. The filter and the question type use its editor, its runner and its
 Jobe client.
 
-> Status: **stable** (1.4.0).
+> Status: **stable** (1.5.0).
 
 > 🌐 **Live demo:** [codelab.tsp.edu.rs](https://codelab.tsp.edu.rs) (look around as a guest, or use `teacher` / `student` with password `Demo-2026`; reset every night)
 
 ## Features
 
 - **Code editor** with syntax highlighting, line numbers, brackets and search, as in VS Code.
+- **VS Code Themes**: Light (`vs`), Dark (`vs-dark`), High Contrast Dark (`hc-black`), and Auto detection.
+- **Modern IDE Cards**: Clean card formatting in the TinyMCE editor with language badges and Run indicators.
 - **Typing help** for every language:
   - keywords;
   - snippets (`main`, `for`, `if`...);
