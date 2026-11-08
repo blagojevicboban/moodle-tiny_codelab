@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.5.0 (2026-11-08)
+
+- Support for VS Code themes: Visual Studio Light (`vs`), Visual Studio Dark (`vs-dark`), and High Contrast Dark (`hc-black`).
+- New administrator setting "Theme" (`tiny_codelab/theme`): choose between Auto (matches site and system dark mode), Light, Dark, or High Contrast.
+- Theme selector in the TinyMCE dialog: teachers can assign a specific theme to any code block.
+- Styled pre.codelab blocks as modern IDE cards in the TinyMCE editor with language badges, Run indicators, and dark card styling for dark themes.
+
 ## 1.4.0 (2026-11-07)
 
 - Debugger of Step, as in the algorithm plugins, for Python in the browser and C and C++ on the CodeLab runner
