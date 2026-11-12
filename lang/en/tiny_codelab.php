@@ -71,6 +71,7 @@ $string['flowchart'] = 'Flowchart';
 $string['flowchartfailed'] = 'The flowchart could not be made: {$a}';
 $string['flowchartwarnings'] = 'Lines that are not drawn as blocks (they became comments): {$a}';
 $string['fullscreen'] = 'Full screen';
+$string['importedcode'] = 'The code of the flowchart (Open in CodeLab) is in the editor. Check it, run it and insert the example.';
 $string['input'] = 'Input';
 $string['inputline'] = 'Input for the program';
 $string['inputok'] = 'Send the line';

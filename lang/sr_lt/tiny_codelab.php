@@ -71,6 +71,7 @@ $string['flowchart'] = 'Dijagram toka';
 $string['flowchartfailed'] = 'Dijagram toka nije mogao da se napravi: {$a}';
 $string['flowchartwarnings'] = 'Linije koje nisu nacrtane kao blokovi (postale su komentari): {$a}';
 $string['fullscreen'] = 'Ceo ekran';
+$string['importedcode'] = 'Kôd dijagrama toka (Otvori u CodeLab-u) je u editoru. Proverite ga, pokrenite i umetnite primer.';
 $string['input'] = 'Ulaz';
 $string['inputline'] = 'Ulaz za program';
 $string['inputok'] = 'Pošalji red';

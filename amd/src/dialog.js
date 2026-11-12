@@ -34,6 +34,7 @@ import {getPyodide, getLanguages, getInteractive, getTheme} from './options';
 import {available as pythonAvailable} from './python';
 import {PythonSession} from './session';
 import {RemoteSession, runsInteractively, stepsInteractively} from './remote';
+import {takeImport} from './importcode';
 
 let counter = 0;
 
@@ -52,6 +53,13 @@ export const openDialog = async(editor) => {
 
     // Only the languages that can run here, and the language of the example being edited.
     const offered = getLanguages(editor);
+    // A new example without selected text starts from the code of a flowchart (Open in CodeLab of tiny_algorithm).
+    const imported = existing || block.code !== '' ? null
+        : takeImport(Object.keys(languages).filter((lang) => !offered.length || offered.includes(lang)));
+    if (imported) {
+        block.lang = imported.lang;
+        block.code = imported.code;
+    }
     const langs = Object.keys(languages).filter((lang) => !offered.length || offered.includes(lang) || lang === block.lang);
     const names = await getStrings(langs.map((lang) => ({key: `lang_${lang}`, component})));
 
@@ -80,6 +88,12 @@ export const openDialog = async(editor) => {
     const region = (name) => root.querySelector(`[data-region="${name}"]`);
     const langSelect = region('lang');
     const themeSelect = region('theme');
+    if (imported) {
+        const notice = document.createElement('div');
+        notice.className = 'alert alert-info py-2 mb-2';
+        notice.textContent = await getString('importedcode', component);
+        region('editor').before(notice);
+    }
     const panel = region('console');
     panel.hidden = true;
     // The input is saved with the block: readers start from it.
