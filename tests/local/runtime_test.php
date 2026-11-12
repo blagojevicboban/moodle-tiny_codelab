@@ -38,4 +38,15 @@ final class runtime_test extends \advanced_testcase {
         set_config('browserpython', 0, 'tiny_codelab');
         $this->assertSame('', runtime::config()['pyodide']);
     }
+
+    public function test_flowchart(): void {
+        $this->resetAfterTest();
+        // The flowchart of a Python example needs tiny_algorithm 2.13 or newer; without it the button is not offered.
+        unset_config('version', 'tiny_algorithm');
+        $this->assertFalse(runtime::config()['flowchart']);
+        set_config('version', runtime::ALGORITHM_VERSION - 1, 'tiny_algorithm');
+        $this->assertFalse(runtime::flowchart());
+        set_config('version', runtime::ALGORITHM_VERSION, 'tiny_algorithm');
+        $this->assertTrue(runtime::flowchart());
+    }
 }

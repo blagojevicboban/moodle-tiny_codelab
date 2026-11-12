@@ -40,11 +40,26 @@ class runtime {
         return rtrim($url, '/') . '/';
     }
 
+    /** Version of tiny_algorithm with Python to flowchart (codeimport, 2.13.0). */
+    const ALGORITHM_VERSION = 2026111512;
+
+    /**
+     * Whether the algorithm plugins can draw a Python example as a flowchart (tiny_algorithm 2.13 or newer installed;
+     * it is optional, CodeLab does not need it).
+     *
+     * @return bool
+     */
+    public static function flowchart(): bool {
+        $version = get_config('tiny_algorithm', 'version');
+        return $version !== false && (int) $version >= self::ALGORITHM_VERSION;
+    }
+
     /**
      * Settings for JavaScript.
      *
      * @return array ['pyodide' => address of the Pyodide files ending with /, or '' when Python runs only on Jobe,
-     *     'interactive' => languages that run on the interactive server, 'theme' => default editor theme]
+     *     'interactive' => languages that run on the interactive server, 'theme' => default editor theme,
+     *     'flowchart' => whether a Python example can be drawn as a flowchart (tiny_algorithm)]
      */
     public static function config(): array {
         $theme = (string) get_config('tiny_codelab', 'theme');
@@ -52,6 +67,7 @@ class runtime {
             'pyodide' => self::pyodide(),
             'interactive' => interactive::languages(),
             'theme' => $theme !== '' ? $theme : 'auto',
+            'flowchart' => self::flowchart(),
         ];
     }
 }

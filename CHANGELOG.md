@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.11.0 (2026-11-12)
+
+- Bridge to the algorithm plugins: the settings for JavaScript say whether tiny_algorithm 2.13 or newer is installed
+  (runtime::flowchart()), so filter_codelab 1.11 can draw a Python example as a flowchart. tiny_algorithm stays
+  optional: without it nothing changes.
+- Strings of the Flowchart button.
+
 ## 1.8.0 (2026-11-12)
 
 - Complexity: a Python program is run in the browser for several sizes n (10 … 500, or the reader's own) with an
