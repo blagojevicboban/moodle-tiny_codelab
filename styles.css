@@ -335,3 +335,144 @@ pre.codelab.codelab-theme-hc-black.codelab-run::after {
     color: #6fc3df;
     border-color: #6fc3df;
 }
+
+/* Memory view of Step (tiny_codelab/memview): frames, objects, cells of lists and arrays, arrows. */
+.tiny_codelab-mem {
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 1rem 3rem;
+    padding: .5rem 0;
+    overflow-x: auto;
+}
+
+.tiny_codelab-mem-frames,
+.tiny_codelab-mem-objects {
+    display: flex;
+    flex-direction: column;
+    gap: .75rem;
+    min-width: 0;
+}
+
+.tiny_codelab-mem-frame,
+.tiny_codelab-mem-object {
+    position: relative;
+    z-index: 1;
+    border: 1px solid #8f959e;
+    border-radius: .25rem;
+    padding: .25rem .5rem;
+    background: #fff;
+}
+
+.tiny_codelab-mem-frame {
+    border-left: 4px solid #0f6cbf;
+}
+
+.tiny_codelab-mem-title,
+.tiny_codelab-mem-type {
+    font-size: .8rem;
+    font-weight: bold;
+    color: #495057;
+}
+
+.tiny_codelab-mem-table td,
+.tiny_codelab-mem-value {
+    font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    font-size: .85rem;
+}
+
+.tiny_codelab-mem-table td {
+    padding: .1rem .5rem .1rem 0;
+    vertical-align: middle;
+}
+
+.tiny_codelab-mem-ptr {
+    display: inline-block;
+    width: .9rem;
+    height: .9rem;
+    border: 2px solid #0f6cbf;
+    border-radius: 50%;
+}
+
+.tiny_codelab-mem-cells {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 2px;
+}
+
+.tiny_codelab-mem-cell {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 2rem;
+}
+
+.tiny_codelab-mem-index {
+    font-size: .7rem;
+    color: #6a737b;
+}
+
+.tiny_codelab-mem-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: center;
+    width: 100%;
+    min-height: 1.6rem;
+    padding: .1rem .25rem;
+    border: 1px solid #8f959e;
+    background: #f8f9fa;
+}
+
+.tiny_codelab-mem-bar {
+    width: 70%;
+    margin-bottom: .1rem;
+    background: #7aa7d6;
+    border-radius: 2px 2px 0 0;
+    transition: height .25s;
+}
+
+.tiny_codelab-mem-changed .tiny_codelab-mem-content,
+tr.tiny_codelab-mem-changed td {
+    background: #c9f2d0;
+}
+
+.tiny_codelab-mem-changed .tiny_codelab-mem-bar {
+    background: #2e8540;
+}
+
+.tiny_codelab-mem-marker {
+    font-size: .75rem;
+    font-weight: bold;
+    color: #b35c00;
+    white-space: nowrap;
+}
+
+.tiny_codelab-mem-more {
+    font-size: .75rem;
+    color: #6a737b;
+}
+
+.tiny_codelab-mem-arrows {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 2;
+    overflow: visible;
+    pointer-events: none;
+    color: #0f6cbf;
+    fill: currentColor;
+}
+
+.tiny_codelab-mem-arrows path {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.5;
+}
+
+.tiny_codelab-mem-arrows marker path {
+    fill: currentColor;
+    stroke: none;
+}

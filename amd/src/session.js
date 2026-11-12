@@ -56,7 +56,8 @@ const loadStrings = async() => {
 export const editorStack = (stack, offset, lines) => stack.map((frame) => {
     const line = frame.line - offset;
     const vars = Array.isArray(frame.vars) ? Object.fromEntries(frame.vars.map((v) => [v.name, v.value])) : frame.vars;
-    return {func: frame.func === '<module>' ? '' : frame.func, line: line >= 1 && line <= lines ? line : 0, vars};
+    return {func: frame.func === '<module>' ? '' : frame.func, line: line >= 1 && line <= lines ? line : 0, vars,
+        ...(frame.refs ? {refs: frame.refs} : {})};
 });
 
 export class PythonSession {
@@ -88,7 +89,7 @@ export class PythonSession {
         this.given = '';
         this.debug = new DebugPanel(vars, {step: () => this.step(), next: () => this.next(), out: () => this.out(),
             mark: (line) => this.editor.highlightLine(line), terminal: () => this.terminal,
-            again: () => this.start(true, this.given)});
+            again: () => this.start(true, this.given), source: () => this.editor.getValue()});
         // Breakpoints set or removed while the program runs.
         this.editor.onBreakpointsChange?.((lines) => this.run?.setBreakpoints(lines.map((l) => l + this.offset)));
     }
@@ -139,7 +140,7 @@ export class PythonSession {
                     this.run.sendInput(line);
                 }
             },
-            onLine: (programLine, scope, vars, stack) => {
+            onLine: (programLine, scope, vars, stack, heap) => {
                 const lines = this.editor.getValue().split('\n').length;
                 const line = programLine - this.offset;
                 if (line < 1 || line > lines) {
@@ -149,7 +150,7 @@ export class PythonSession {
                 }
                 terminal.setStatus(s.paused.replace('{$a}', line), 'running');
                 this.editor.highlightLine(line);
-                this.debug.show({line, stack: editorStack(stack, this.offset, lines)});
+                this.debug.show({line, stack: editorStack(stack, this.offset, lines), heap});
                 this.setState('paused');
             },
             onDone: ({status, message}) => {

@@ -26,6 +26,7 @@
  */
 import {getStrings} from 'core/str';
 import {component} from './common';
+import {MemoryView, buildView, indexNames} from './memview';
 import {Timeline, outputLength, outputUpTo} from './timeline';
 
 /**
@@ -65,7 +66,7 @@ export const showVariables = (panel, vars, previous, title, empty) => {
 
 const KEYS = ['stepover', 'stepout', 'autostep', 'autostop', 'speed', 'callstack', 'tracetable', 'traceline', 'variables',
     'novariables', 'mainprogram', 'stepback', 'stepforward', 'stepagain', 'timeline', 'timelinepos', 'timelineend',
-    'timelinepast', 'timelinepastended'];
+    'timelinepast', 'timelinepastended', 'memory', 'memref', 'memmore'];
 let strings = null;
 
 /** Most rows the trace table shows. */
@@ -112,6 +113,7 @@ export class DebugPanel {
      * @param {function(?number): void} [actions.mark] mark a line in the editor (null: none)
      * @param {function(): ?import('./terminal').Terminal} [actions.terminal] the console of the run
      * @param {function(): void} [actions.again] Step the program again with the same input
+     * @param {function(): string} [actions.source] the code of the editor (its names in [...] are index markers)
      */
     constructor(root, actions) {
         this.root = root;
@@ -164,12 +166,13 @@ export class DebugPanel {
      * @param {number} pause.line line in the editor
      * @param {Array<{func: string, line: number, vars: Object<string, string>}>} pause.stack frames, innermost first,
      *     lines in the editor (0 for a line of the hidden code)
+     * @param {?Object} [pause.heap] objects of the memory view (Python)
      */
-    async show({line, stack}) {
+    async show({line, stack, heap = null}) {
         const s = await loadPanelStrings();
         const terminal = this.actions.terminal?.();
         const out = terminal ? outputLength(terminal.output) : 0;
-        this.view = this.timeline.record({line, stack: stack.length ? stack : [{func: '', line, vars: {}}], out});
+        this.view = this.timeline.record({line, stack: stack.length ? stack : [{func: '', line, vars: {}}], out, heap});
         this.selected = 0;
         this.render(s);
         if (this.auto) {
@@ -369,10 +372,45 @@ export class DebugPanel {
         showVariables(vars, frame.vars, previous,
             frame.func && frame.func !== '<module>' ? `${s.variables}: ${frame.func}()` : s.variables, s.novariables);
         this.root.append(vars);
+        const memory = this.memorySection(s, index);
+        if (memory) {
+            this.root.append(memory);
+        }
         if (this.timeline.length > 1) {
             this.root.append(this.traceTable(s, index));
         }
         this.root.hidden = false;
+    }
+
+    /**
+     * The memory view of a stop (objects, lists with their cells, arrows), or null when it has no object.
+     *
+     * @param {Object<string, string>} s strings
+     * @param {number} index the stop
+     * @returns {?HTMLDetailsElement}
+     */
+    memorySection(s, index) {
+        const snap = this.timeline.get(index);
+        const code = this.actions.source?.();
+        const view = buildView(snap.stack, snap.heap, index > 0 ? this.timeline.get(index - 1) : null,
+            code === undefined ? null : indexNames(code));
+        const details = document.createElement('details');
+        details.className = 'tiny_codelab-memory mt-2';
+        details.open = this.memoryOpen ?? true;
+        const summary = document.createElement('summary');
+        summary.textContent = s.memory;
+        const body = document.createElement('div');
+        details.append(summary, body);
+        this.memoryView?.dispose();
+        this.memoryView = new MemoryView(body, s);
+        if (!this.memoryView.render(view)) {
+            return null;
+        }
+        details.addEventListener('toggle', () => {
+            this.memoryOpen = details.open;
+            this.memoryView?.arrows();
+        });
+        return details;
     }
 
     /**

@@ -32,6 +32,7 @@ export const MAX_SNAPSHOTS = 20000;
  * @property {Array<{func: string, line: number, vars: Object<string, string>}>} stack frames, innermost first
  * @property {number} out length of the console text at this stop
  * @property {number} step number of the stop in the run (1 for the first), kept when snapshots are dropped
+ * @property {?Object} heap objects of the memory view (Python), null for C and C++
  */
 
 export class Timeline {
@@ -67,16 +68,19 @@ export class Timeline {
     /**
      * Add a stop. The stack is copied, so later changes of the caller do not change the record.
      *
-     * @param {{line: number, stack: Array, out: number}} stop
+     * @param {{line: number, stack: Array, out: number, heap?: Object}} stop
      * @returns {number} index of the new snapshot
      */
-    record({line, stack, out}) {
+    record({line, stack, out, heap = null}) {
         this.count++;
         this.items.push({
             line,
-            stack: (stack || []).map((f) => ({func: f.func, line: f.line, vars: {...(f.vars || {})}})),
+            stack: (stack || []).map((f) => ({func: f.func, line: f.line, vars: {...(f.vars || {})},
+                ...(f.refs ? {refs: f.refs} : {})})),
             out: out || 0,
             step: this.count,
+            // Parsed for this stop only, so nobody changes it later.
+            heap,
         });
         if (this.items.length > this.max) {
             const half = Math.floor(this.items.length / 2);

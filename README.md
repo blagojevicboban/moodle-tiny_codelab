@@ -114,7 +114,10 @@ next is marked in the editor, and the debugger panel below the console shows:
 - the **trace table**: the line and the values after each step.
 - **Step back**, **Step forward** and a slider *Step N of M* over the recorded stops (also after the program ended):
   the editor marks the line of the shown step and the console shows the output as it was then; **Step again with
-  the same input** starts a new Step run with the input of the last one.
+  the same input** starts a new Step run with the input of the last one;
+- **Memory**: the frames and the objects their variables point to, with arrows (Python in the browser: lists, dicts,
+  sets, objects of classes, two names of one object; C and C++: arrays, matrices, structs, std::vector). Lists and
+  arrays are cells (numbers also as bars), changed cells are green, index variables (a[i]) stand under their cell.
 
 A click left of a line number sets or removes a **breakpoint** (a red dot); Run then stops there, also without Step.
 

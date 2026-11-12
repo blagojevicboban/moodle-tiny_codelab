@@ -52,6 +52,60 @@ const HARNESS = [
     '        out[k] = r if len(r) <= 200 else r[:197] + "..."',
     '    return json.dumps(out)',
     '',
+    '__codelab_skip = (types.ModuleType, types.FunctionType, types.BuiltinFunctionType, type)',
+    '__codelab_prim = (bool, int, float, complex, str, bytes, type(None))',
+    '',
+    'def __codelab_short(v):',
+    '    try:',
+    '        r = repr(v)',
+    '    except Exception:',
+    '        r = "?"',
+    '    return r if len(r) <= 60 else r[:57] + "..."',
+    '',
+    '# The memory view (tiny_codelab/memview): a value is {"v": text} or {"r": id} of an object of the heap.',
+    'def __codelab_ref(v, heap, depth):',
+    '    if isinstance(v, __codelab_prim):',
+    '        return {"v": __codelab_short(v)}',
+    '    i = str(id(v))',
+    '    if i in heap:',
+    '        return {"r": i}',
+    '    if len(heap) >= 60 or depth > 8 or isinstance(v, __codelab_skip):',
+    '        return {"v": __codelab_short(v)}',
+    '    node = {"t": type(v).__name__}',
+    '    heap[i] = node',
+    '    try:',
+    '        if isinstance(v, (list, tuple, set, frozenset)):',
+    '            many = isinstance(v, (set, frozenset))',
+    '            seq = sorted(v, key=repr) if many else list(v)',
+    '            node["k"] = "set" if many else ("tuple" if isinstance(v, tuple) else "list")',
+    '            node["n"] = len(seq)',
+    '            node["items"] = [__codelab_ref(x, heap, depth + 1) for x in seq[:50]]',
+    '        elif isinstance(v, dict):',
+    '            node["k"] = "dict"',
+    '            node["n"] = len(v)',
+    '            node["items"] = [[__codelab_ref(a, heap, depth + 1), __codelab_ref(b, heap, depth + 1)]',
+    '                             for a, b in list(v.items())[:50]]',
+    '        elif hasattr(v, "__dict__") and not callable(v):',
+    '            fields = [(a, b) for a, b in vars(v).items() if not a.startswith("__")]',
+    '            node["k"] = "object"',
+    '            node["n"] = len(fields)',
+    '            node["items"] = [[{"v": a}, __codelab_ref(b, heap, depth + 1)] for a, b in fields[:50]]',
+    '        else:',
+    '            node["k"] = "other"',
+    '            node["items"] = [{"v": __codelab_short(v)}]',
+    '    except Exception:',
+    '        node["k"] = "other"',
+    '        node["items"] = [{"v": "?"}]',
+    '    return {"r": i}',
+    '',
+    'def __codelab_refs(frame, heap):',
+    '    out = {}',
+    '    for k, v in frame.f_locals.items():',
+    '        if k.startswith("__") or isinstance(v, __codelab_skip):',
+    '            continue',
+    '        out[k] = __codelab_ref(v, heap, 0)',
+    '    return out',
+    '',
     'def __codelab_depth(frame):',
     '    depth = 0',
     '    while frame is not None:',
@@ -62,12 +116,13 @@ const HARNESS = [
     '',
     'def __codelab_stack(frame):',
     '    stack = []',
+    '    heap = {}',
     '    while frame is not None and len(stack) < 30:',
     '        if frame.f_code.co_filename == "<program>":',
     '            stack.append({"func": frame.f_code.co_name, "line": frame.f_lineno,',
-    '                          "vars": json.loads(__codelab_vars(frame))})',
+    '                          "vars": json.loads(__codelab_vars(frame)), "refs": __codelab_refs(frame, heap)})',
     '        frame = frame.f_back',
-    '    return json.dumps(stack)',
+    '    return json.dumps({"frames": stack, "heap": heap})',
     '',
     'def __codelab_trace(frame, event, arg):',
     '    if frame.f_code.co_filename != "<program>":',
@@ -234,8 +289,9 @@ const stopWorker = () => {
  * @property {function(): void} [onStarted] the program has started
  * @property {function(string, string): void} onOutput text and stream (out or err)
  * @property {function(): void} onInput the program waits for a line (answer with sendInput)
- * @property {function(number, string, Object<string, string>, Array): void} [onLine] Step: line, function, variables and
- *     the call stack (frames of the program, innermost first: func, line, vars)
+ * @property {function(number, string, Object<string, string>, Array, Object): void} [onLine] Step: line, function,
+ *     variables, the call stack (frames of the program, innermost first: func, line, vars, refs) and the heap of the
+ *     memory view (tiny_codelab/memview)
  * @property {function({status: string, message?: string}): void} onDone status ok, error, stopped or toolong
  */
 
@@ -283,7 +339,8 @@ export const runPython = (base, code, handlers, step = false, breakpoints = []) 
         } else if (m.type === 'input') {
             handlers.onInput();
         } else if (m.type === 'line' && handlers.onLine) {
-            handlers.onLine(m.line, m.scope, JSON.parse(m.vars), JSON.parse(m.stack));
+            const memory = JSON.parse(m.stack);
+            handlers.onLine(m.line, m.scope, JSON.parse(m.vars), memory.frames, memory.heap);
         } else if (m.type === 'toolong') {
             toolong = true;
         } else if (m.type === 'done') {

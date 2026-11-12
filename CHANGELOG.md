@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.7.0 (2026-11-12)
+
+- Memory view in the debugger (Memory, under the variables): the frames with their variables and the objects they
+  point to, with arrows, as in Python Tutor. Lists, tuples and arrays are rows of cells (numbers also as bars), the
+  cells changed by the last step are green, and the variables used as an index in the program (a[i], a[j + 1]) are
+  shown under their cell.
+- Python in the browser: objects keep their identity (two names of one list point to the same box), with dicts, sets
+  and objects of classes (a linked list of nodes).
+- C and C++ on the CodeLab runner: arrays, arrays of arrays (as a grid), structs and std::vector, read from the values
+  of gdb; no new runner needed.
+- The memory view moves with Step back and the timeline of 1.6.
+- New module tiny_codelab/memview with Node unit tests.
+
 ## 1.6.0 (2026-11-12)
 
 - Step back and a timeline for the debugger, as in the algorithm plugins: every stop of a Step run is recorded (line,
