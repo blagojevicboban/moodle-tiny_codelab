@@ -82,3 +82,28 @@ test('index names: only the names used in [...]', () => {
     assert.deepEqual(view.markers[a], {1: ['i']});
     assert.equal(view.markers[m], undefined, 'no markers on the rows of a matrix');
 });
+
+test('C pointers of the runner: into an array, to a variable, a linked list on the heap and NULL', () => {
+    // As runner 0.6.0 sends them: the addresses [address, size, element size] and the targets outside the variables.
+    const stack = [{func: 'main', line: 17, vars: {a: '{5, 6, 7, 8}', x: '3', p: '0x1008', q: '0x1010', head: '0x9000',
+        none: '0x0', s: '0x2000 "hi"'},
+    addrs: {a: [0x1000, 16, 4], x: [0x1010, 4, 0], p: [0x1018, 8, 0], q: [0x1020, 8, 0], head: [0x1028, 8, 0]}}];
+    const targets = {'0x9000': '{data = 3, next = 0x9020}', '0x9020': '{data = 2, next = 0x0}'};
+    // No name is used in [...]: only the pointer marks a cell.
+    const view = buildView(stack, null, null, new Set(), targets);
+    const rows = Object.fromEntries(view.frames[0].rows.map((row) => [row.name, row.ref]));
+    const a = rows.a.r;
+    assert.equal(rows.p.r, a, 'p points to the array');
+    assert.deepEqual(view.markers[a], {2: ['p']}, 'p under a[2]');
+    assert.equal(rows.q.v, '&x');
+    assert.equal(rows.none.v, 'NULL');
+    assert.equal(rows.s.v, '0x2000 "hi"', 'a string stays text');
+    assert.equal(rows.head.r, '@0x9000');
+    const first = view.heap['@0x9000'];
+    assert.equal(first.k, 'object');
+    assert.deepEqual(first.items[1][1], {r: '@0x9020'});
+    assert.equal(refText(view.heap['@0x9020'].items[1][1]), 'NULL');
+    assert.deepEqual(view.order, [a, '@0x9000', '@0x9020']);
+    // Without the data of the runner (older runner) a pointer stays its value.
+    assert.equal(buildView([{func: 'main', line: 1, vars: {p: '0x1008'}}], null).frames[0].rows[0].ref.v, '0x1008');
+});

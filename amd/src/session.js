@@ -57,7 +57,7 @@ export const editorStack = (stack, offset, lines) => stack.map((frame) => {
     const line = frame.line - offset;
     const vars = Array.isArray(frame.vars) ? Object.fromEntries(frame.vars.map((v) => [v.name, v.value])) : frame.vars;
     return {func: frame.func === '<module>' ? '' : frame.func, line: line >= 1 && line <= lines ? line : 0, vars,
-        ...(frame.refs ? {refs: frame.refs} : {})};
+        ...(frame.refs ? {refs: frame.refs} : {}), ...(frame.addrs ? {addrs: frame.addrs} : {})};
 });
 
 export class PythonSession {

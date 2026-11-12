@@ -168,6 +168,91 @@ export const refText = (ref) => (ref && 'v' in ref ? String(ref.v) : '');
  */
 const isNumber = (text) => /^-?\d+(\.\d+)?(e[+-]?\d+)?$/i.test(String(text).trim());
 
+/** A pointer value of gdb (not a string, not a function). */
+const POINTER = /^0x[0-9a-f]+$/;
+
+/**
+ * C and C++ pointers (runner 0.6.0): a pointer into a variable becomes an arrow to it (to an array with the pointer's
+ * name under its cell, or the text &name for a plain variable), a pointer to an object on the heap an arrow to that
+ * object, followed through its pointer fields (a linked list), and NULL is written as such.
+ *
+ * @param {Array<{addrs?: Object<string, number[]>}>} stack frames with the addresses of their variables
+ * @param {Array<{rows: Array<{name: string, ref: Object}>}>} frames rows built from the values
+ * @param {Object<string, Object>} all heap objects (changed here)
+ * @param {?Object<string, string>} targets values of the objects that pointers point to, by address
+ * @returns {Object<string, Object<number, string[]>>} pointer names by object and cell
+ */
+const linkPointers = (stack, frames, all, targets) => {
+    const ranges = [];
+    stack.forEach((frame, f) => Object.entries(frame.addrs || {}).forEach(([name, [addr, size, elem]]) => {
+        ranges.push({name, addr, size, elem, ref: frames[f].rows.find((row) => row.name === name)?.ref});
+    }));
+    const pointed = {};
+    const linked = new Set();
+    let resolve = null;
+    const link = (node) => {
+        if (!node || linked.has(node)) {
+            return;
+        }
+        linked.add(node);
+        node.items = (node.items || []).map((item) => {
+            if (Array.isArray(item)) {
+                if ('node' in item[1]) {
+                    link(item[1].node);
+                    return item;
+                }
+                return [item[0], resolve(item[1].v, refText(item[0])) || item[1]];
+            }
+            if ('node' in item) {
+                link(item.node);
+                return item;
+            }
+            return resolve(item.v, '') || item;
+        });
+    };
+    resolve = (text, name) => {
+        const hex = String(text).trim();
+        if (!POINTER.test(hex)) {
+            return null;
+        }
+        if (hex === '0x0') {
+            return {v: 'NULL'};
+        }
+        const addr = Number.parseInt(hex, 16);
+        const range = ranges.find((r) => addr >= r.addr && addr < r.addr + r.size);
+        if (range) {
+            if (!range.ref || !('r' in range.ref)) {
+                return {v: `&${range.name}`};
+            }
+            const node = all[range.ref.r];
+            if (name && range.elem > 0 && node?.k === 'list') {
+                const cell = ((pointed[range.ref.r] ||= {})[Math.floor((addr - range.addr) / range.elem)] ||= []);
+                if (!cell.includes(name)) {
+                    cell.push(name);
+                }
+            }
+            return {r: range.ref.r};
+        }
+        if (!targets || !(hex in targets)) {
+            return null;
+        }
+        const id = `@${hex}`;
+        if (!all[id]) {
+            all[id] = parseValue(targets[hex]) || {t: '*', k: 'list', n: 1, items: [{v: String(targets[hex])}]};
+            link(all[id]);
+        }
+        return {r: id};
+    };
+    frames.forEach((frame) => frame.rows.forEach((row) => {
+        if ('r' in row.ref) {
+            link(all[row.ref.r]);
+        } else {
+            row.ref = resolve(row.ref.v, row.name) || row.ref;
+        }
+    }));
+    return pointed;
+};
+
 /**
  * The view of one stop: the frames with their references, the heap objects in the order they are first reached,
  * the index variables of each list and the cells changed since the stop before.
@@ -177,10 +262,11 @@ const isNumber = (text) => /^-?\d+(\.\d+)?(e[+-]?\d+)?$/i.test(String(text).trim
  * @param {?Object<string, Object>} heap
  * @param {?{stack: Array, heap: ?Object}} [before] the stop before, for the changed cells
  * @param {?Set<string>} [indexNames] names used as an index in the program (in [...]); null: every integer
+ * @param {?Object<string, string>} [targets] C and C++: values of the objects pointers point to, by address (runner)
  * @returns {{frames: Array<{func: string, rows: Array<{name: string, ref: Object}>}>, heap: Object<string, Object>,
  *     order: string[], markers: Object<string, Object<number, string[]>>, changed: Object<string, Set<number>>}}
  */
-export const buildView = (stack, heap, before = null, indexNames = null) => {
+export const buildView = (stack, heap, before = null, indexNames = null, targets = null) => {
     const all = {...(heap || {})};
     const frames = (stack || []).map((frame, f) => {
         const rows = [];
@@ -208,6 +294,9 @@ export const buildView = (stack, heap, before = null, indexNames = null) => {
             (all[ref.r].items || []).forEach((item) => (Array.isArray(item) ? item.forEach(visit) : visit(item)));
         }
     };
+    // C and C++ with the addresses of the runner: arrows of the pointers.
+    const pointed = (stack || []).some((frame) => frame.addrs) || targets
+        ? linkPointers(stack || [], frames, all, targets) : {};
     frames.forEach((frame) => frame.rows.forEach((row) => visit(row.ref)));
 
     // Index variables: integers of a frame that are a valid index of a list the same frame points to.
@@ -232,12 +321,17 @@ export const buildView = (stack, heap, before = null, indexNames = null) => {
             });
         });
     });
+    // Pointers into an array: their names under the cell they point to.
+    Object.entries(pointed).forEach(([id, cells]) => Object.entries(cells).forEach(([index, names]) => {
+        const cell = ((markers[id] ||= {})[index] ||= []);
+        names.forEach((name) => cell.includes(name) || cell.push(name));
+    }));
 
-    // Changed cells: the same object (Python: same id; C: same frame and variable) at the stop before.
+    // Changed cells: the same object (Python: same id; C: same frame and variable, or address) at the stop before.
     const changed = {};
     if (before) {
         const old = before.heap && !before.stack?.some((f) => !f.refs) ? before.heap
-            : buildView(before.stack, before.heap).heap;
+            : buildView(before.stack, before.heap, null, null, before.targets).heap;
         order.forEach((id) => {
             const now = all[id];
             const was = old[id];

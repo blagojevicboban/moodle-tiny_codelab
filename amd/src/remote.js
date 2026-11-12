@@ -245,8 +245,9 @@ export class RemoteSession {
      * @param {string} message.func function of that line
      * @param {Array<{name: string, value: string}>} message.vars variables of the function
      * @param {Array<{func: string, line: number, vars: Array}>} [message.stack] the program's frames, innermost first
+     * @param {Object<string, string>} [message.targets] what the pointers point to, by address (memory view)
      */
-    paused({line, func, vars, stack}) {
+    paused({line, func, vars, stack, targets}) {
         const s = this.strings;
         const shown = line - this.offset;
         const lines = this.editor ? this.editor.getValue().split('\n').length : 0;
@@ -257,7 +258,8 @@ export class RemoteSession {
         }
         this.terminal.setStatus(s.paused.replace('{$a}', shown), 'running');
         this.editor.highlightLine(shown);
-        this.debug?.show({line: shown, stack: editorStack(stack || [{func, line, vars}], this.offset, lines)});
+        this.debug?.show({line: shown, stack: editorStack(stack || [{func, line, vars}], this.offset, lines),
+            targets: targets || null});
         this.setState('paused');
     }
 

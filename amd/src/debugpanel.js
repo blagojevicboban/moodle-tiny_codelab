@@ -167,12 +167,14 @@ export class DebugPanel {
      * @param {Array<{func: string, line: number, vars: Object<string, string>}>} pause.stack frames, innermost first,
      *     lines in the editor (0 for a line of the hidden code)
      * @param {?Object} [pause.heap] objects of the memory view (Python)
+     * @param {?Object<string, string>} [pause.targets] what the pointers point to (C and C++)
      */
-    async show({line, stack, heap = null}) {
+    async show({line, stack, heap = null, targets = null}) {
         const s = await loadPanelStrings();
         const terminal = this.actions.terminal?.();
         const out = terminal ? outputLength(terminal.output) : 0;
-        this.view = this.timeline.record({line, stack: stack.length ? stack : [{func: '', line, vars: {}}], out, heap});
+        this.view = this.timeline.record({line, stack: stack.length ? stack : [{func: '', line, vars: {}}], out, heap,
+            targets});
         this.selected = 0;
         this.render(s);
         if (this.auto) {
@@ -393,7 +395,7 @@ export class DebugPanel {
         const snap = this.timeline.get(index);
         const code = this.actions.source?.();
         const view = buildView(snap.stack, snap.heap, index > 0 ? this.timeline.get(index - 1) : null,
-            code === undefined ? null : indexNames(code));
+            code === undefined ? null : indexNames(code), snap.targets);
         const details = document.createElement('details');
         details.className = 'tiny_codelab-memory mt-2';
         details.open = this.memoryOpen ?? true;
