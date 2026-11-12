@@ -230,7 +230,7 @@ An older filter_ace_inline can stay on: CodeLab blocks have no ace markup, so th
 | Address of Pyodide | (empty: jsDelivr) | Or a copy on your own server, about 12 MB |
 | Runs per minute | 20 | Per user; 0 = no limit |
 | Address of the interactive server | (empty) | For example `wss://runner.example.org`. Empty: every program runs on Jobe |
-| Secret of the interactive server | (empty) | The same as `CODELAB_SECRET` of the runner, at least 16 characters |
+| Secret of the interactive server | (empty) | The same as `CODELAB_SECRET` of the runner (or the secret of this site in `CODELAB_SECRETS`), at least 16 characters |
 
 The settings of qtype_codelab hold the upper limits for questions: *Largest CPU time of a question* (s per run) and
 *Largest memory of a question* (MB per run).
@@ -239,8 +239,10 @@ The settings page asks the servers each time it is opened and shows two boxes:
 
 - **State of the Jobe server**: green with the list of languages; red when the server does not answer or does not
   accept the API key; a list of the languages that are missing.
-- **State of the interactive server**: green with its languages (c, cpp, java, csharp, mysql) and the number of open
-  sessions; red when it does not answer.
+- **State of the interactive server**: green with its version, its languages (c, cpp, java, csharp, mysql) and the
+  number of open sessions; red when it does not answer. Under it, the id of this site: one runner can serve several
+  Moodle sites, each with a secret of its own (`CODELAB_SECRETS=<site id>:<secret>,...` on the runner, from 0.6.0),
+  so that the administrator of one site cannot open sessions in the name of another.
 
 ### Interactive server (CodeLab runner)
 
@@ -255,7 +257,7 @@ A typical installation:
 | Part | Where |
 |---|---|
 | Program | `/opt/codelab-runner/app`, owned by the system user `codelab` |
-| Settings | `/etc/codelab-runner.env` (`CODELAB_SECRET`, `CODELAB_ORIGINS`, MariaDB, `CODELAB_DEPLOY_SECRET`) |
+| Settings | `/etc/codelab-runner.env` (`CODELAB_SECRET` or `CODELAB_SECRETS`, `CODELAB_ORIGINS`, MariaDB), root only (600) |
 | Service | systemd `codelab-runner`; listens on `127.0.0.1:8090` only |
 | HTTPS | A TLS proxy in front (nginx, or Apache with `ProxyPass ... upgrade=websocket`); browsers need `wss://` |
 | Check | `curl http://127.0.0.1:8090/health` answers `{"ok":true,...}` |

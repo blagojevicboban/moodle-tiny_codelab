@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.12.0 (2026-11-12)
+
+- Memory view of C and C++ with CodeLab runner 0.6.0: pointers are arrows. A pointer into an array points to it with
+  its name under the cell (p walking through a), a pointer to a variable is shown as &name, objects on the heap are
+  drawn with arrows through their pointer fields (a linked list of nodes), and NULL is written as such. With an older
+  runner nothing changes.
+- Open in CodeLab of tiny_algorithm: a new CodeLab example in the same editor starts from the code of the flowchart,
+  with a note (new module tiny_codelab/importcode, Node tests).
+- Runner security: each session token is for one language (the server refuses another), the settings page shows the
+  id of the site for a secret of its own on a shared runner (CODELAB_SECRETS), and runs for grading (SQL) carry the
+  site and a nonce, so a request cannot be sent again; with a runner older than 0.6.0 they are sent once more as before.
+  The state of the server shows its version.
+
 ## 1.11.0 (2026-11-12)
 
 - Bridge to the algorithm plugins: the settings for JavaScript say whether tiny_algorithm 2.13 or newer is installed
