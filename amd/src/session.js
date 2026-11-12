@@ -85,7 +85,10 @@ export class PythonSession {
         this.terminal = null;
         this.state = 'idle';
         this.mode = 'step';
-        this.debug = new DebugPanel(vars, {step: () => this.step(), next: () => this.next(), out: () => this.out()});
+        this.given = '';
+        this.debug = new DebugPanel(vars, {step: () => this.step(), next: () => this.next(), out: () => this.out(),
+            mark: (line) => this.editor.highlightLine(line), terminal: () => this.terminal,
+            again: () => this.start(true, this.given)});
         // Breakpoints set or removed while the program runs.
         this.editor.onBreakpointsChange?.((lines) => this.run?.setBreakpoints(lines.map((l) => l + this.offset)));
     }
@@ -109,6 +112,8 @@ export class PythonSession {
     async start(step, stdin = '') {
         const s = await loadStrings();
         const queue = stdin === '' ? [] : stdin.replace(/\r\n?/g, '\n').replace(/\n$/, '').split('\n');
+        // The lines the program read, for Step again with the same input.
+        let given = '';
         this.terminal = new Terminal(this.panel, s.inputline, s.inputok);
         this.terminal.setStatus(s.running_browser, 'running');
         this.debug.reset();
@@ -129,6 +134,7 @@ export class PythonSession {
                 } else {
                     line = await terminal.ask();
                 }
+                given += line + '\n';
                 if (this.run) {
                     this.run.sendInput(line);
                 }
@@ -154,9 +160,10 @@ export class PythonSession {
                 const text = {ok: s.status_ok, stopped: s.status_stopped, toolong: s.status_toolong}[status] || s.status_runtime;
                 terminal.setStatus(text, status === 'ok' ? 'ok' : 'error');
                 this.editor.highlightLine(null);
-                this.debug.stopAuto();
+                this.given = given;
                 this.run = null;
                 this.setState('idle');
+                this.debug.finish();
             },
         }, step, breakpoints);
     }
@@ -182,6 +189,10 @@ export class PythonSession {
      * Run the next line (paused).
      */
     step() {
+        if (this.debug.inPast()) {
+            this.debug.forward();
+            return;
+        }
         this.go('step');
     }
 

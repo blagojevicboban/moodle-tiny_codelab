@@ -112,6 +112,9 @@ next is marked in the editor, and the debugger panel below the console shows:
 - the **call stack**, innermost call first: a click on a call shows its variables (useful for recursion);
 - the **variables** of the function, the changed ones marked;
 - the **trace table**: the line and the values after each step.
+- **Step back**, **Step forward** and a slider *Step N of M* over the recorded stops (also after the program ended):
+  the editor marks the line of the shown step and the console shows the output as it was then; **Step again with
+  the same input** starts a new Step run with the input of the last one.
 
 A click left of a line number sets or removes a **breakpoint** (a red dot); Run then stops there, also without Step.
 

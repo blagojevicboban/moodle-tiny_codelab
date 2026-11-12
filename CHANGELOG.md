@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.6.0 (2026-11-12)
+
+- Step back and a timeline for the debugger, as in the algorithm plugins: every stop of a Step run is recorded (line,
+  call stack, variables, output), so Step back, Step forward and a slider "Step N of M" move along the run, for Python
+  in the browser and for C and C++ on the CodeLab runner. The editor marks the line of the shown step and the console
+  shows the output as it was then.
+- The record stays after the program ended: the slider goes over the whole run, up to the end of the program.
+- Step again with the same input: a new Step run that gets the same input lines again, without typing.
+- A click on a row number of the trace table shows that step; the row of the shown step is marked.
+- New module tiny_codelab/timeline with Node unit tests (a new CI job).
+
 ## 1.5.1 (2026-11-08)
 
 - Input on phones: the line where a running program reads its input has a check button, and the Go / Send key of a

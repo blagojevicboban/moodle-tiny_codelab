@@ -154,6 +154,28 @@ html.tiny_codelab-noscroll body {
     padding: .125rem .75rem .125rem 0;
 }
 
+.tiny_codelab-trace-table tr.tiny_codelab-trace-current td {
+    outline: 2px solid #0f6cbf;
+    outline-offset: -2px;
+}
+
+/* Slider over the record of a Step run, and the console as it was at an older stop (tiny_codelab/timeline). */
+.tiny_codelab-timeline-range {
+    flex: 1 1 10rem;
+    min-width: 6rem;
+    max-width: 24rem;
+}
+
+.tiny_codelab-timeline-pos {
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+}
+
+.tiny_codelab-console-past {
+    border-left: 3px solid #f0ad4e;
+    padding-left: .5rem;
+}
+
 /* CodeLab block in Tiny editor and reading view (Light IDE / GitHub theme) */
 pre.codelab {
     position: relative;

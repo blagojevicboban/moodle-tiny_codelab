@@ -95,8 +95,10 @@ export class RemoteSession {
         this.vars = vars;
         this.offset = offset;
         this.mode = 'step';
-        this.debug = vars ? new DebugPanel(vars, {step: () => this.step(), next: () => this.next(), out: () => this.out()})
-            : null;
+        this.given = '';
+        this.debug = vars ? new DebugPanel(vars, {step: () => this.step(), next: () => this.next(), out: () => this.out(),
+            mark: (line) => this.editor?.highlightLine(line), terminal: () => this.terminal,
+            again: () => this.start(true, this.given)}) : null;
         // Breakpoints set or removed while the program runs.
         editor?.onBreakpointsChange?.((lines) => this.send({type: 'breakpoints', lines: lines.map((l) => l + this.offset)}));
         this.lang = typeof lang === 'function' ? lang : () => lang;
@@ -131,6 +133,8 @@ export class RemoteSession {
         }
         const s = this.strings = await loadStrings();
         this.debug?.reset();
+        // The input of this run, for Step again with the same input.
+        this.typed = stdin;
         this.mode = step ? 'step' : 'continue';
         const breakpoints = (this.editor?.getBreakpoints?.() || []).map((l) => l + this.offset);
         // Under gdb when stepping, or when Run has breakpoints to stop at.
@@ -228,6 +232,7 @@ export class RemoteSession {
                 this.ws.send(JSON.stringify({type: 'eof'}));
                 return;
             }
+            this.typed += `${line}\n`;
             this.ws.send(JSON.stringify({type: 'stdin', data: `${line}\n`}));
         }
     }
@@ -288,6 +293,10 @@ export class RemoteSession {
      * Run the next line (paused).
      */
     step() {
+        if (this.debug?.inPast()) {
+            this.debug.forward();
+            return;
+        }
         this.go('step');
     }
 
@@ -333,6 +342,7 @@ export class RemoteSession {
      */
     end(text, kind) {
         this.debug?.stopAuto();
+        this.given = this.typed || '';
         this.editor?.highlightLine(null);
         this.terminal?.cancelAsk();
         this.terminal?.setStatus(text, kind);
@@ -343,5 +353,6 @@ export class RemoteSession {
         if (this.state !== 'idle') {
             this.setState('idle');
         }
+        this.debug?.finish();
     }
 }
