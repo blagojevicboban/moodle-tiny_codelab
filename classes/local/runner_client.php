@@ -43,17 +43,29 @@ class runner_client extends jobe {
     }
 
     /**
-     * The headers of a signed request: the time and base64url(HMAC-SHA256(secret, time + "\n" + body)).
+     * The headers of a signed request: the site, the time, a nonce (the server takes each request once) and
+     * base64url(HMAC-SHA256(secret, time + "\n" + nonce + "\n" + body)); without the nonce, of time + "\n" + body
+     * (runners older than 0.6.0).
      *
      * @param string $body
      * @param int|null $now
+     * @param bool|string $nonce true for a new nonce, false for none, or the nonce
      * @return string[]
      */
-    public static function signature_headers(string $body, ?int $now = null): array {
+    public static function signature_headers(string $body, ?int $now = null, $nonce = true): array {
         $time = (string) ($now ?? time());
-        $mac = hash_hmac('sha256', $time . "\n" . $body, trim((string) get_config('tiny_codelab', 'runnersecret')), true);
-        return ['Content-Type: application/json', 'X-CodeLab-Time: ' . $time,
-            'X-CodeLab-Signature: ' . interactive::base64url($mac)];
+        $headers = ['Content-Type: application/json', 'X-CodeLab-Site: ' . interactive::site(), 'X-CodeLab-Time: ' . $time];
+        if ($nonce === true) {
+            $nonce = random_string(24);
+        }
+        if ($nonce === false) {
+            $signed = $time . "\n" . $body;
+        } else {
+            $signed = $time . "\n" . $nonce . "\n" . $body;
+            $headers[] = 'X-CodeLab-Nonce: ' . $nonce;
+        }
+        $headers[] = 'X-CodeLab-Signature: ' . interactive::base64url(hash_hmac('sha256', $signed, interactive::secret(), true));
+        return $headers;
     }
 
     /**
@@ -72,12 +84,18 @@ class runner_client extends jobe {
         global $CFG;
         require_once($CFG->libdir . '/filelib.php');
         $body = json_encode(['lang' => $lang, 'code' => $code, 'stdin' => $stdin]);
-        $curl = new \curl(['ignoresecurity' => true]);
-        $curl->setHeader(self::signature_headers($body));
         $url = preg_replace('~^ws~', 'http', interactive::url()) . '/run';
-        $response = $curl->post($url, $body, ['CURLOPT_TIMEOUT' => 60, 'CURLOPT_CONNECTTIMEOUT' => 10]);
-        if ($curl->get_errno()) {
-            return ['stderr' => 'CodeLab runner: ' . $curl->error] + $result;
+        // A runner older than 0.6.0 does not know the nonce and refuses its signature: then once more without it.
+        foreach ([true, false] as $nonce) {
+            $curl = new \curl(['ignoresecurity' => true]);
+            $curl->setHeader(self::signature_headers($body, null, $nonce));
+            $response = $curl->post($url, $body, ['CURLOPT_TIMEOUT' => 60, 'CURLOPT_CONNECTTIMEOUT' => 10]);
+            if ($curl->get_errno()) {
+                return ['stderr' => 'CodeLab runner: ' . $curl->error] + $result;
+            }
+            if ((int) ($curl->get_info()['http_code'] ?? 0) !== 401) {
+                break;
+            }
         }
         $data = json_decode((string) $response, true);
         if (!is_array($data) || !isset($data['status'])) {

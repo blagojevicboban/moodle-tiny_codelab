@@ -82,6 +82,9 @@ final class session_test extends \advanced_testcase {
         $this->assertSame(interactive::base64url(hash_hmac('sha256', $body, self::SECRET, true)), $mac);
         $payload = json_decode(base64_decode(strtr($body, '-_', '+/')), true);
         $this->assertEquals($USER->id, $payload['u']);
+        // The session may run only the language of the token, on the server of this site.
+        $this->assertSame('cpp', $payload['l']);
+        $this->assertSame(interactive::site(), $payload['s']);
         $this->assertGreaterThan(time(), $payload['e']);
         $this->assertLessThanOrEqual(time() + interactive::TOKEN_SECONDS, $payload['e']);
         // Every token has its own nonce.
@@ -100,11 +103,23 @@ final class session_test extends \advanced_testcase {
         set_config('runnersecret', self::SECRET, 'tiny_codelab');
         $this->assertTrue($client->is_configured());
         $this->assertContains('mysql', interactive::languages());
-        // The signature the runner checks: HMAC-SHA256 of the time, a new line and the body.
-        $headers = \tiny_codelab\local\runner_client::signature_headers('{"lang":"mysql"}', 1800000000);
-        $mac = interactive::base64url(hash_hmac('sha256', "1800000000\n{\"lang\":\"mysql\"}", self::SECRET, true));
+        // The signature the runner checks: HMAC-SHA256 of the time, the nonce and the body, each after a new line.
+        $client = \tiny_codelab\local\runner_client::class;
+        $headers = $client::signature_headers('{"lang":"mysql"}', 1800000000, 'abcdefghijklmnopqrstuvwx');
+        $signed = "1800000000\nabcdefghijklmnopqrstuvwx\n{\"lang\":\"mysql\"}";
+        $mac = interactive::base64url(hash_hmac('sha256', $signed, self::SECRET, true));
         $this->assertContains('X-CodeLab-Time: 1800000000', $headers);
+        $this->assertContains('X-CodeLab-Nonce: abcdefghijklmnopqrstuvwx', $headers);
+        $this->assertContains('X-CodeLab-Site: ' . interactive::site(), $headers);
         $this->assertContains('X-CodeLab-Signature: ' . $mac, $headers);
+        // Without a nonce (runners older than 0.6.0): of the time and the body.
+        $old = $client::signature_headers('{"lang":"mysql"}', 1800000000, false);
+        $mac = interactive::base64url(hash_hmac('sha256', "1800000000\n{\"lang\":\"mysql\"}", self::SECRET, true));
+        $this->assertContains('X-CodeLab-Signature: ' . $mac, $old);
+        $this->assertEmpty(preg_grep('/^X-CodeLab-Nonce/', $old));
+        // A new nonce for every request.
+        $first = preg_grep('/^X-CodeLab-Nonce/', $client::signature_headers('{}'));
+        $this->assertNotEquals($first, preg_grep('/^X-CodeLab-Nonce/', $client::signature_headers('{}')));
     }
 
     public function test_rate_limit(): void {

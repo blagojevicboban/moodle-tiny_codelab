@@ -65,7 +65,7 @@ class session extends external_api {
             $result['status'] = 'ratelimit';
         } else {
             $result['url'] = interactive::url() . '/session';
-            $result['token'] = interactive::token((int) $USER->id);
+            $result['token'] = interactive::token((int) $USER->id, $params['lang']);
         }
         return $result;
     }

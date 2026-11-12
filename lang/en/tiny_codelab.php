@@ -132,7 +132,8 @@ $string['runnersecret_desc'] = 'The same secret as CODELAB_SECRET of the server,
 $string['runnerstatus'] = 'State of the interactive server';
 $string['runnerstatus_error'] = 'The interactive server does not answer at {$a}.';
 $string['runnerstatus_notset'] = 'The interactive server is not set: programs run on Jobe with the input given before the run.';
-$string['runnerstatus_ok'] = 'The interactive server answers. Languages: {$a->languages}. Open sessions: {$a->sessions}.';
+$string['runnerstatus_ok'] = 'The interactive server answers (version {$a->version}). Languages: {$a->languages}. Open sessions: {$a->sessions}.';
+$string['runnerstatus_site'] = 'Id of this site on the server: {$a}. With CODELAB_SECRETS={$a}:secret the server gives this site a secret of its own.';
 $string['runnerurl'] = 'Address of the interactive server';
 $string['runnerurl_desc'] = 'WebSocket address, for example wss://runner.example.org. Leave it empty to run every program on Jobe.';
 $string['running'] = 'Running…';

@@ -132,7 +132,8 @@ $string['runnersecret_desc'] = 'Иста тајна као CODELAB_SECRET на �
 $string['runnerstatus'] = 'Стање интерактивног сервера';
 $string['runnerstatus_error'] = 'Интерактивни сервер се не јавља на {$a}.';
 $string['runnerstatus_notset'] = 'Интерактивни сервер није подешен: програми се извршавају на Jobe-у са улазом датим пре покретања.';
-$string['runnerstatus_ok'] = 'Интерактивни сервер се јавља. Језици: {$a->languages}. Отворених сесија: {$a->sessions}.';
+$string['runnerstatus_ok'] = 'Интерактивни сервер се јавља (верзија {$a->version}). Језици: {$a->languages}. Отворених сесија: {$a->sessions}.';
+$string['runnerstatus_site'] = 'Ознака овог сајта на серверу: {$a}. Са CODELAB_SECRETS={$a}:тајна сервер овом сајту даје посебну тајну.';
 $string['runnerurl'] = 'Адреса интерактивног сервера';
 $string['runnerurl_desc'] = 'WebSocket адреса, на пример wss://runner.example.org. Оставите празно да се сви програми извршавају на Jobe-у.';
 $string['running'] = 'Извршава се…';
