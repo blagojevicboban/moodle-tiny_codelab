@@ -119,6 +119,10 @@ next is marked in the editor, and the debugger panel below the console shows:
   sets, objects of classes, two names of one object; C and C++: arrays, matrices, structs, std::vector). Lists and
   arrays are cells (numbers also as bars), changed cells are green, index variables (a[i]) stand under their cell.
 
+**Complexity** (Python in the browser, button of the example): the program runs for sizes n = 10 … 500 with an input
+from a template (`{n}`, `{random}`, `{sorted}`, `{reversed}`), the lines it runs are counted and drawn against n beside
+n, n log n and n², and the growth is named. **Keep for comparison** puts a second version on the same chart.
+
 A click left of a line number sets or removes a **breakpoint** (a red dot); Run then stops there, also without Step.
 
 ## Manual

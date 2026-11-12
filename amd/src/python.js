@@ -173,6 +173,52 @@ const HARNESS = [
     '        sys.settrace(None)',
     '        sys.stdout.flush()',
     '        sys.stderr.flush()',
+    '',
+    '# Complexity (tiny_codelab/complexity): the lines of the program run for one input, without its output.',
+    'class __CodelabTooMany(Exception):',
+    '    pass',
+    '',
+    'class __CodelabNull:',
+    '    def write(self, s):',
+    '        return len(s)',
+    '    def flush(self):',
+    '        pass',
+    '',
+    'def __codelab_count(code, stdin, limit):',
+    '    lines = stdin.split("\\n")',
+    '    lines.reverse()',
+    '    def given(prompt=""):',
+    '        if not lines:',
+    '            raise EOFError("EOF when reading a line")',
+    '        return lines.pop()',
+    '    count = [0]',
+    '    def tracer(frame, event, arg):',
+    '        if frame.f_code.co_filename != "<program>":',
+    '            return None',
+    '        if event == "line":',
+    '            count[0] += 1',
+    '            if count[0] > limit:',
+    '                raise __CodelabTooMany()',
+    '        return tracer',
+    '    builtins.input = given',
+    '    out, err = sys.stdout, sys.stderr',
+    '    sys.stdout, sys.stderr = __CodelabNull(), __CodelabNull()',
+    '    status = "ok"',
+    '    try:',
+    '        compiled = compile(code, "<program>", "exec")',
+    '        sys.settrace(tracer)',
+    '        exec(compiled, {"__name__": "__main__", "__builtins__": builtins})',
+    '    except SystemExit:',
+    '        pass',
+    '    except __CodelabTooMany:',
+    '        status = "toolong"',
+    '    except BaseException as e:',
+    '        status = "error"',
+    '        count.append(type(e).__name__ + ": " + str(e)[:200])',
+    '    finally:',
+    '        sys.settrace(None)',
+    '        sys.stdout, sys.stderr = out, err',
+    '    return json.dumps({"status": status, "steps": count[0], "message": count[1] if len(count) > 1 else ""})',
 ].join('\n');
 
 /**
@@ -231,6 +277,24 @@ onmessage = async(e) => {
         const resolve = pendingStep;
         pendingStep = null;
         resolve();
+    } else if (m.type === 'count') {
+        try {
+            if (!pyodide) {
+                postMessage({type: 'loading'});
+                pyodide = await loadPyodide({indexURL: ${JSON.stringify(base)}});
+                pyodide.setStdout(writer('out'));
+                pyodide.setStderr(writer('err'));
+            }
+            pyodide.globals.set('__codelab_code', m.code);
+            pyodide.globals.set('__codelab_stdin', m.stdin);
+            pyodide.globals.set('__codelab_limit', m.limit);
+            const result = await pyodide.runPythonAsync(HARNESS +
+                '\\n__codelab_count(__codelab_code, __codelab_stdin, __codelab_limit)');
+            postMessage({type: 'counted', result: String(result)});
+        } catch (err) {
+            postMessage({type: 'counted', result: JSON.stringify({status: 'error', steps: 0,
+                message: String(err && err.message || err)})});
+        }
     } else if (m.type === 'run') {
         try {
             if (!pyodide) {
@@ -360,3 +424,34 @@ export const runPython = (base, code, handlers, step = false, breakpoints = []) 
         },
     };
 };
+
+/**
+ * Count the lines a Python program runs for one input, without showing its output (the complexity chart). A program
+ * that is running is stopped first.
+ *
+ * @param {string} base address of the Pyodide files, ending with /
+ * @param {string} code
+ * @param {string} stdin lines given to input(); after them input() raises EOFError
+ * @param {number} limit most lines; more ends with the status toolong
+ * @returns {Promise<{status: string, steps: number, message: string}>} status ok, toolong or error
+ */
+export const countLines = (base, code, stdin, limit) => new Promise((resolve) => {
+    if (current) {
+        stopWorker();
+    }
+    if (!worker) {
+        const url = URL.createObjectURL(new Blob([workerSource(base)], {type: 'text/javascript'}));
+        worker = new Worker(url, {type: 'module'});
+    }
+    const own = worker;
+    own.onerror = (e) => {
+        stopWorker();
+        resolve({status: 'error', steps: 0, message: e.message || 'Python could not be loaded.'});
+    };
+    own.onmessage = (e) => {
+        if (e.data.type === 'counted') {
+            resolve(JSON.parse(e.data.result));
+        }
+    };
+    own.postMessage({type: 'count', code, stdin, limit});
+});

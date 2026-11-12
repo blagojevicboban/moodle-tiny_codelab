@@ -4,7 +4,7 @@ on: [push, pull_request]
 
 jobs:
   node-tests:
-    # Unit tests of the browser modules that need no Moodle (the record of a Step run).
+    # Unit tests of the browser modules that need no Moodle (timeline, memory view, complexity).
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
@@ -12,7 +12,7 @@ jobs:
         with:
           node-version: 22
       - name: Node tests
-        run: node --test tests/*.test.mjs
+        run: node --import ./tests/register.mjs --test "tests/*.test.mjs"
 
   test:
     runs-on: ubuntu-24.04

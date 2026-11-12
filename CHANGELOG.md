@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.8.0 (2026-11-12)
+
+- Complexity: a Python program is run in the browser for several sizes n (10 … 500, or the reader's own) with an
+  input made from a template ({n}, {random}, {sorted}, {reversed}); the lines it runs are counted (the same on every
+  computer, unlike time), drawn against n beside the curves n, n log n and n², and the growth that fits best is named
+  (It grows like O(n²)). Keep for comparison draws a second version on the same chart; a table shows the counts.
+- New module tiny_codelab/complexity and countLines in tiny_codelab/python; Node tests run with a small loader
+  (tests/register.mjs) that stands in for Moodle's core modules.
+
 ## 1.7.0 (2026-11-12)
 
 - Memory view in the debugger (Memory, under the variables): the frames with their variables and the objects they
