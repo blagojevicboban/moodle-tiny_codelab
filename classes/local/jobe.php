@@ -261,10 +261,24 @@ class jobe {
             'CURLOPT_TIMEOUT' => $this->cputime + 30,
             'CURLOPT_CONNECTTIMEOUT' => 10,
         ]);
+        $httpcode = (int) ($curl->get_info()['http_code'] ?? 0);
+        // Jobe cannot be reached or is broken: with the setting Auto, the runner runs the program instead.
+        if (($curl->get_errno() || $httpcode >= 500) && !($this instanceof runner_client) && backend::fallback()) {
+            return (new runner_client($this->cputime, $this->fallback_memory()))->run($lang, $code, $stdin);
+        }
         if ($curl->get_errno()) {
             return ['status' => 'error', 'outcome' => 0, 'cmpinfo' => '', 'stdout' => '',
                 'stderr' => 'Jobe: ' . $curl->error];
         }
-        return self::parse_response((int) ($curl->get_info()['http_code'] ?? 0), (string) $body);
+        return self::parse_response($httpcode, (string) $body);
+    }
+
+    /**
+     * The memory limit (MB) a run keeps when it goes to the runner because Jobe could not be reached.
+     *
+     * @return int 0 for the runner's default
+     */
+    protected function fallback_memory(): int {
+        return 0;
     }
 }

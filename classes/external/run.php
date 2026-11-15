@@ -20,6 +20,7 @@ use core_external\external_api;
 use core_external\external_function_parameters;
 use core_external\external_single_structure;
 use core_external\external_value;
+use tiny_codelab\local\backend;
 use tiny_codelab\local\interactive;
 use tiny_codelab\local\jobe;
 use tiny_codelab\local\runner_client;
@@ -79,8 +80,7 @@ class run extends external_api {
         if (!self::allow_run((int) $USER->id)) {
             return self::result(['status' => 'ratelimit']);
         }
-        $jobe = new jobe();
-        $client = ($runner || !$jobe->is_configured()) ? new runner_client() : $jobe;
+        $client = backend::on_runner($params['lang']) ? new runner_client() : new jobe();
         return self::result($client->run($params['lang'], $params['code'], $params['stdin']));
     }
 

@@ -25,6 +25,17 @@
 defined('MOODLE_INTERNAL') || die();
 
 if ($ADMIN->fulltree) {
+    $settings->add(new admin_setting_configselect(
+        'tiny_codelab/backend',
+        get_string('backend', 'tiny_codelab'),
+        get_string('backend_desc', 'tiny_codelab'),
+        \tiny_codelab\local\backend::AUTO,
+        [
+            \tiny_codelab\local\backend::AUTO => get_string('backend_auto', 'tiny_codelab'),
+            \tiny_codelab\local\backend::JOBE => get_string('backend_jobe', 'tiny_codelab'),
+            \tiny_codelab\local\backend::RUNNER => get_string('backend_runner', 'tiny_codelab'),
+        ]
+    ));
     $settings->add(new admin_setting_configtext(
         'tiny_codelab/jobeserver',
         get_string('jobeserver', 'tiny_codelab'),

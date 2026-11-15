@@ -36,15 +36,7 @@ class languages {
      * @return array
      */
     public static function server(?jobe $jobe = null, bool $refresh = false): array {
-        if ($jobe === null) {
-            $jobe = new jobe();
-            if (!$jobe->is_configured()) {
-                $runner = new runner_client();
-                if ($runner->is_configured()) {
-                    $jobe = $runner;
-                }
-            }
-        }
+        $jobe = $jobe ?? backend::languages_client();
         if (!$jobe->is_configured()) {
             return ['ok' => false, 'versions' => [], 'error' => '', 'time' => 0];
         }
