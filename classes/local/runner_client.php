@@ -26,6 +26,9 @@ namespace tiny_codelab\local;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class runner_client extends jobe {
+    /** Seconds before a run refused as busy is sent once more. */
+    const BUSY_PAUSE = 3;
+
     /** @var int memory limit in MB, 0 for runner's default */
     protected $memorylimit = 0;
 
@@ -111,7 +114,32 @@ class runner_client extends jobe {
             array_merge(array_keys(jobe::LANGUAGES), interactive::ONLY),
             array_map('strval', (array) ($data['languages'] ?? []))
         ));
-        return ['ok' => true, 'versions' => array_fill_keys($langs, ''), 'error' => ''];
+        // Runner 0.8.0 and newer also give the versions, as Jobe does.
+        $versions = [];
+        foreach ($langs as $lang) {
+            $versions[$lang] = is_string($data['versions'][$lang] ?? null) ? $data['versions'][$lang] : '';
+        }
+        return ['ok' => true, 'versions' => $versions, 'error' => ''];
+    }
+
+    /**
+     * Send one run for grading.
+     *
+     * @param string $url
+     * @param string $body
+     * @param bool $nonce sign with a nonce (runner 0.6.0 and newer)
+     * @return array code (HTTP), data (decoded answer or null), error (of the connection, '' when none)
+     */
+    protected function post_run(string $url, string $body, bool $nonce): array {
+        $curl = new \curl(['ignoresecurity' => true]);
+        $curl->setHeader(self::signature_headers($body, null, $nonce));
+        // The runner may keep a run waiting for a place (30 s), then it runs up to three times its CPU time.
+        $response = $curl->post($url, $body, ['CURLOPT_TIMEOUT' => 45 + 3 * $this->cputime, 'CURLOPT_CONNECTTIMEOUT' => 10]);
+        if ($curl->get_errno()) {
+            return ['code' => 0, 'data' => null, 'error' => (string) $curl->error];
+        }
+        return ['code' => (int) ($curl->get_info()['http_code'] ?? 0), 'data' => json_decode((string) $response, true),
+            'error' => ''];
     }
 
     /**
@@ -135,22 +163,22 @@ class runner_client extends jobe {
         }
         $body = json_encode($payload);
         $url = preg_replace('~^ws~', 'http', interactive::url()) . '/run';
+        $sent = $this->post_run($url, $body, true);
         // A runner older than 0.6.0 does not know the nonce and refuses its signature: then once more without it.
-        foreach ([true, false] as $nonce) {
-            $curl = new \curl(['ignoresecurity' => true]);
-            $curl->setHeader(self::signature_headers($body, null, $nonce));
-            $response = $curl->post($url, $body, ['CURLOPT_TIMEOUT' => 60, 'CURLOPT_CONNECTTIMEOUT' => 10]);
-            if ($curl->get_errno()) {
-                return ['stderr' => 'CodeLab runner: ' . $curl->error] + $result;
-            }
-            if ((int) ($curl->get_info()['http_code'] ?? 0) !== 401) {
-                break;
-            }
+        if ($sent['error'] === '' && $sent['code'] === 401) {
+            $sent = $this->post_run($url, $body, false);
         }
-        $data = json_decode((string) $response, true);
+        // Runner 0.8.0 lets a run wait for a place; a run still refused as busy is sent once more, after a pause.
+        if ($sent['error'] === '' && ($sent['data']['status'] ?? '') === 'busy') {
+            sleep(self::BUSY_PAUSE);
+            $sent = $this->post_run($url, $body, true);
+        }
+        if ($sent['error'] !== '') {
+            return ['stderr' => 'CodeLab runner: ' . $sent['error']] + $result;
+        }
+        $data = $sent['data'];
         if (!is_array($data) || !isset($data['status'])) {
-            $code = (int) ($curl->get_info()['http_code'] ?? 0);
-            return ['stderr' => "CodeLab runner: HTTP {$code}"] + $result;
+            return ['stderr' => "CodeLab runner: HTTP {$sent['code']}"] + $result;
         }
         foreach (['cmpinfo', 'stdout', 'stderr'] as $field) {
             $result[$field] = is_string($data[$field] ?? null) ? $data[$field] : '';

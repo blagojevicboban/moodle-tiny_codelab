@@ -78,10 +78,24 @@ final class interactive_test extends \advanced_testcase {
             'secret' => 'my-secret-0123456789',
         ])), 'tiny_codelab');
         $client = new runner_client();
-        foreach (['quota', 'suspended', 'expired', 'busy'] as $status) {
+        foreach (['quota', 'suspended', 'expired'] as $status) {
             \curl::mock_response(json_encode(['status' => $status, 'stdout' => '', 'stderr' => '', 'cmpinfo' => '']));
             $this->assertSame($status, $client->run('python', 'print(1)')['status']);
         }
+        // Busy: sent once more after a pause; the second answer counts.
+        \curl::mock_response(json_encode(['status' => 'busy', 'stdout' => '', 'stderr' => '', 'cmpinfo' => '']));
+        \curl::mock_response(json_encode(['status' => 'ok', 'stdout' => "1\n", 'stderr' => '', 'cmpinfo' => '']));
+        $result = $client->run('python', 'print(1)');
+        $this->assertSame(['ok', "1\n"], [$result['status'], $result['stdout']]);
+        \curl::mock_response(json_encode(['status' => 'busy', 'stdout' => '', 'stderr' => '', 'cmpinfo' => '']));
+        \curl::mock_response(json_encode(['status' => 'busy', 'stdout' => '', 'stderr' => '', 'cmpinfo' => '']));
+        $this->assertSame('busy', $client->run('python', 'print(1)')['status']);
+
+        // The languages and their versions from a signed /health (runner 0.8.0).
+        \curl::mock_response(json_encode(['ok' => true, 'languages' => ['c', 'python', 'mysql', 'unknown'],
+            'versions' => ['c' => '13.3.0', 'python' => '3.12.3']]));
+        $expected = ['ok' => true, 'versions' => ['c' => '13.3.0', 'python' => '3.12.3', 'mysql' => ''], 'error' => ''];
+        $this->assertSame($expected, $client->languages());
         // A status this version does not know, and an answer that is not JSON, are plain errors.
         \curl::mock_response(json_encode(['status' => 'unauthorized', 'stdout' => '', 'stderr' => '', 'cmpinfo' => '']));
         $this->assertSame('error', $client->run('python', 'print(1)')['status']);
