@@ -24,6 +24,15 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+// The test of the servers (test.php), reached by the link below the setting of the server.
+$ADMIN->add('editortiny', new admin_externalpage(
+    'tiny_codelab_servertest',
+    new lang_string('servertest', 'tiny_codelab'),
+    new moodle_url('/lib/editor/tiny/plugins/codelab/test.php'),
+    'moodle/site:config',
+    true
+));
+
 if ($ADMIN->fulltree) {
     $settings->add(new admin_setting_configselect(
         'tiny_codelab/backend',
@@ -36,6 +45,12 @@ if ($ADMIN->fulltree) {
             \tiny_codelab\local\backend::RUNNER => get_string('backend_runner', 'tiny_codelab'),
         ]
     ));
+    $testlink = html_writer::link(
+        new moodle_url('/lib/editor/tiny/plugins/codelab/test.php'),
+        get_string('servertest_link', 'tiny_codelab'),
+        ['class' => 'btn btn-secondary']
+    );
+    $settings->add(new admin_setting_description('tiny_codelab/servertest', get_string('servertest', 'tiny_codelab'), $testlink));
     $settings->add(new admin_setting_configtext(
         'tiny_codelab/jobeserver',
         get_string('jobeserver', 'tiny_codelab'),

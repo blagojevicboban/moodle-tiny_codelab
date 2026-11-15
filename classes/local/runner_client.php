@@ -157,12 +157,7 @@ class runner_client extends jobe {
         }
         global $CFG;
         require_once($CFG->libdir . '/filelib.php');
-        $payload = ['lang' => $lang, 'code' => $code, 'stdin' => $stdin, 'cputime' => $this->cputime];
-        if ($this->memorylimit > 0) {
-            $payload['memory'] = $this->memorylimit;
-        }
-        $body = json_encode($payload);
-        $url = preg_replace('~^ws~', 'http', interactive::url()) . '/run';
+        ['url' => $url, 'body' => $body] = $this->request($lang, $code, $stdin);
         $sent = $this->post_run($url, $body, true);
         // A runner older than 0.6.0 does not know the nonce and refuses its signature: then once more without it.
         if ($sent['error'] === '' && $sent['code'] === 401) {
@@ -176,9 +171,49 @@ class runner_client extends jobe {
         if ($sent['error'] !== '') {
             return ['stderr' => 'CodeLab runner: ' . $sent['error']] + $result;
         }
-        $data = $sent['data'];
+        return self::parse_data($sent['code'], $sent['data']);
+    }
+
+    /**
+     * The request of a run for grading, signed with a nonce of its own (see server_test for runs sent together).
+     *
+     * @param string $lang
+     * @param string $code
+     * @param string $stdin
+     * @return array url, headers, body
+     */
+    public function request(string $lang, string $code, string $stdin = ''): array {
+        $payload = ['lang' => $lang, 'code' => $code, 'stdin' => $stdin, 'cputime' => $this->cputime];
+        if ($this->memorylimit > 0) {
+            $payload['memory'] = $this->memorylimit;
+        }
+        $body = json_encode($payload);
+        return ['url' => preg_replace('~^ws~', 'http', interactive::url()) . '/run',
+            'headers' => self::signature_headers($body), 'body' => $body];
+    }
+
+    /**
+     * Turn an answer of the runner into a result.
+     *
+     * @param int $httpcode
+     * @param string $body
+     * @return array status, outcome, cmpinfo, stdout, stderr
+     */
+    public function parse(int $httpcode, string $body): array {
+        return self::parse_data($httpcode, json_decode($body, true));
+    }
+
+    /**
+     * Turn a decoded answer of the runner into a result.
+     *
+     * @param int $httpcode
+     * @param mixed $data
+     * @return array status, outcome, cmpinfo, stdout, stderr
+     */
+    protected static function parse_data(int $httpcode, $data): array {
+        $result = ['status' => 'error', 'outcome' => 0, 'cmpinfo' => '', 'stdout' => '', 'stderr' => ''];
         if (!is_array($data) || !isset($data['status'])) {
-            return ['stderr' => "CodeLab runner: HTTP {$sent['code']}"] + $result;
+            return ['stderr' => "CodeLab runner: HTTP {$httpcode}"] + $result;
         }
         foreach (['cmpinfo', 'stdout', 'stderr'] as $field) {
             $result[$field] = is_string($data[$field] ?? null) ? $data[$field] : '';

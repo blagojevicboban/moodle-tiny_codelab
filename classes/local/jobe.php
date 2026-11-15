@@ -212,6 +212,30 @@ class jobe {
     }
 
     /**
+     * The request of a run (see server_test for runs sent together).
+     *
+     * @param string $lang
+     * @param string $code
+     * @param string $stdin
+     * @return array url, headers, body
+     */
+    public function request(string $lang, string $code, string $stdin = ''): array {
+        return ['url' => $this->runs_url(), 'headers' => $this->headers(),
+            'body' => json_encode($this->run_spec($lang, $code, $stdin))];
+    }
+
+    /**
+     * Turn an answer of the server into a result.
+     *
+     * @param int $httpcode
+     * @param string $body
+     * @return array status, outcome, cmpinfo, stdout, stderr
+     */
+    public function parse(int $httpcode, string $body): array {
+        return self::parse_response($httpcode, $body);
+    }
+
+    /**
      * Turn Jobe's answer into a result.
      *
      * @param int $httpcode

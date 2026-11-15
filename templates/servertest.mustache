@@ -1,0 +1,102 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template tiny_codelab/servertest
+
+    Results of the test of the servers (test.php): per server whether it answers, a small program in each language,
+    and the benchmark of runs sent together.
+
+    Context variables required for this template:
+    * backend - the setting Server for running and grading
+    * burst - runs sent together in the benchmark
+    * servers - name, configured, ok, error, answerms, languages (name, version, right, status, ms, detail),
+      hasbenchmark, benchmark (language, runs, right, allright, seconds, median, slowest, perminute)
+
+    @copyright  2026 Boban Blagojević
+    @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+
+    Example context (json):
+    {
+        "backend": "Automatic: Jobe when it is set, otherwise the CodeLab runner",
+        "burst": 10,
+        "servers": [
+            {"name": "Jobe", "configured": true, "ok": true, "error": "", "answerms": 85, "hasbenchmark": true,
+             "languages": [
+                {"name": "C", "version": "13.3.0", "right": true, "status": "Finished", "ms": 412, "detail": ""},
+                {"name": "Java", "version": "21.0.8", "right": false, "status": "Compilation error", "ms": 980,
+                 "detail": "error: class Main"}
+             ],
+             "benchmark": {"language": "C", "runs": 10, "right": 10, "allright": true, "seconds": "1.4", "median": 820,
+                           "slowest": 1350, "perminute": 428}
+            },
+            {"name": "CodeLab runner", "configured": false, "ok": false, "error": "", "languages": [], "hasbenchmark": false}
+        ]
+    }
+}}
+<div class="tiny_codelab-servertest">
+    <p>{{#str}} servertest_backend, tiny_codelab, {{backend}} {{/str}}</p>
+    {{#servers}}
+    <h3 class="h4 mt-4">{{name}}</h3>
+    {{^configured}}
+        <p class="text-muted">{{#str}} servertest_notset, tiny_codelab {{/str}}</p>
+    {{/configured}}
+    {{#configured}}
+        {{^ok}}
+            <div class="alert alert-danger">{{#str}} servertest_noanswer, tiny_codelab, {{error}} {{/str}}</div>
+        {{/ok}}
+        {{#ok}}
+            <p>{{#str}} servertest_answers, tiny_codelab, {{answerms}} {{/str}}</p>
+            <table class="table table-sm generaltable">
+                <thead>
+                    <tr>
+                        <th scope="col">{{#str}} servertest_language, tiny_codelab {{/str}}</th>
+                        <th scope="col">{{#str}} servertest_version, tiny_codelab {{/str}}</th>
+                        <th scope="col">{{#str}} servertest_result, tiny_codelab {{/str}}</th>
+                        <th scope="col">{{#str}} servertest_time, tiny_codelab {{/str}}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {{#languages}}
+                    <tr>
+                        <td>{{name}}</td>
+                        <td>{{version}}</td>
+                        <td>
+                            {{#right}}<span class="badge bg-success">{{#str}} servertest_right, tiny_codelab {{/str}}</span>{{/right}}
+                            {{^right}}<span class="badge bg-danger">{{status}}</span> <small>{{detail}}</small>{{/right}}
+                        </td>
+                        <td>{{#str}} servertest_ms, tiny_codelab, {{ms}} {{/str}}</td>
+                    </tr>
+                {{/languages}}
+                </tbody>
+            </table>
+            {{#hasbenchmark}}
+            {{#benchmark}}
+                <div class="alert {{#allright}}alert-info{{/allright}}{{^allright}}alert-warning{{/allright}}">
+                    <strong>{{#str}} servertest_benchmark, tiny_codelab {{/str}}</strong>
+                    {{#str}} servertest_benchmark_result, tiny_codelab, {
+                        "runs": {{runs}}, "language": {{#quote}}{{language}}{{/quote}}, "right": {{right}},
+                        "seconds": {{#quote}}{{seconds}}{{/quote}}, "median": {{median}}, "slowest": {{slowest}},
+                        "perminute": {{perminute}}
+                    } {{/str}}
+                </div>
+            {{/benchmark}}
+            {{/hasbenchmark}}
+        {{/ok}}
+    {{/configured}}
+    {{/servers}}
+    <p class="text-muted small">{{#str}} servertest_note, tiny_codelab {{/str}}</p>
+</div>
