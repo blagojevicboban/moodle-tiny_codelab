@@ -121,4 +121,22 @@ if ($ADMIN->fulltree) {
         get_string('runnerstatus', 'tiny_codelab'),
         $refresh ? \tiny_codelab\local\interactive::status_html() : ''
     ));
+
+    // CodeLab Cloud (optional): one connection key replaces manual runner/Jobe setup.
+    $settings->add(new admin_setting_heading(
+        'tiny_codelab/cloudheading',
+        get_string('cloud', 'tiny_codelab'),
+        get_string('cloud_desc', 'tiny_codelab')
+    ));
+    $settings->add(new admin_setting_configpasswordunmask(
+        'tiny_codelab/cloudkey',
+        get_string('cloudkey', 'tiny_codelab'),
+        get_string('cloudkey_desc', 'tiny_codelab'),
+        ''
+    ));
+    $settings->add(new admin_setting_description(
+        'tiny_codelab/cloudstatus',
+        get_string('cloudstatus', 'tiny_codelab'),
+        $refresh ? \tiny_codelab\local\interactive::usage_html() : ''
+    ));
 }

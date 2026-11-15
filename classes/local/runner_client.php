@@ -26,11 +26,27 @@ namespace tiny_codelab\local;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class runner_client extends jobe {
+    /** @var int memory limit in MB, 0 for runner's default */
+    protected $memorylimit = 0;
+
     /**
      * Client of the runner of the settings.
+     *
+     * @param int|null $cputime CPU seconds, null for the plugin setting
+     * @param int $memorylimit memory limit in MB, 0 for the runner's default
      */
-    public function __construct() {
-        parent::__construct('', '', null);
+    public function __construct(?int $cputime = null, int $memorylimit = 0) {
+        parent::__construct('', '', $cputime);
+        $this->memorylimit = max(0, $memorylimit);
+    }
+
+    /**
+     * Cache key for what is cached about this runner.
+     *
+     * @return string
+     */
+    public function cache_key(): string {
+        return sha1('runner:' . interactive::url());
     }
 
     /**
@@ -69,6 +85,36 @@ class runner_client extends jobe {
     }
 
     /**
+     * Ask the runner which languages it has via /health.
+     *
+     * @return array ok (bool), versions (CodeLab language => ''), error (text)
+     */
+    public function languages(): array {
+        if (!$this->is_configured()) {
+            return ['ok' => false, 'versions' => [], 'error' => ''];
+        }
+        global $CFG;
+        require_once($CFG->libdir . '/filelib.php');
+        $curl = new \curl(['ignoresecurity' => true]);
+        $curl->setHeader(self::signature_headers('', null, false));
+        $health = preg_replace('~^ws~', 'http', interactive::url()) . '/health';
+        $body = $curl->get($health, [], ['CURLOPT_TIMEOUT' => 5, 'CURLOPT_CONNECTTIMEOUT' => 3]);
+        if ($curl->get_errno()) {
+            return ['ok' => false, 'versions' => [], 'error' => $curl->error];
+        }
+        $data = json_decode((string) $body, true);
+        if (!is_array($data) || empty($data['ok'])) {
+            $code = (int) ($curl->get_info()['http_code'] ?? 0);
+            return ['ok' => false, 'versions' => [], 'error' => "HTTP {$code}"];
+        }
+        $langs = array_values(array_intersect(
+            array_merge(array_keys(jobe::LANGUAGES), interactive::ONLY),
+            array_map('strval', (array) ($data['languages'] ?? []))
+        ));
+        return ['ok' => true, 'versions' => array_fill_keys($langs, ''), 'error' => ''];
+    }
+
+    /**
      * Run a program on the runner.
      *
      * @param string $lang
@@ -83,7 +129,11 @@ class runner_client extends jobe {
         }
         global $CFG;
         require_once($CFG->libdir . '/filelib.php');
-        $body = json_encode(['lang' => $lang, 'code' => $code, 'stdin' => $stdin]);
+        $payload = ['lang' => $lang, 'code' => $code, 'stdin' => $stdin, 'cputime' => $this->cputime];
+        if ($this->memorylimit > 0) {
+            $payload['memory'] = $this->memorylimit;
+        }
+        $body = json_encode($payload);
         $url = preg_replace('~^ws~', 'http', interactive::url()) . '/run';
         // A runner older than 0.6.0 does not know the nonce and refuses its signature: then once more without it.
         foreach ([true, false] as $nonce) {
@@ -105,8 +155,8 @@ class runner_client extends jobe {
         foreach (['cmpinfo', 'stdout', 'stderr'] as $field) {
             $result[$field] = is_string($data[$field] ?? null) ? $data[$field] : '';
         }
-        $result['status'] = in_array($data['status'], ['ok', 'compile', 'runtime', 'time', 'memory', 'toolong', 'busy'], true)
-            ? $data['status'] : 'error';
+        $statuses = ['ok', 'compile', 'runtime', 'time', 'memory', 'toolong', 'busy', 'quota', 'suspended', 'expired'];
+        $result['status'] = in_array($data['status'], $statuses, true) ? $data['status'] : 'error';
         return $result;
     }
 }

@@ -79,7 +79,8 @@ class run extends external_api {
         if (!self::allow_run((int) $USER->id)) {
             return self::result(['status' => 'ratelimit']);
         }
-        $client = $runner ? new runner_client() : new jobe();
+        $jobe = new jobe();
+        $client = ($runner || !$jobe->is_configured()) ? new runner_client() : $jobe;
         return self::result($client->run($params['lang'], $params['code'], $params['stdin']));
     }
 

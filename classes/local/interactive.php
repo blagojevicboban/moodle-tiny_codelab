@@ -35,11 +35,42 @@ class interactive {
     const TOKEN_SECONDS = 60;
 
     /**
+     * Decoded CodeLab Cloud connection key, or null when empty or invalid.
+     *
+     * @return array|null keys: url, secret, site
+     */
+    public static function cloud_config(): ?array {
+        $raw = trim((string) get_config('tiny_codelab', 'cloudkey'));
+        if ($raw === '') {
+            return null;
+        }
+        $decoded = base64_decode($raw, true);
+        if ($decoded === false) {
+            return null;
+        }
+        $data = json_decode($decoded, true);
+        if (!is_array($data)) {
+            return null;
+        }
+        $url = rtrim(trim((string) ($data['url'] ?? '')), '/');
+        $secret = trim((string) ($data['secret'] ?? ''));
+        $site = trim((string) ($data['site'] ?? ''));
+        if (!preg_match('~^wss?://~', $url) || $secret === '') {
+            return null;
+        }
+        return ['url' => $url, 'secret' => $secret, 'site' => $site];
+    }
+
+    /**
      * Address of the server (ws:// or wss://), or '' when it is not set up.
      *
      * @return string
      */
     public static function url(): string {
+        $cloud = self::cloud_config();
+        if ($cloud !== null) {
+            return $cloud['url'];
+        }
         $url = rtrim(trim((string) get_config('tiny_codelab', 'runnerurl')), '/');
         return preg_match('~^wss?://~', $url) && self::secret() !== '' ? $url : '';
     }
@@ -50,6 +81,10 @@ class interactive {
      * @return string
      */
     public static function secret(): string {
+        $cloud = self::cloud_config();
+        if ($cloud !== null) {
+            return $cloud['secret'];
+        }
         return trim((string) get_config('tiny_codelab', 'runnersecret'));
     }
 
@@ -72,6 +107,10 @@ class interactive {
      * @return string
      */
     public static function site(): string {
+        $cloud = self::cloud_config();
+        if ($cloud !== null && $cloud['site'] !== '') {
+            return $cloud['site'];
+        }
         global $CFG;
         return substr(sha1($CFG->wwwroot), 0, 12);
     }
@@ -135,5 +174,41 @@ class interactive {
             'sessions' => isset($data['sessions']) ? (int) $data['sessions'] : '?',
             'version' => s((string) ($data['version'] ?? '?')),
         ]), 'success', false) . $site;
+    }
+
+    /**
+     * HTML for the settings page: Cloud plan and monthly usage from GET /usage (empty for plain self-host runners).
+     *
+     * @return string
+     */
+    public static function usage_html(): string {
+        global $CFG, $OUTPUT;
+        $url = self::url();
+        if ($url === '') {
+            return '';
+        }
+        require_once($CFG->libdir . '/filelib.php');
+        $curl = new \curl(['ignoresecurity' => true]);
+        $curl->setHeader(runner_client::signature_headers('', null, false));
+        $usageurl = preg_replace('~^ws~', 'http', $url) . '/usage';
+        $body = $curl->get($usageurl, [], ['CURLOPT_TIMEOUT' => 5, 'CURLOPT_CONNECTTIMEOUT' => 3]);
+        $code = (int) ($curl->get_info()['http_code'] ?? 0);
+        if ($curl->get_errno() || $code === 404) {
+            return '';
+        }
+        $data = json_decode((string) $body, true);
+        if (!is_array($data) || !isset($data['quota'])) {
+            return '';
+        }
+        $used = (int) ($data['used'] ?? 0);
+        $quota = (int) $data['quota'];
+        $type = ($quota > 0 && $used >= $quota) || ($data['status'] ?? '') !== 'active' ? 'warning' : 'info';
+        return $OUTPUT->notification(get_string('cloudusage', 'tiny_codelab', (object) [
+            'plan' => s((string) ($data['plan'] ?? '')),
+            'used' => $used,
+            'quota' => $quota,
+            'status' => s((string) ($data['status'] ?? '')),
+            'expires' => s((string) ($data['expires'] ?? '')),
+        ]), $type, false);
     }
 }

@@ -32,7 +32,8 @@ import {editorStack} from './session';
 
 const KEYS = ['compiling', 'running', 'running_server', 'inputline', 'inputok', 'endinput', 'status_ok', 'status_runtime',
     'status_time', 'status_memory', 'status_toolong', 'status_stopped', 'status_compile', 'status_error', 'status_notconfigured',
-    'status_nolanguage', 'status_ratelimit', 'status_busy', 'status_disconnected', 'status_unreachable', 'paused'];
+    'status_nolanguage', 'status_ratelimit', 'status_busy', 'status_quota', 'status_suspended', 'status_expired',
+    'status_disconnected', 'status_unreachable', 'paused'];
 
 /** Languages that run step by step on the interactive server. */
 const STEP_LANGUAGES = ['c', 'cpp'];
@@ -198,7 +199,7 @@ export class RemoteSession {
                     break;
                 case 'error':
                     finished = true;
-                    this.end(message.message, 'error');
+                    this.end(s[`status_${message.reason}`] || message.message, 'error');
                     break;
             }
         };
