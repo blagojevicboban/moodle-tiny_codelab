@@ -183,6 +183,9 @@ class interactive {
      */
     public static function usage_html(): string {
         global $CFG, $OUTPUT;
+        if (trim((string) get_config('tiny_codelab', 'cloudkey')) !== '' && self::cloud_config() === null) {
+            return $OUTPUT->notification(get_string('cloudkeyinvalid', 'tiny_codelab'), 'warning', false);
+        }
         $url = self::url();
         if ($url === '') {
             return '';

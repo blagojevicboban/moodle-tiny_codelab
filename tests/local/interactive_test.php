@@ -69,4 +69,45 @@ final class interactive_test extends \advanced_testcase {
         $this->assertContains('X-CodeLab-Time: 1700000000', $headers);
         $this->assertContains('X-CodeLab-Nonce: testnonce1234567890', $headers);
     }
+
+    public function test_runner_client_passes_the_states_of_the_service(): void {
+        $this->resetAfterTest();
+        set_config('cloudkey', base64_encode(json_encode([
+            'url' => 'wss://run.codelab.cloud',
+            'site' => 'site-1',
+            'secret' => 'my-secret-0123456789',
+        ])), 'tiny_codelab');
+        $client = new runner_client();
+        foreach (['quota', 'suspended', 'expired', 'busy'] as $status) {
+            \curl::mock_response(json_encode(['status' => $status, 'stdout' => '', 'stderr' => '', 'cmpinfo' => '']));
+            $this->assertSame($status, $client->run('python', 'print(1)')['status']);
+        }
+        // A status this version does not know, and an answer that is not JSON, are plain errors.
+        \curl::mock_response(json_encode(['status' => 'unauthorized', 'stdout' => '', 'stderr' => '', 'cmpinfo' => '']));
+        $this->assertSame('error', $client->run('python', 'print(1)')['status']);
+        \curl::mock_response('<html>Bad gateway</html>');
+        $result = $client->run('python', 'print(1)');
+        $this->assertSame('error', $result['status']);
+        $this->assertStringContainsString('CodeLab runner', $result['stderr']);
+    }
+
+    public function test_usage_html_warns_about_a_key_that_is_not_valid(): void {
+        $this->resetAfterTest();
+        set_config('cloudkey', '', 'tiny_codelab');
+        set_config('runnerurl', '', 'tiny_codelab');
+        $this->assertSame('', interactive::usage_html());
+        set_config('cloudkey', 'half-of-a-key', 'tiny_codelab');
+        $this->assertStringContainsString(get_string('cloudkeyinvalid', 'tiny_codelab'), interactive::usage_html());
+
+        set_config('cloudkey', base64_encode(json_encode([
+            'url' => 'wss://run.codelab.cloud',
+            'site' => 'site-1',
+            'secret' => 'my-secret-0123456789',
+        ])), 'tiny_codelab');
+        \curl::mock_response(json_encode(['site' => 'site-1', 'plan' => 'school', 'status' => 'active', 'used' => 120,
+            'quota' => 150000, 'expires' => '2027-01-15']));
+        $html = interactive::usage_html();
+        $this->assertStringContainsString('school', $html);
+        $this->assertStringContainsString('120 / 150000', $html);
+    }
 }
