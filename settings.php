@@ -148,7 +148,7 @@ if ($ADMIN->fulltree) {
         $refresh ? \tiny_codelab\local\interactive::status_html() : ''
     ));
 
-    // CodeLab Cloud (optional): one connection key replaces manual runner/Jobe setup.
+    // Hosted runner (optional): one connection key replaces the runner address and secret.
     $settings->add(new admin_setting_heading(
         'tiny_codelab/cloudheading',
         get_string('cloud', 'tiny_codelab'),

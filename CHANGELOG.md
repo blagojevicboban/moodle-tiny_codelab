@@ -1,5 +1,21 @@
 # Changelog
 
+## 1.13.0 (2026-11-16)
+
+- Running and grading without Jobe: with CodeLab runner 0.8.0 the runner runs all eight languages and SQL to their
+  end for grading. New setting Server for running and grading (Automatic, Jobe, CodeLab runner; class
+  tiny_codelab\local\backend), used by the web service run, the language lists and qtype_codelab. Automatic uses Jobe
+  when it is set and sends a run to the runner when Jobe cannot be reached or answers with a server error.
+- Test the servers (test.php, linked on the settings page): whether Jobe and the runner answer, the version of each
+  language, a small program in each that must print 42, and a benchmark of 10 different C programs sent together
+  (median, slowest, runs per minute). Template tiny_codelab/servertest; jobe and runner_client get request() and parse().
+- Hosted runner (optional): one connection key sets the address, the secret and the site of a hosted runner; the
+  settings page shows its plan and monthly usage (GET /usage) and warns about a key that is not valid. The states
+  quota, suspended and expired are shown to the reader and leave quiz answers for the teacher.
+- Runner client: the versions of the languages from the signed /health, a run refused as busy is sent once more after
+  3 s, a longer wait for the runner's queue, the limits of a question (CPU time, memory) on the runner.
+- Privacy text: grading may also go to the runner. CI: Mustache lint.
+
 ## 1.12.0 (2026-11-12)
 
 - Memory view of C and C++ with CodeLab runner 0.6.0: pointers are arrows. A pointer into an array points to it with

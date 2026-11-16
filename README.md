@@ -69,6 +69,8 @@ An example is a `pre` element whose settings are class names, because Moodle's H
 
 | Setting | Default | Meaning |
 |---|---|---|
+| Server for running and grading | Automatic | *Automatic*: Jobe when it is set, otherwise the CodeLab runner, and the runner when Jobe does not answer; *Jobe*; *CodeLab runner* (no Jobe needed, runner 0.8.0+) |
+| Test the servers | | Link to a page that checks Jobe and the runner: languages and versions, a program in each, and a benchmark of 10 runs sent together |
 | Jobe server | (empty) | Address of the Jobe server, for example `https://jobe.example.org` |
 | Jobe API key | (empty) | Key sent in the `X-API-KEY` header |
 | State of the Jobe server | | Shows whether the server answers, its languages, and whether a test program is accepted |
@@ -80,6 +82,7 @@ An example is a `pre` element whose settings are class names, because Moodle's H
 | Address of the interactive server | (empty) | WebSocket address of a [CodeLab runner](https://github.com/blagojevicboban/codelab-runner), for example `wss://runner.example.org` |
 | Secret of the interactive server | (empty) | The secret shared with the runner (`CODELAB_SECRET`) |
 | State of the interactive server | | Shows whether the runner answers and its languages |
+| Hosted runner: connection key | (empty) | Key given by the provider of a hosted runner; sets the address, the secret and the site id instead of the two settings above. The settings page then shows the plan and the monthly usage |
 
 C and C++ are compiled without warnings as errors (`-w`) and with the maths library (`-lm`). The Visual Studio functions
 `scanf_s`, `fscanf_s`, `sscanf_s`, `printf_s` and `fprintf_s` are mapped to the standard ones.
@@ -91,7 +94,9 @@ it runs. With a [CodeLab runner](https://github.com/blagojevicboban/codelab-runn
 program running: the prompts appear in the console and the reader types the input line by line, as in a terminal
 (*End of input* or Ctrl+D closes it). **Step** runs C and C++ line by line there (gdb on the runner): the line that
 runs next is marked and the variables of the function are shown, as for Python. This works in the editor dialog, in examples (filter_codelab) and in the attempt of a
-question (qtype_codelab). The text in the input field is sent first. Grading and *Run the tests* stay on Jobe.
+question (qtype_codelab). The text in the input field is sent first. Grading and *Run the tests* use the server of the
+setting *Server for running and grading*: Jobe, or the runner itself (runner 0.8.0 runs all eight languages to their
+end, with inputs of megabytes, and gave the same results as Jobe on 1,416 tests of real courses).
 
 The runner is a small Node.js server that runs each program in a bubblewrap sandbox; see its README for the
 installation. Moodle gives the browser a signed token for one session, valid for 60 seconds.

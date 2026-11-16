@@ -17,7 +17,7 @@
 namespace tiny_codelab\local;
 
 /**
- * Unit tests for CodeLab Cloud connection key and runner_client.
+ * Unit tests for the connection key of a hosted runner and runner_client.
  *
  * @package    tiny_codelab
  * @copyright  2026 Boban Blagojević
@@ -34,13 +34,13 @@ final class interactive_test extends \advanced_testcase {
         $this->assertSame('self-secret-123456', interactive::secret());
 
         $key = base64_encode(json_encode([
-            'url' => 'wss://run.codelab.cloud/',
+            'url' => 'wss://runner.example.org/',
             'site' => 'school-42',
-            'secret' => 'cloud-secret-123456',
+            'secret' => 'hosted-secret-123456',
         ]));
         set_config('cloudkey', $key, 'tiny_codelab');
-        $this->assertSame('wss://run.codelab.cloud', interactive::url());
-        $this->assertSame('cloud-secret-123456', interactive::secret());
+        $this->assertSame('wss://runner.example.org', interactive::url());
+        $this->assertSame('hosted-secret-123456', interactive::secret());
         $this->assertSame('school-42', interactive::site());
 
         // Invalid key falls back to self-hosted settings.
@@ -59,7 +59,7 @@ final class interactive_test extends \advanced_testcase {
         $this->assertSame('notconfigured', $result['status']);
 
         set_config('cloudkey', base64_encode(json_encode([
-            'url' => 'wss://run.codelab.cloud',
+            'url' => 'wss://runner.example.org',
             'site' => 'site-1',
             'secret' => 'my-secret-0123456789',
         ])), 'tiny_codelab');
@@ -73,7 +73,7 @@ final class interactive_test extends \advanced_testcase {
     public function test_runner_client_passes_the_states_of_the_service(): void {
         $this->resetAfterTest();
         set_config('cloudkey', base64_encode(json_encode([
-            'url' => 'wss://run.codelab.cloud',
+            'url' => 'wss://runner.example.org',
             'site' => 'site-1',
             'secret' => 'my-secret-0123456789',
         ])), 'tiny_codelab');
@@ -82,9 +82,9 @@ final class interactive_test extends \advanced_testcase {
             \curl::mock_response(json_encode(['status' => $status, 'stdout' => '', 'stderr' => '', 'cmpinfo' => '']));
             $this->assertSame($status, $client->run('python', 'print(1)')['status']);
         }
-        // Busy: sent once more after a pause; the second answer counts.
-        \curl::mock_response(json_encode(['status' => 'busy', 'stdout' => '', 'stderr' => '', 'cmpinfo' => '']));
+        // Busy: sent once more after a pause; the second answer counts. The mock answers last in, first out.
         \curl::mock_response(json_encode(['status' => 'ok', 'stdout' => "1\n", 'stderr' => '', 'cmpinfo' => '']));
+        \curl::mock_response(json_encode(['status' => 'busy', 'stdout' => '', 'stderr' => '', 'cmpinfo' => '']));
         $result = $client->run('python', 'print(1)');
         $this->assertSame(['ok', "1\n"], [$result['status'], $result['stdout']]);
         \curl::mock_response(json_encode(['status' => 'busy', 'stdout' => '', 'stderr' => '', 'cmpinfo' => '']));
@@ -114,7 +114,7 @@ final class interactive_test extends \advanced_testcase {
         $this->assertStringContainsString(get_string('cloudkeyinvalid', 'tiny_codelab'), interactive::usage_html());
 
         set_config('cloudkey', base64_encode(json_encode([
-            'url' => 'wss://run.codelab.cloud',
+            'url' => 'wss://runner.example.org',
             'site' => 'site-1',
             'secret' => 'my-secret-0123456789',
         ])), 'tiny_codelab');

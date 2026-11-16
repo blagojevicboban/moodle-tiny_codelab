@@ -1,6 +1,6 @@
 <div>
   <p><strong>CodeLab: Runnable Program Examples in the VS Code Editor</strong></p>
-  <p><em>Insert program examples in C, C++, Python, Java, C#, JavaScript, Pascal and PHP into any Moodle text, write them in the code editor of VS Code and run them on a Jobe server or in the browser.</em></p>
+  <p><em>Insert program examples in C, C++, Python, Java, C#, JavaScript, Pascal and PHP into any Moodle text, write them in the code editor of VS Code and run them on a Jobe server, on the CodeLab runner or in the browser.</em></p>
   <div>
     <a href="https://github.com/blagojevicboban/moodle-tiny_codelab/actions/workflows/ci.yml" target="_blank" rel="noreferrer noopener"><img src="https://github.com/blagojevicboban/moodle-tiny_codelab/actions/workflows/ci.yml/badge.svg" alt="Moodle Plugin CI"></a>
     <a href="https://moodle.org" target="_blank" rel="noreferrer noopener"><img src="https://img.shields.io/badge/Moodle-4.5%20to%205.3-orange.svg" alt="Moodle 4.5 to 5.3"></a>
@@ -10,11 +10,12 @@
   <p><strong>Live demo:</strong> try the CodeLab plugins on <a href="https://codelab.tsp.edu.rs" target="_blank" rel="noreferrer noopener">codelab.tsp.edu.rs</a>. Look around as a guest (Python runs in the browser), or use the demo accounts <strong>teacher</strong> and <strong>student</strong> (password <strong>Demo-2026</strong>) to run every language, the debugger and SQL. Everything is reset every night.</p>
 
   <hr>
-  <p><strong>What's New in v1.12.0</strong></p>
+  <p><strong>What's New in v1.13.0</strong></p>
   <ul>
-    <li><strong>Pointers in the memory view:</strong> with CodeLab runner 0.6.0, C and C++ pointers are arrows: a pointer walking through an array stands under its cell, a pointer to a variable reads &amp;name, and a linked list on the heap is drawn node by node down to NULL.</li>
-    <li><strong>From the flowchart to CodeLab:</strong> Open in CodeLab of the Algorithm plugins starts a new CodeLab example with the code of the flowchart.</li>
-    <li><strong>Safer runner:</strong> session tokens are for one language, a shared runner can have a secret for each site, and runs for grading cannot be sent twice.</li>
+    <li><strong>No Jobe needed:</strong> with CodeLab runner 0.8.0 all eight languages and SQL are run and graded on the runner. A new setting chooses the server for running and grading: Automatic, Jobe or CodeLab runner. Automatic uses Jobe and moves to the runner when Jobe does not answer.</li>
+    <li><strong>Test the servers:</strong> a page for the administrator shows whether Jobe and the runner answer, the version of each language, runs a small program in each, and measures how fast runs sent together are.</li>
+    <li><strong>Hosted runner:</strong> one connection key sets the address and the secret of a hosted runner, and the settings page shows its monthly usage.</li>
+    <li><strong>Busy server:</strong> a run that finds the runner busy is sent once more, and a run out of memory is reported as such.</li>
   </ul>
 
   <hr>
@@ -22,12 +23,13 @@
   <ul>
     <li><strong>The code editor of VS Code:</strong> Monaco, with syntax highlighting, line numbers, bracket matching and search.</li>
     <li><strong>Typing help for every language:</strong> for Python from Jedi, for the others keywords, snippets, library functions with their parameters, and members of strings, lists and Scanner. Teachers can turn it off for a single example.</li>
-    <li><strong>Run on Jobe:</strong> programs are compiled and run on your Jobe server, with an input field. There is a rate limit per user and a size limit.</li>
+    <li><strong>Run on Jobe or the CodeLab runner:</strong> programs are compiled and run on your server, with an input field. There is a rate limit per user and a size limit.</li>
+    <li><strong>Interactive runs:</strong> with the CodeLab runner, programs ask for their input while they run, as in a terminal; each session token is for one language and each site can have a secret of its own.</li>
     <li><strong>Python in the browser:</strong> with Pyodide, input asks for the input while the program runs. Step goes line by line with the variables, and Stop also ends an endless loop.</li>
     <li><strong>Debugger:</strong> breakpoints, Step over and out, call stack, step back and a timeline, for Python and C/C++.</li>
-    <li><strong>Memory view:</strong> frames and the objects their variables point to, with arrows; changed cells green, index variables under their cell.</li>
+    <li><strong>Memory view:</strong> frames and the objects their variables point to, with arrows; C and C++ pointers too, down a linked list to NULL.</li>
     <li><strong>Complexity:</strong> a Python example runs for sizes n from 10 to 500, its steps are drawn beside n, n log n and n&sup2;, and the growth is named.</li>
-    <li><strong>Flowchart bridge:</strong> with the Algorithm plugins, Python examples are also drawn as flowcharts that run step by step.</li>
+    <li><strong>Flowchart bridge:</strong> with the Algorithm plugins, Python examples are drawn as flowcharts, and a flowchart opens as a CodeLab example.</li>
     <li><strong>VS Code themes and phones:</strong> Light, Dark and High Contrast with Auto dark mode; a check button sends input on phones.</li>
     <li><strong>Default input:</strong> saved with the example, so readers start from it.</li>
     <li><strong>Simple markup:</strong> an example is a pre element with class names, which survive Moodle's HTML cleaning.</li>
@@ -38,21 +40,21 @@
   <ul>
     <li><strong><a href="https://marketplace.moodle.com/plugins/tiny_codelab" target="_blank" rel="noreferrer noopener">CodeLab for TinyMCE</a></strong> (this plugin): inserts examples in the TinyMCE editor. The other two plugins use its editor and runner.</li>
     <li><strong><a href="https://marketplace.moodle.com/plugins/filter_codelab" target="_blank" rel="noreferrer noopener">CodeLab filter</a></strong>: turns examples into code editors that readers can edit and run.</li>
-    <li><strong><a href="https://marketplace.moodle.com/plugins/qtype_codelab" target="_blank" rel="noreferrer noopener">CodeLab question type</a></strong>: programming questions graded on Jobe with tests.</li>
+    <li><strong><a href="https://marketplace.moodle.com/plugins/qtype_codelab" target="_blank" rel="noreferrer noopener">CodeLab question type</a></strong>: programming questions graded with tests on Jobe or the CodeLab runner.</li>
   </ul>
 
   <hr>
   <p><strong>Requirements</strong></p>
   <ul>
     <li><strong>Moodle:</strong> 4.5 LTS to 5.3 (PHP as required by your Moodle version).</li>
-    <li><strong>Jobe server:</strong> for running programs. Set its address and API key in the plugin settings. Python in the browser works without it.</li>
+    <li><strong>A server for running programs:</strong> a Jobe server, or the CodeLab runner (open source, github.com/blagojevicboban/codelab-runner), your own or a hosted one. Python in the browser works without a server.</li>
     <li><strong>Python in the browser:</strong> Chrome or Edge 137 or newer. Other browsers run Python on Jobe.</li>
     <li><strong>CodeLab filter:</strong> install it too and switch the filter <strong>On</strong> in Site administration, Plugins, Filters, Manage filters. Without it readers see the examples as plain code.</li>
   </ul>
 
   <hr>
   <p><strong>Privacy</strong></p>
-  <p>Programs and their input are sent to the Jobe server set by the administrator to be compiled and run. Interactive runs, the debugger and SQL go to the CodeLab runner server set by the administrator instead, with a short-lived signed token that holds only the numeric user id; the runner keeps nothing after the session ends. Nothing is stored in Moodle. When Python runs in the browser, the browser downloads Pyodide from the address in the settings, by default the jsDelivr CDN. It does not send the program or its input there. The plugin implements the Moodle Privacy API.</p>
+  <p>Programs and their input are sent to the server set by the administrator (Jobe or the CodeLab runner, own or hosted) to be compiled and run. Interactive runs, the debugger and SQL always go to the CodeLab runner, with a short-lived signed token that holds only the numeric user id; the runner keeps nothing after the session ends. Nothing is stored in Moodle. When Python runs in the browser, the browser downloads Pyodide from the address in the settings, by default the jsDelivr CDN. It does not send the program or its input there. The plugin implements the Moodle Privacy API.</p>
 
   <hr>
   <p>Developed by <strong>Boban Blagojevi&#263;</strong>. Languages: English and Serbian (Latin and Cyrillic). It bundles Monaco Editor (MIT).<br>

@@ -35,7 +35,7 @@ class interactive {
     const TOKEN_SECONDS = 60;
 
     /**
-     * Decoded CodeLab Cloud connection key, or null when empty or invalid.
+     * Decoded connection key of a hosted runner, or null when empty or invalid.
      *
      * @return array|null keys: url, secret, site
      */
@@ -177,7 +177,7 @@ class interactive {
     }
 
     /**
-     * HTML for the settings page: Cloud plan and monthly usage from GET /usage (empty for plain self-host runners).
+     * HTML for the settings page: plan and monthly usage of a hosted runner from GET /usage (empty for plain self-host runners).
      *
      * @return string
      */
