@@ -160,12 +160,14 @@ class interactive {
         }
         require_once($CFG->libdir . '/filelib.php');
         $curl = new \curl(['ignoresecurity' => true]);
-        // Signed, so that the server also tells its version and load (only to Moodle).
-        $curl->setHeader(runner_client::signature_headers('', null, false));
+        // Signed (with a nonce, which a hosted runner requires), so that the server also tells its version and load.
+        $curl->setHeader(runner_client::signature_headers('', null, true));
         $health = preg_replace('~^ws~', 'http', $url) . '/health';
         $body = $curl->get($health, [], ['CURLOPT_TIMEOUT' => 5, 'CURLOPT_CONNECTTIMEOUT' => 3]);
         $data = json_decode((string) $body, true);
-        $site = \html_writer::div(get_string('runnerstatus_site', 'tiny_codelab', self::site()), 'small');
+        // With a connection key the address and the secret fields are not used, and CODELAB_SECRETS is not the site's.
+        $sitetext = self::cloud_config() !== null ? 'runnerstatus_cloud' : 'runnerstatus_site';
+        $site = \html_writer::div(get_string($sitetext, 'tiny_codelab', s(self::site())), 'small');
         if ($curl->get_errno() || empty($data['ok'])) {
             return $OUTPUT->notification(get_string('runnerstatus_error', 'tiny_codelab', s($health)), 'error', false) . $site;
         }
@@ -192,16 +194,24 @@ class interactive {
         }
         require_once($CFG->libdir . '/filelib.php');
         $curl = new \curl(['ignoresecurity' => true]);
-        $curl->setHeader(runner_client::signature_headers('', null, false));
+        $curl->setHeader(runner_client::signature_headers('', null, true));
         $usageurl = preg_replace('~^ws~', 'http', $url) . '/usage';
         $body = $curl->get($usageurl, [], ['CURLOPT_TIMEOUT' => 5, 'CURLOPT_CONNECTTIMEOUT' => 3]);
         $code = (int) ($curl->get_info()['http_code'] ?? 0);
-        if ($curl->get_errno() || $code === 404) {
-            return '';
-        }
         $data = json_decode((string) $body, true);
-        if (!is_array($data) || !isset($data['quota'])) {
-            return '';
+        if ($curl->get_errno() || $code === 404 || !is_array($data) || !isset($data['quota'])) {
+            // A self-hosted runner has no /usage: nothing to show. With a connection key the answer must be there.
+            if (self::cloud_config() === null) {
+                return '';
+            }
+            if ($curl->get_errno()) {
+                $why = (string) $curl->error;
+            } else if (is_array($data) && is_string($data['error'] ?? null)) {
+                $why = $data['error'];
+            } else {
+                $why = $code ? "HTTP {$code}" : get_string('error');
+            }
+            return $OUTPUT->notification(get_string('cloudusage_error', 'tiny_codelab', s($why)), 'warning', false);
         }
         $used = (int) ($data['used'] ?? 0);
         $quota = (int) $data['quota'];

@@ -123,5 +123,46 @@ final class interactive_test extends \advanced_testcase {
         $html = interactive::usage_html();
         $this->assertStringContainsString('school', $html);
         $this->assertStringContainsString('120 / 150000', $html);
+
+        // A refused answer is shown with a connection key (it was an empty box), and nothing for a self-hosted runner.
+        \curl::mock_response(json_encode(['error' => 'Unauthorized']));
+        $refused = get_string('cloudusage_error', 'tiny_codelab', 'Unauthorized');
+        $this->assertStringContainsString($refused, interactive::usage_html());
+        set_config('cloudkey', '', 'tiny_codelab');
+        set_config('runnerurl', 'wss://runner.example.org', 'tiny_codelab');
+        set_config('runnersecret', 'my-secret-0123456789', 'tiny_codelab');
+        \curl::mock_response(json_encode(['error' => 'Unauthorized']));
+        $this->assertSame('', interactive::usage_html());
+    }
+
+    public function test_status_html_tells_when_the_connection_key_is_used(): void {
+        $this->resetAfterTest();
+        set_config('runnerurl', 'wss://own.example.org', 'tiny_codelab');
+        set_config('runnersecret', 'my-secret-0123456789', 'tiny_codelab');
+        \curl::mock_response(json_encode(['ok' => true, 'languages' => ['c'], 'version' => '0.8.0', 'sessions' => 2]));
+        $html = interactive::status_html();
+        $this->assertStringContainsString('0.8.0', $html);
+        $this->assertStringContainsString('CODELAB_SECRETS=', $html);
+
+        set_config('cloudkey', base64_encode(json_encode([
+            'url' => 'wss://cloud.example.org',
+            'site' => 'school-1',
+            'secret' => 'my-secret-0123456789',
+        ])), 'tiny_codelab');
+        \curl::mock_response(json_encode(['ok' => true, 'languages' => ['c'], 'version' => '0.8.0', 'sessions' => 0]));
+        $html = interactive::status_html();
+        $this->assertStringContainsString(get_string('runnerstatus_cloud', 'tiny_codelab', 'school-1'), $html);
+        $this->assertStringNotContainsString('CODELAB_SECRETS=', $html);
+    }
+
+    public function test_signed_requests_carry_a_nonce(): void {
+        // A hosted runner (CODELAB_REQUIRE_NONCE=1) refuses a signature without a nonce, also for /health and /usage.
+        $this->resetAfterTest();
+        set_config('runnersecret', 'my-secret-0123456789', 'tiny_codelab');
+        $source = file_get_contents(__DIR__ . '/../../classes/local/interactive.php')
+            . file_get_contents(__DIR__ . '/../../classes/local/runner_client.php');
+        $this->assertStringNotContainsString("signature_headers('', null, false)", $source);
+        $headers = runner_client::signature_headers('', null, true);
+        $this->assertCount(1, preg_grep('/^X-CodeLab-Nonce: [A-Za-z0-9]{24}$/', $headers));
     }
 }

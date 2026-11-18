@@ -59,11 +59,16 @@ class languages {
     public static function status_html(bool $refresh = false): string {
         $jobe = new jobe();
         if (!$jobe->is_configured()) {
-            return \html_writer::div(get_string('jobestatus_notset', 'tiny_codelab'), 'alert alert-warning');
+            // Not set is fine when the CodeLab runner (or a hosted one) runs the programs.
+            $type = interactive::url() !== '' ? 'alert alert-info' : 'alert alert-warning';
+            return \html_writer::div(get_string('jobestatus_notset', 'tiny_codelab'), $type);
         }
+        $notused = backend::mode() === backend::RUNNER
+            ? ' ' . get_string('jobestatus_notused', 'tiny_codelab') : '';
         $info = self::server($jobe, $refresh);
         if (!$info['ok']) {
-            return \html_writer::div(get_string('jobestatus_error', 'tiny_codelab', s($info['error'])), 'alert alert-danger');
+            $text = get_string('jobestatus_error', 'tiny_codelab', s($info['error'])) . $notused;
+            return \html_writer::div($text, 'alert alert-danger');
         }
         $have = [];
         $missing = [];
@@ -83,9 +88,9 @@ class languages {
         $failed = $refresh ? self::test_run($jobe, array_keys($info['versions'])) : '';
         if ($failed !== '') {
             $text .= ' ' . get_string('jobestatus_runfailed', 'tiny_codelab', s($failed));
-            return \html_writer::div($text, 'alert alert-danger');
+            return \html_writer::div($text . $notused, 'alert alert-danger');
         }
-        return \html_writer::div($text, $missing ? 'alert alert-warning' : 'alert alert-success');
+        return \html_writer::div($text . $notused, $missing ? 'alert alert-warning' : 'alert alert-success');
     }
 
     /**

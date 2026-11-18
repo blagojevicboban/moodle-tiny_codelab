@@ -10,17 +10,16 @@
   <p><strong>Live demo:</strong> try the CodeLab plugins on <a href="https://codelab.tsp.edu.rs" target="_blank" rel="noreferrer noopener">codelab.tsp.edu.rs</a>. Look around as a guest (Python runs in the browser), or use the demo accounts <strong>teacher</strong> and <strong>student</strong> (password <strong>Demo-2026</strong>) to run every language, the debugger and SQL. Everything is reset every night.</p>
 
   <hr>
-  <p><strong>What's New in v1.13.0</strong></p>
+  <p><strong>What's New in v1.13.1</strong></p>
   <ul>
-    <li><strong>No Jobe needed:</strong> with CodeLab runner 0.8.0 all eight languages and SQL are run and graded on the runner. A new setting chooses the server for running and grading: Automatic, Jobe or CodeLab runner. Automatic uses Jobe and moves to the runner when Jobe does not answer.</li>
-    <li><strong>Test the servers:</strong> a page for the administrator shows whether Jobe and the runner answer, the version of each language, runs a small program in each, and measures how fast runs sent together are.</li>
-    <li><strong>Hosted runner:</strong> one connection key sets the address and the secret of a hosted runner, and the settings page shows its monthly usage.</li>
-    <li><strong>Busy server:</strong> a run that finds the runner busy is sent once more, and a run out of memory is reported as such.</li>
+    <li><strong>Hosted runner on the settings page:</strong> it comes first after the server choice, shows the plan and the monthly usage, and the runner status tells that the connection key is used.</li>
+    <li><strong>Clearer settings:</strong> the texts name the server for running and grading, Jobe or the CodeLab runner, and the Jobe status says when Jobe is not used.</li>
   </ul>
 
   <hr>
   <p><strong>Core features</strong></p>
   <ul>
+    <li><strong>Jobe, your own runner or a hosted runner:</strong> choose the server for running and grading, with a page that tests the servers and measures their speed.</li>
     <li><strong>The code editor of VS Code:</strong> Monaco, with syntax highlighting, line numbers, bracket matching and search.</li>
     <li><strong>Typing help for every language:</strong> for Python from Jedi, for the others keywords, snippets, library functions with their parameters, and members of strings, lists and Scanner. Teachers can turn it off for a single example.</li>
     <li><strong>Run on Jobe or the CodeLab runner:</strong> programs are compiled and run on your server, with an input field. There is a rate limit per user and a size limit.</li>

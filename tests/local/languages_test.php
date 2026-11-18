@@ -92,5 +92,20 @@ final class languages_test extends \advanced_testcase {
         $this->assertStringContainsString('C 13.3.0', $html);
         $this->assertStringContainsString('Pascal', $html);
         $this->assertStringContainsString('alert-warning', $html);
+        $this->assertStringNotContainsString(get_string('jobestatus_notused', 'tiny_codelab'), $html);
+        set_config('backend', backend::RUNNER, 'tiny_codelab');
+        $this->assertStringContainsString(get_string('jobestatus_notused', 'tiny_codelab'), languages::status_html());
+    }
+
+    public function test_no_jobe_is_only_information_with_a_runner(): void {
+        $this->resetAfterTest();
+        set_config('jobeserver', '', 'tiny_codelab');
+        set_config('runnerurl', '', 'tiny_codelab');
+        $this->assertStringContainsString('alert-warning', languages::status_html());
+        set_config('runnerurl', 'wss://runner.example.org', 'tiny_codelab');
+        set_config('runnersecret', 'my-secret-0123456789', 'tiny_codelab');
+        $html = languages::status_html();
+        $this->assertStringContainsString('alert-info', $html);
+        $this->assertStringContainsString(get_string('jobestatus_notset', 'tiny_codelab'), $html);
     }
 }

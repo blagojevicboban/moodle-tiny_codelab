@@ -99,7 +99,7 @@ class runner_client extends jobe {
         global $CFG;
         require_once($CFG->libdir . '/filelib.php');
         $curl = new \curl(['ignoresecurity' => true]);
-        $curl->setHeader(self::signature_headers('', null, false));
+        $curl->setHeader(self::signature_headers('', null, true));
         $health = preg_replace('~^ws~', 'http', interactive::url()) . '/health';
         $body = $curl->get($health, [], ['CURLOPT_TIMEOUT' => 5, 'CURLOPT_CONNECTTIMEOUT' => 3]);
         if ($curl->get_errno()) {

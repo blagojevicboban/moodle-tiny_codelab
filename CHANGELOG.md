@@ -1,5 +1,19 @@
 # Changelog
 
+## 1.13.1 (2026-11-18)
+
+- Hosted runner: the settings page showed no usage and the runner status had no version or sessions, because the
+  signed GET /usage and /health were sent without a nonce, which a hosted runner (CODELAB_REQUIRE_NONCE=1) refuses.
+  Both are now signed with a nonce (every runner since 0.6.0 accepts it), and a usage the hosted runner does not give
+  is shown with the reason instead of an empty box.
+- Settings page: the hosted runner comes first after the server choice, with its own heading for the Jobe server,
+  languages and editor below it. The runner status tells that the connection key is used (not the address, the
+  secret or CODELAB_SECRETS above). The Jobe status says when Jobe is not used (Server for running and grading:
+  CodeLab runner), and no Jobe server is only information when a runner runs the programs.
+- Texts that still spoke only of Jobe now name the server for running and grading: the Jobe server, the languages,
+  Python in the browser, the runner address and description, and the hosted runner (Automatic already uses it when
+  the Jobe server is empty). English, Serbian Latin and Cyrillic.
+
 ## 1.13.0 (2026-11-16)
 
 - Running and grading without Jobe: with CodeLab runner 0.8.0 the runner runs all eight languages and SQL to their

@@ -34,6 +34,8 @@ $ADMIN->add('editortiny', new admin_externalpage(
 ));
 
 if ($ADMIN->fulltree) {
+    // The servers are asked when this settings page is opened (not when the admin tree is built for other pages).
+    $refresh = optional_param('section', '', PARAM_ALPHANUMEXT) === $settings->name;
     $settings->add(new admin_setting_configselect(
         'tiny_codelab/backend',
         get_string('backend', 'tiny_codelab'),
@@ -51,6 +53,32 @@ if ($ADMIN->fulltree) {
         ['class' => 'btn btn-secondary']
     );
     $settings->add(new admin_setting_description('tiny_codelab/servertest', get_string('servertest', 'tiny_codelab'), $testlink));
+
+    // Hosted runner (optional), first after the server choice: for a school that uses one, it is the only setting.
+    // One connection key replaces the address and the secret of the runner.
+    $settings->add(new admin_setting_heading(
+        'tiny_codelab/cloudheading',
+        get_string('cloud', 'tiny_codelab'),
+        get_string('cloud_desc', 'tiny_codelab')
+    ));
+    $settings->add(new admin_setting_configpasswordunmask(
+        'tiny_codelab/cloudkey',
+        get_string('cloudkey', 'tiny_codelab'),
+        get_string('cloudkey_desc', 'tiny_codelab'),
+        ''
+    ));
+    $settings->add(new admin_setting_description(
+        'tiny_codelab/cloudstatus',
+        get_string('cloudstatus', 'tiny_codelab'),
+        $refresh ? \tiny_codelab\local\interactive::usage_html() : ''
+    ));
+
+    // Own Jobe server, the languages and the editor.
+    $settings->add(new admin_setting_heading(
+        'tiny_codelab/jobeheading',
+        get_string('jobeheading', 'tiny_codelab'),
+        ''
+    ));
     $settings->add(new admin_setting_configtext(
         'tiny_codelab/jobeserver',
         get_string('jobeserver', 'tiny_codelab'),
@@ -64,8 +92,7 @@ if ($ADMIN->fulltree) {
         get_string('jobeapikey_desc', 'tiny_codelab'),
         ''
     ));
-    // What the Jobe server answers: asked again when this settings page is opened, otherwise taken from the cache.
-    $refresh = optional_param('section', '', PARAM_ALPHANUMEXT) === $settings->name;
+    // What Jobe answers is taken from the cache, except on this page itself.
     $settings->add(new admin_setting_description(
         'tiny_codelab/jobestatus',
         get_string('jobestatus', 'tiny_codelab'),
@@ -146,23 +173,5 @@ if ($ADMIN->fulltree) {
         'tiny_codelab/runnerstatus',
         get_string('runnerstatus', 'tiny_codelab'),
         $refresh ? \tiny_codelab\local\interactive::status_html() : ''
-    ));
-
-    // Hosted runner (optional): one connection key replaces the runner address and secret.
-    $settings->add(new admin_setting_heading(
-        'tiny_codelab/cloudheading',
-        get_string('cloud', 'tiny_codelab'),
-        get_string('cloud_desc', 'tiny_codelab')
-    ));
-    $settings->add(new admin_setting_configpasswordunmask(
-        'tiny_codelab/cloudkey',
-        get_string('cloudkey', 'tiny_codelab'),
-        get_string('cloudkey_desc', 'tiny_codelab'),
-        ''
-    ));
-    $settings->add(new admin_setting_description(
-        'tiny_codelab/cloudstatus',
-        get_string('cloudstatus', 'tiny_codelab'),
-        $refresh ? \tiny_codelab\local\interactive::usage_html() : ''
     ));
 }
