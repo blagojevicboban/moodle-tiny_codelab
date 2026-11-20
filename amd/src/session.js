@@ -89,6 +89,7 @@ export class PythonSession {
         this.given = '';
         this.debug = new DebugPanel(vars, {step: () => this.step(), next: () => this.next(), out: () => this.out(),
             mark: (line) => this.editor.highlightLine(line), terminal: () => this.terminal,
+            values: (vars) => this.editor.setValues?.(vars),
             again: () => this.start(true, this.given), source: () => this.editor.getValue()});
         // Breakpoints set or removed while the program runs.
         this.editor.onBreakpointsChange?.((lines) => this.run?.setBreakpoints(lines.map((l) => l + this.offset)));

@@ -114,6 +114,7 @@ export class DebugPanel {
      * @param {function(): ?import('./terminal').Terminal} [actions.terminal] the console of the run
      * @param {function(): void} [actions.again] Step the program again with the same input
      * @param {function(): string} [actions.source] the code of the editor (its names in [...] are index markers)
+     * @param {function(?Object<string, string>): void} [actions.values] variables of the shown step, for the tooltips
      */
     constructor(root, actions) {
         this.root = root;
@@ -135,6 +136,7 @@ export class DebugPanel {
         this.stopAuto();
         this.showConsole(true);
         this.timeline.clear();
+        this.actions.values?.(null);
         this.view = -1;
         this.ended = false;
         this.root.replaceChildren();
@@ -369,6 +371,7 @@ export class DebugPanel {
         }
 
         const frame = stack[this.selected] || {func: '', vars: {}};
+        this.actions.values?.(frame.vars);
         const previous = this.selected === 0 && this.view < this.timeline.length ? this.timeline.varsAt(index - 1) : frame.vars;
         const vars = document.createElement('div');
         showVariables(vars, frame.vars, previous,

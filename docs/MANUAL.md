@@ -158,6 +158,10 @@ line.
 - Ctrl + mouse wheel, Ctrl + plus and Ctrl + minus make the code bigger or smaller (for example on a projector);
   Ctrl + 0 brings back the default size. All editors on the page follow, and your browser remembers the size.
 - Alt+Z turns word wrap on and off.
+- Rest the mouse on the code for a tooltip: what a keyword or an operator does, what each part of a printf or scanf
+  format means (for example `%5.2lf`), and a number in decimal, hexadecimal, binary and octal. While you follow a
+  program with **Step**, the tooltip of a variable shows its value at the shown step. A block or question without
+  typing help shows only the values.
 - Your changes to an example on a page stay in your browser; **Restore original** brings back the code of the page.
 - **Full screen** shows the editor and the console over the whole screen; Esc goes back.
 

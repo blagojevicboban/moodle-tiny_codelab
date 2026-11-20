@@ -99,6 +99,7 @@ export class RemoteSession {
         this.given = '';
         this.debug = vars ? new DebugPanel(vars, {step: () => this.step(), next: () => this.next(), out: () => this.out(),
             mark: (line) => this.editor?.highlightLine(line), terminal: () => this.terminal,
+            values: (vars) => this.editor?.setValues?.(vars),
             again: () => this.start(true, this.given), source: () => this.editor?.getValue() ?? ''}) : null;
         // Breakpoints set or removed while the program runs.
         editor?.onBreakpointsChange?.((lines) => this.send({type: 'breakpoints', lines: lines.map((l) => l + this.offset)}));

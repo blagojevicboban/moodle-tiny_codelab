@@ -25,6 +25,7 @@
  */
 import {languages, defaultLanguage} from './common';
 import {registerAssist} from './intellisense';
+import {registerHover} from './hover';
 
 const LINE_HEIGHT = 19;
 const PADDING = 8;
@@ -176,7 +177,6 @@ const NO_ASSIST = {
     suggestOnTriggerCharacters: false,
     wordBasedSuggestions: 'off',
     parameterHints: {enabled: false},
-    hover: {enabled: false},
     snippetSuggestions: 'none',
     acceptSuggestionOnEnter: 'off',
 };
@@ -192,6 +192,7 @@ const NO_ASSIST = {
  * @property {function(boolean): void} setReadOnly
  * @property {function(function(string): void): void} onChange
  * @property {function(?number): void} highlightLine mark the line that runs next (null: none)
+ * @property {function(?Object<string, string>): void} setValues variables of the shown step for the tooltips (null: none)
  * @property {function(): void} focus
  * @property {function(?number): void} setFixedHeight a fixed height in pixels (full screen), or null to grow with the code
  * @property {function(): number[]} getBreakpoints lines with a breakpoint (options.breakpoints)
@@ -239,6 +240,7 @@ export const createEditor = async(container, options = {}) => {
     if (!options.noassist) {
         registerAssist(monaco, options.pyodide || '');
     }
+    registerHover(monaco);
     const lang = Object.prototype.hasOwnProperty.call(languages, options.lang) ? options.lang : defaultLanguage;
     const theme = resolveTheme(options.theme || 'auto');
     win.document.body.className = `theme-${theme}`;
@@ -257,6 +259,7 @@ export const createEditor = async(container, options = {}) => {
         stickyScroll: {enabled: true, maxLineCount: 3},
         bracketPairColorization: {enabled: true},
         guides: {bracketPairs: 'active', indentation: true},
+        hover: {delay: 500},
         lineNumbersMinChars: 3,
         glyphMargin: !!options.breakpoints,
         tabSize: 4,
@@ -267,6 +270,11 @@ export const createEditor = async(container, options = {}) => {
         padding: {top: PADDING / 2, bottom: PADDING / 2},
     }, options.noassist ? NO_ASSIST : {}));
 
+    // What the tooltips show (tiny_codelab/hover): help and numbers with typing help, values while stepping.
+    editor.getModel().codelab = {help: !options.noassist, values: null};
+    editor.onDidChangeModelContent(() => {
+        editor.getModel().codelab.values = null;
+    });
     if (options.noassist) {
         // Ctrl+Space would still open the list of suggestions. Monaco combines keys with a bitwise or.
         // eslint-disable-next-line no-bitwise
@@ -362,6 +370,9 @@ export const createEditor = async(container, options = {}) => {
             if (line) {
                 editor.revealLineInCenterIfOutsideViewport(line);
             }
+        },
+        setValues: (values) => {
+            editor.getModel().codelab.values = values || null;
         },
         setValue: (value) => editor.setValue(value),
         setLanguage: (value) => monaco.editor.setModelLanguage(editor.getModel(), languages[value] || languages[defaultLanguage]),

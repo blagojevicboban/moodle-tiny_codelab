@@ -8,6 +8,15 @@
 - Alt+Z turns word wrap on and off, as in Visual Studio Code; remembered like the zoom.
 - Sticky scroll (the lines of the enclosing function and loop stay on top while scrolling), coloured bracket pairs and
   a guide line for the brackets around the cursor.
+- Tooltips in the code editor, when the mouse rests on the code:
+  - while a program is followed step by step, the value of a variable at the shown step (also when an older step is
+    shown with Step back);
+  - help for beginners on keywords (for, while, int, double, def, range ...), operators (= and ==, %, &&, ++, &, / between
+    whole numbers, // and ** in Python) and on every part of a printf / scanf format such as %5.2lf (width, precision,
+    & in scanf, %lf for double);
+  - whole numbers in decimal, hexadecimal, binary and octal, and the code of a character such as 'A'.
+  Help and numbers follow the typing help: a block or question without typing help shows only the values of a step.
+  The texts are in English, Serbian Latin and Serbian Cyrillic.
 - The filter and the question type use this editor, so they get all of it with this version.
 
 ## 1.13.2 (2026-11-20)
