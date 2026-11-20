@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.13.2 (2026-11-20)
+
+- Output panel: the text has its own dark colour on the light panel. Before, it took the colour of the page around the
+  block, so a block on a dark part of a page (white text) printed white text on a light grey panel. The input line of
+  an interactive program takes the colour of the panel too.
+- No emoji in the block labels: the label above a block reads CodeLab and the language, and the stdin label has no
+  keyboard sign.
+
 ## 1.13.1 (2026-11-18)
 
 - Hosted runner: the settings page showed no usage and the runner status had no version or sessions, because the

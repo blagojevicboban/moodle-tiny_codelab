@@ -16,7 +16,7 @@ Jobe client.
 
 > Status: **stable** (1.5.0).
 
-> 🌐 **Live demo:** [codelab.tsp.edu.rs](https://codelab.tsp.edu.rs) (look around as a guest, or use `teacher` / `student` with password `Demo-2026`; reset every night)
+> **Live demo:** [codelab.tsp.edu.rs](https://codelab.tsp.edu.rs) (look around as a guest, or use `teacher` / `student` with password `Demo-2026`; reset every night)
 
 ## Features
 

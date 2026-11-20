@@ -30,7 +30,7 @@ pre.codelab:hover {
 /* Header bar on top of the code card */
 .mce-content-body pre.codelab::before,
 pre.codelab::before {
-    content: "🚀 CodeLab";
+    content: "CodeLab";
     position: absolute;
     top: 0;
     left: 0;
@@ -49,47 +49,47 @@ pre.codelab::before {
 
 .mce-content-body pre.codelab.codelab-lang-c::before,
 pre.codelab.codelab-lang-c::before {
-    content: "🚀 CodeLab • C";
+    content: "CodeLab • C";
 }
 
 .mce-content-body pre.codelab.codelab-lang-cpp::before,
 pre.codelab.codelab-lang-cpp::before {
-    content: "🚀 CodeLab • C++";
+    content: "CodeLab • C++";
 }
 
 .mce-content-body pre.codelab.codelab-lang-python::before,
 pre.codelab.codelab-lang-python::before {
-    content: "🚀 CodeLab • Python";
+    content: "CodeLab • Python";
 }
 
 .mce-content-body pre.codelab.codelab-lang-java::before,
 pre.codelab.codelab-lang-java::before {
-    content: "🚀 CodeLab • Java";
+    content: "CodeLab • Java";
 }
 
 .mce-content-body pre.codelab.codelab-lang-csharp::before,
 pre.codelab.codelab-lang-csharp::before {
-    content: "🚀 CodeLab • C#";
+    content: "CodeLab • C#";
 }
 
 .mce-content-body pre.codelab.codelab-lang-javascript::before,
 pre.codelab.codelab-lang-javascript::before {
-    content: "🚀 CodeLab • JavaScript";
+    content: "CodeLab • JavaScript";
 }
 
 .mce-content-body pre.codelab.codelab-lang-pascal::before,
 pre.codelab.codelab-lang-pascal::before {
-    content: "🚀 CodeLab • Pascal";
+    content: "CodeLab • Pascal";
 }
 
 .mce-content-body pre.codelab.codelab-lang-php::before,
 pre.codelab.codelab-lang-php::before {
-    content: "🚀 CodeLab • PHP";
+    content: "CodeLab • PHP";
 }
 
 .mce-content-body pre.codelab.codelab-lang-mysql::before,
 pre.codelab.codelab-lang-mysql::before {
-    content: "🚀 CodeLab • SQL (MySQL)";
+    content: "CodeLab • SQL (MySQL)";
 }
 
 .mce-content-body pre.codelab.codelab-run::after,
@@ -126,7 +126,7 @@ pre.codelab-stdin {
 
 .mce-content-body pre.codelab-stdin::before,
 pre.codelab-stdin::before {
-    content: "⌨ Standard Input (stdin):";
+    content: "Standard Input (stdin):";
     display: block;
     font-weight: 600;
     margin-bottom: .25rem;
