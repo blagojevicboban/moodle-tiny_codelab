@@ -155,6 +155,9 @@ line.
 - Ctrl+Space offers completion (statements, functions, variables); while you type a function call, its parameters are
   shown.
 - Ctrl+Enter runs the program.
+- Ctrl + mouse wheel, Ctrl + plus and Ctrl + minus make the code bigger or smaller (for example on a projector);
+  Ctrl + 0 brings back the default size. All editors on the page follow, and your browser remembers the size.
+- Alt+Z turns word wrap on and off.
 - Your changes to an example on a page stay in your browser; **Restore original** brings back the code of the page.
 - **Full screen** shows the editor and the console over the whole screen; Esc goes back.
 

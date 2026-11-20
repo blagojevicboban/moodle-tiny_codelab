@@ -21,6 +21,7 @@ Jobe client.
 ## Features
 
 - **Code editor** with syntax highlighting, line numbers, brackets and search, as in VS Code.
+  Zoom with Ctrl + mouse wheel or Ctrl + plus / minus, word wrap with Alt+Z, sticky scroll and coloured bracket pairs.
 - **VS Code Themes**: Light (`vs`), Dark (`vs-dark`), High Contrast Dark (`hc-black`), and Auto detection.
 - **Modern IDE Cards**: Clean card formatting in the TinyMCE editor with language badges and Run indicators.
 - **Typing help** for every language:

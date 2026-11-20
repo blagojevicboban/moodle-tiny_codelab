@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.13.3 (2026-11-20)
+
+- Zoom in the code editor: Ctrl + mouse wheel (or a touchpad pinch), Ctrl + plus, Ctrl + minus and Ctrl + 0 for the
+  default size. The block grows with the text, all editors on the page follow, and the browser remembers the size.
+  The browser no longer zooms the whole page when Ctrl + wheel is used over an editor.
+- Alt+Z turns word wrap on and off, as in Visual Studio Code; remembered like the zoom.
+- Sticky scroll (the lines of the enclosing function and loop stay on top while scrolling), coloured bracket pairs and
+  a guide line for the brackets around the cursor.
+- The filter and the question type use this editor, so they get all of it with this version.
+
 ## 1.13.2 (2026-11-20)
 
 - Output panel: the text has its own dark colour on the light panel. Before, it took the colour of the page around the

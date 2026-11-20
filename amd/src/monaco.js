@@ -28,6 +28,84 @@ import {registerAssist} from './intellisense';
 
 const LINE_HEIGHT = 19;
 const PADDING = 8;
+const FONT_SIZE = 14;
+
+/** Font sizes of the zoom steps (Ctrl + mouse wheel, Ctrl + plus / minus, Ctrl + 0 for the default). */
+const ZOOM_SIZES = [10, 11, 12, 13, 14, 16, 18, 20, 22, 24, 28, 32];
+const STORE_ZOOM = 'tiny_codelab_zoom';
+const STORE_WRAP = 'tiny_codelab_wrap';
+
+/**
+ * Read a remembered value of this browser (private windows can refuse the storage).
+ *
+ * @param {string} key
+ * @returns {?string}
+ */
+const recall = (key) => {
+    try {
+        return window.localStorage.getItem(key);
+    } catch (e) {
+        return null;
+    }
+};
+
+/**
+ * Remember a value in this browser.
+ *
+ * @param {string} key
+ * @param {string} value
+ */
+const remember = (key, value) => {
+    try {
+        window.localStorage.setItem(key, value);
+    } catch (e) {
+        // Nothing to do: the setting only lasts until the page is left.
+    }
+};
+
+/**
+ * Editor settings that every editor on the page shares: zoom and word wrap.
+ *
+ * @type {{fontSize: number, wrap: boolean, editors: Set<function(): void>}}
+ */
+const shared = {
+    fontSize: ZOOM_SIZES.includes(Number(recall(STORE_ZOOM))) ? Number(recall(STORE_ZOOM)) : FONT_SIZE,
+    wrap: recall(STORE_WRAP) === '1',
+    editors: new Set(),
+};
+
+/**
+ * Line height that goes with a font size.
+ *
+ * @param {number} fontSize
+ * @returns {number}
+ */
+const lineHeightFor = (fontSize) => Math.round(fontSize * LINE_HEIGHT / FONT_SIZE);
+
+/**
+ * Change the font size of all editors on the page by some zoom steps, or back to the default (0).
+ *
+ * @param {number} steps
+ */
+const zoom = (steps) => {
+    const index = ZOOM_SIZES.indexOf(shared.fontSize);
+    const next = steps === 0 ? FONT_SIZE : ZOOM_SIZES[Math.min(Math.max(index + steps, 0), ZOOM_SIZES.length - 1)];
+    if (next === shared.fontSize) {
+        return;
+    }
+    shared.fontSize = next;
+    remember(STORE_ZOOM, String(next));
+    shared.editors.forEach((update) => update());
+};
+
+/**
+ * Turn word wrap on or off in all editors on the page.
+ */
+const toggleWrap = () => {
+    shared.wrap = !shared.wrap;
+    remember(STORE_WRAP, shared.wrap ? '1' : '0');
+    shared.editors.forEach((update) => update());
+};
 
 /**
  * Address of the frame page; jsrev makes browsers load a new copy after an upgrade.
@@ -150,7 +228,8 @@ export const createEditor = async(container, options = {}) => {
     frame.style.width = '100%';
     frame.style.border = '0';
     frame.style.display = 'block';
-    frame.style.height = `${Math.min(Math.max(lines, minLines), maxLines) * LINE_HEIGHT + PADDING}px`;
+    let lineHeight = lineHeightFor(shared.fontSize);
+    frame.style.height = `${Math.min(Math.max(lines, minLines), maxLines) * lineHeight + PADDING}px`;
     const ready = frameReady(frame);
     frame.src = frameUrl();
     container.appendChild(frame);
@@ -171,8 +250,13 @@ export const createEditor = async(container, options = {}) => {
         automaticLayout: true,
         minimap: {enabled: false},
         scrollBeyondLastLine: false,
-        fontSize: 14,
-        lineHeight: LINE_HEIGHT,
+        fontSize: shared.fontSize,
+        lineHeight,
+        wordWrap: shared.wrap ? 'on' : 'off',
+        mouseWheelZoom: false,
+        stickyScroll: {enabled: true, maxLineCount: 3},
+        bracketPairColorization: {enabled: true},
+        guides: {bracketPairs: 'active', indentation: true},
         lineNumbersMinChars: 3,
         glyphMargin: !!options.breakpoints,
         tabSize: 4,
@@ -192,14 +276,37 @@ export const createEditor = async(container, options = {}) => {
         // eslint-disable-next-line no-bitwise
         editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, options.onRun);
     }
+    // Zoom: Ctrl + plus / minus / 0 (also on the number pad) and Ctrl + mouse wheel (a touchpad pinch sends the same).
+    // Monaco combines keys with a bitwise or.
+    /* eslint-disable no-bitwise */
+    const ctrl = monaco.KeyMod.CtrlCmd;
+    const keys = monaco.KeyCode;
+    [[keys.Equal, 1], [keys.NumpadAdd, 1], [keys.Minus, -1], [keys.NumpadSubtract, -1], [keys.Digit0, 0], [keys.Numpad0, 0]]
+        .forEach(([key, steps]) => editor.addCommand(ctrl | key, () => zoom(steps)));
+    // Alt+Z turns word wrap on and off, as in Visual Studio Code.
+    editor.addCommand(monaco.KeyMod.Alt | keys.KeyZ, toggleWrap);
+    /* eslint-enable no-bitwise */
+    const onWheel = (e) => {
+        if (!e.ctrlKey && !e.metaKey) {
+            return;
+        }
+        // Without this the browser would zoom the whole page.
+        e.preventDefault();
+        e.stopPropagation();
+        if (e.deltaY) {
+            zoom(e.deltaY < 0 ? 1 : -1);
+        }
+    };
+    win.addEventListener('wheel', onWheel, {capture: true, passive: false});
+
     let fixedHeight = null;
     let normalHeight = frame.style.height;
     const resize = () => {
         if (fixedHeight !== null) {
             frame.style.height = `${fixedHeight}px`;
         } else if (options.autoHeight !== false) {
-            const height = Math.min(Math.max(editor.getContentHeight(), minLines * LINE_HEIGHT + PADDING),
-                maxLines * LINE_HEIGHT + PADDING);
+            const height = Math.min(Math.max(editor.getContentHeight(), minLines * lineHeight + PADDING),
+                maxLines * lineHeight + PADDING);
             frame.style.height = `${height}px`;
         } else {
             frame.style.height = normalHeight;
@@ -209,6 +316,18 @@ export const createEditor = async(container, options = {}) => {
         editor.onDidContentSizeChange(resize);
         resize();
     }
+    const applyShared = () => {
+        const previous = lineHeight;
+        lineHeight = lineHeightFor(shared.fontSize);
+        if (fixedHeight === null && options.autoHeight === false) {
+            // A block of a fixed number of lines keeps its number of lines.
+            const height = parseFloat(normalHeight) || 0;
+            normalHeight = `${Math.round((height - PADDING) * lineHeight / previous) + PADDING}px`;
+        }
+        editor.updateOptions({fontSize: shared.fontSize, lineHeight, wordWrap: shared.wrap ? 'on' : 'off'});
+        resize();
+    };
+    shared.editors.add(applyShared);
 
     const current = editor.createDecorationsCollection();
 
@@ -264,6 +383,8 @@ export const createEditor = async(container, options = {}) => {
             resize();
         },
         dispose: () => {
+            shared.editors.delete(applyShared);
+            win.removeEventListener('wheel', onWheel, {capture: true});
             editor.dispose();
             frame.remove();
         },
