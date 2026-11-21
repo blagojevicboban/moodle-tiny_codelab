@@ -391,6 +391,19 @@ const el = (tag, className, text) => {
     return e;
 };
 
+/**
+ * An SVG element with attributes.
+ *
+ * @param {string} tag
+ * @param {Object<string, string|number>} [attrs]
+ * @returns {SVGElement}
+ */
+const svgEl = (tag, attrs = {}) => {
+    const e = document.createElementNS('http://www.w3.org/2000/svg', tag);
+    Object.entries(attrs).forEach(([name, value]) => e.setAttribute(name, String(value)));
+    return e;
+};
+
 export class MemoryView {
     /**
      * The view in an element.
@@ -552,7 +565,12 @@ export class MemoryView {
             return;
         }
         const base = this.box.getBoundingClientRect();
-        const lines = [];
+        const head = svgEl('marker', {id: 'tiny_codelab-mem-head', viewBox: '0 0 8 8', refX: 7, refY: 4, markerWidth: 7,
+            markerHeight: 7, orient: 'auto'});
+        head.append(svgEl('path', {d: 'M0,0 L8,4 L0,8 z'}));
+        const defs = svgEl('defs');
+        defs.append(head);
+        const lines = [defs];
         this.box.querySelectorAll('.tiny_codelab-mem-ptr').forEach((dot) => {
             const target = this.box.querySelector(`.tiny_codelab-mem-object[data-id="${CSS.escape(dot.dataset.target)}"]`);
             if (!target || !dot.offsetParent) {
@@ -566,14 +584,12 @@ export class MemoryView {
             const x2 = (toLeft ? b.left : b.right) - base.left;
             const y2 = b.top + 12 - base.top;
             const bend = Math.max(24, Math.abs(x2 - x1) / 2) * (toLeft ? 1 : -1);
-            lines.push(`<path d="M${x1},${y1} C${x1 + bend},${y1} ${x2 - bend},${y2} ${x2},${y2}" ` +
-                'marker-end="url(#tiny_codelab-mem-head)"/>' +
-                `<circle cx="${x1}" cy="${y1}" r="3"/>`);
+            lines.push(svgEl('path', {d: `M${x1},${y1} C${x1 + bend},${y1} ${x2 - bend},${y2} ${x2},${y2}`,
+                'marker-end': 'url(#tiny_codelab-mem-head)'}), svgEl('circle', {cx: x1, cy: y1, r: 3}));
         });
         this.svg.setAttribute('width', String(this.box.scrollWidth));
         this.svg.setAttribute('height', String(this.box.scrollHeight));
-        this.svg.innerHTML = '<defs><marker id="tiny_codelab-mem-head" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" ' +
-            'markerHeight="7" orient="auto"><path d="M0,0 L8,4 L0,8 z"/></marker></defs>' + lines.join('');
+        this.svg.replaceChildren(...lines);
     }
 
     /**

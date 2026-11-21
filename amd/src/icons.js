@@ -40,10 +40,18 @@ const PATHS = {
  * @returns {HTMLButtonElement} the button
  */
 export const setIcon = (button, name, label) => {
-    const fill = name === 'theme' ? ' fill="currentColor" fill-opacity=".35"' : ' fill="none"';
-    button.innerHTML = '<svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" focusable="false">' +
-        `<path d="${PATHS[name]}"${fill} stroke="currentColor" stroke-width="1.6" stroke-linecap="round" ` +
-        'stroke-linejoin="round"/></svg>';
+    const NS = 'http://www.w3.org/2000/svg';
+    const svg = document.createElementNS(NS, 'svg');
+    const path = document.createElementNS(NS, 'path');
+    const attrs = [[svg, {viewBox: '0 0 16 16', width: '14', height: '14', 'aria-hidden': 'true', focusable: 'false'}],
+        [path, {d: PATHS[name], fill: name === 'theme' ? 'currentColor' : 'none', stroke: 'currentColor', 'stroke-width': '1.6',
+            'stroke-linecap': 'round', 'stroke-linejoin': 'round'}]];
+    attrs.forEach(([e, list]) => Object.entries(list).forEach(([k, v]) => e.setAttribute(k, v)));
+    if (name === 'theme') {
+        path.setAttribute('fill-opacity', '.35');
+    }
+    svg.append(path);
+    button.replaceChildren(svg);
     button.title = label;
     button.setAttribute('aria-label', label);
     button.classList.add('tiny_codelab-icon-button');

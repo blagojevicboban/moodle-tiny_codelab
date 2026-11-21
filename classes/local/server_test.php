@@ -119,40 +119,35 @@ class server_test {
      */
     public static function benchmark(jobe $client, string $lang, int $count): array {
         $comment = $lang === 'python' ? '#' : '//';
-        $multi = curl_multi_init();
-        $handles = [];
+        // Moodle's HTTP client keeps the proxy settings and the blocked hosts of the site; the runs go out together.
+        // As in runner_client, the CodeLab runner may sit on a local address that the site's blocked hosts list stops.
+        $http = new \core\http_client(['http_errors' => false, 'timeout' => 120, 'connect_timeout' => 10,
+            'ignoresecurity' => $client instanceof runner_client]);
+        $times = [];
+        $promises = [];
         for ($i = 0; $i < $count; $i++) {
             $code = self::SAMPLES[$lang] . "$comment benchmark " . random_string(8) . " $i\n";
             $request = $client->request($lang, $code, "21\n");
-            $handle = curl_init($request['url']);
-            curl_setopt_array($handle, [
-                CURLOPT_POST => true,
-                CURLOPT_POSTFIELDS => $request['body'],
-                CURLOPT_HTTPHEADER => $request['headers'],
-                CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_TIMEOUT => 120,
-                CURLOPT_CONNECTTIMEOUT => 10,
+            $promises[] = $http->postAsync($request['url'], [
+                'headers' => self::header_map($request['headers']),
+                'body' => $request['body'],
+                'on_stats' => function (\GuzzleHttp\TransferStats $stats) use (&$times): void {
+                    $times[] = (int) round(($stats->getTransferTime() ?? 0) * 1000);
+                },
             ]);
-            curl_multi_add_handle($multi, $handle);
-            $handles[] = $handle;
         }
         $start = microtime(true);
-        do {
-            $status = curl_multi_exec($multi, $running);
-            if ($running) {
-                curl_multi_select($multi, 1.0);
-            }
-        } while ($running && $status === CURLM_OK);
+        $results = \GuzzleHttp\Promise\Utils::settle($promises)->wait();
         $seconds = microtime(true) - $start;
-        $times = [];
         $right = 0;
-        foreach ($handles as $handle) {
-            $times[] = (int) round(curl_getinfo($handle, CURLINFO_TOTAL_TIME) * 1000);
-            $run = $client->parse((int) curl_getinfo($handle, CURLINFO_HTTP_CODE), (string) curl_multi_getcontent($handle));
+        foreach ($results as $result) {
+            if ($result['state'] !== 'fulfilled') {
+                continue;
+            }
+            $response = $result['value'];
+            $run = $client->parse($response->getStatusCode(), (string) $response->getBody());
             $right += $run['status'] === 'ok' && strpos($run['stdout'], '42') !== false ? 1 : 0;
-            curl_multi_remove_handle($multi, $handle);
         }
-        curl_multi_close($multi);
         sort($times);
         return [
             'runs' => $count,
@@ -163,6 +158,21 @@ class server_test {
             'slowest' => end($times) ?: 0,
             'perminute' => $seconds > 0 ? (int) round($right / $seconds * 60) : 0,
         ];
+    }
+
+    /**
+     * Turn header lines (Name: value) into the map that the HTTP client takes.
+     *
+     * @param string[] $lines
+     * @return array name => value
+     */
+    public static function header_map(array $lines): array {
+        $headers = [];
+        foreach ($lines as $line) {
+            [$name, $value] = array_pad(explode(':', $line, 2), 2, '');
+            $headers[trim($name)] = trim($value);
+        }
+        return $headers;
     }
 
     /**

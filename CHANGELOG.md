@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.13.4 (2026-11-21)
+
+Fixes for the Moodle Plugins review:
+
+- The speed test on the page Test the servers sends its runs through Moodle's HTTP client instead of calling curl
+  directly, so the proxy settings of the site apply (#2).
+- The arrows of the memory view and the icons of the toolbar are built as SVG elements, not from HTML strings (#3).
+- The description says who provides the optional hosted runner, that it is a paid plan and where to ask for a key (#4).
+
 ## 1.13.3 (2026-11-20)
 
 - Zoom in the code editor: Ctrl + mouse wheel (or a touchpad pinch), Ctrl + plus, Ctrl + minus and Ctrl + 0 for the
