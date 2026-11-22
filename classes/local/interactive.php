@@ -153,13 +153,12 @@ class interactive {
      * @return string
      */
     public static function status_html(): string {
-        global $CFG, $OUTPUT;
+        global $OUTPUT;
         $url = self::url();
         if ($url === '') {
             return $OUTPUT->notification(get_string('runnerstatus_notset', 'tiny_codelab'), 'info', false);
         }
-        require_once($CFG->libdir . '/filelib.php');
-        $curl = new \curl(['ignoresecurity' => true]);
+        $curl = runner_client::curl();
         // Signed (with a nonce, which a hosted runner requires), so that the server also tells its version and load.
         $curl->setHeader(runner_client::signature_headers('', null, true));
         $health = preg_replace('~^ws~', 'http', $url) . '/health';
@@ -184,7 +183,7 @@ class interactive {
      * @return string
      */
     public static function usage_html(): string {
-        global $CFG, $OUTPUT;
+        global $OUTPUT;
         if (trim((string) get_config('tiny_codelab', 'cloudkey')) !== '' && self::cloud_config() === null) {
             return $OUTPUT->notification(get_string('cloudkeyinvalid', 'tiny_codelab'), 'warning', false);
         }
@@ -192,8 +191,7 @@ class interactive {
         if ($url === '') {
             return '';
         }
-        require_once($CFG->libdir . '/filelib.php');
-        $curl = new \curl(['ignoresecurity' => true]);
+        $curl = runner_client::curl();
         $curl->setHeader(runner_client::signature_headers('', null, true));
         $usageurl = preg_replace('~^ws~', 'http', $url) . '/usage';
         $body = $curl->get($usageurl, [], ['CURLOPT_TIMEOUT' => 5, 'CURLOPT_CONNECTTIMEOUT' => 3]);

@@ -62,6 +62,21 @@ class runner_client extends jobe {
     }
 
     /**
+     * Moodle's curl for a request to the runner, without the checks of the site's blocked hosts and ports.
+     *
+     * The runner is often on a private address or on localhost (beside Moodle or Jobe), which curl_security_helper
+     * blocks by default. Its address comes only from the plugin settings, which only the site administrator can change,
+     * never from a teacher or a student; every request to it is signed with the shared secret.
+     *
+     * @return \curl
+     */
+    public static function curl(): \curl {
+        global $CFG;
+        require_once($CFG->libdir . '/filelib.php');
+        return new \curl(['ignoresecurity' => true]);
+    }
+
+    /**
      * The headers of a signed request: the site, the time, a nonce (the server takes each request once) and
      * base64url(HMAC-SHA256(secret, time + "\n" + nonce + "\n" + body)); without the nonce, of time + "\n" + body
      * (runners older than 0.6.0).
@@ -96,9 +111,7 @@ class runner_client extends jobe {
         if (!$this->is_configured()) {
             return ['ok' => false, 'versions' => [], 'error' => ''];
         }
-        global $CFG;
-        require_once($CFG->libdir . '/filelib.php');
-        $curl = new \curl(['ignoresecurity' => true]);
+        $curl = self::curl();
         $curl->setHeader(self::signature_headers('', null, true));
         $health = preg_replace('~^ws~', 'http', interactive::url()) . '/health';
         $body = $curl->get($health, [], ['CURLOPT_TIMEOUT' => 5, 'CURLOPT_CONNECTTIMEOUT' => 3]);
@@ -131,7 +144,7 @@ class runner_client extends jobe {
      * @return array code (HTTP), data (decoded answer or null), error (of the connection, '' when none)
      */
     protected function post_run(string $url, string $body, bool $nonce): array {
-        $curl = new \curl(['ignoresecurity' => true]);
+        $curl = self::curl();
         $curl->setHeader(self::signature_headers($body, null, $nonce));
         // The runner may keep a run waiting for a place (30 s), then it runs up to three times its CPU time.
         $response = $curl->post($url, $body, ['CURLOPT_TIMEOUT' => 45 + 3 * $this->cputime, 'CURLOPT_CONNECTTIMEOUT' => 10]);
