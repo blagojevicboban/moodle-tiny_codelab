@@ -65,15 +65,18 @@ switched off with `setRecording(false)` while a page loads, so loading never sho
 1. Intro card and the runner options card (`cards/codelab-card.html#intro`, `#runners`, `#admin`, `#outro`)
 2. Login as `teacher` / `Demo-2026` (the public demo account) and the section "Features one by one" of the course
    "CodeLab: demo (English)"
-3. Admin page with the servers (page 15), the quiz and question editing (the quiz of the section, page 14)
-4. Class view (13), interactive input (2), languages (3), debugger (5), step back and timeline (6), memory view (7),
-   complexity (8), flowchart bridge (9), SQL (10), then the auto-graded quiz again
+3. Admin page with the servers (page 15), the quiz and question editing (the quiz of the section, page 14), the
+   template library of the CodeLab dialog (in the settings form of the page "Turtle graphics", nothing is saved)
+4. Class view (13), interactive input (2), languages (3), turtle graphics (page "Turtle graphics"), debugger (5), step
+   back and timeline (6), memory view (7), call tree (page "Call tree: recursion"), complexity (8), flowchart bridge
+   (9), SQL (10), then the auto-graded quiz again
 5. Outro card, held as long as needed so that the reel ends exactly with the music (`TARGET_SEC`, default 132.05)
 
 Every demo reset restores the course with new ids, so the script never uses fixed ids: right after the login,
 `findDemoIds()` finds the course, the section and the pages by name, and `ids.pages[n]` is the page whose name starts
 with `n.` ("2. Run and input while the program runs"). Keep that numbering when you add pages to the demo course, and
-add new pages at the end so the numbers of the others do not change.
+add new pages at the end so the numbers of the others do not change. Pages of the other sections are found by the
+start of their name with `namedPage(ids, 'Turtle graphics')`.
 
 Code inside `b.eval()` runs in the page from a template literal, which drops single backslashes: write a regex
 there with doubled ones (`/^\\s*(\\d+)\\./`).
@@ -82,7 +85,8 @@ Helpers you will use when you change scenes:
 
 - `preparePage(id)`: opens a page, waits until the CodeLab editor is ready, hides the Moodle navigation so the viewer
   fills the frame.
-- `realClickBtn(label, idx)`: moves the cursor to the button with that text in the idx-th viewer on the page and clicks.
+- `realClickBtn(label, idx)`: moves the cursor to the button with that text in the idx-th viewer on the page and clicks
+  it (also in the second or third viewer of a page).
 - `b.moveTo(x, y, steps)`, `b.click(selector, text)`, `b.type(text)`, `b.waitFor(jsExpression, ms)`, `scrollDown(px)`:
   from `cdp.mjs`.
 - `gifRange.start = frames.length` and `gifRange.end = frames.length` mark which part goes into the GIF. GIF speed and
@@ -97,9 +101,8 @@ Captions and cards are English. Keep them short (one line at 1920 px), plain tex
 3. The total must stay under the music length: the script prints `Recorded N s of scenes`. Shorten other holds if N
    gets close to 128 s, since the outro needs at least 4 s.
 
-Now (November 2026, tiny_codelab 1.20) the scenes take about 102 s, so the outro card stays on screen for 30 s. There
-is room for three or four scenes of the newer features that the reel does not show yet: turtle graphics, the call
-tree, the template library and the AI hints.
+Now (November 2026, tiny_codelab 1.20) the scenes take about 122 s, so the outro card stays on screen for 10 s. The
+AI hints have no scene: the demo site has no AI provider, so the button is not there.
 4. Record, add the music, watch the whole video once, then send the MP4 and GIF (or upload them to the release) and
    tell Boban, who puts them on the Marketplace listing and YouTube.
 
