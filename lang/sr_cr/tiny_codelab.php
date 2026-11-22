@@ -253,6 +253,7 @@ $string['noassist'] = 'Без помоћи при куцању (за контр�
 $string['nooutput'] = '(програм није ништа исписао)';
 $string['novariables'] = '(још нема променљивих)';
 $string['output'] = 'Излаз';
+$string['outputannounce'] = 'Излаз: {$a}';
 $string['paused'] = 'Заустављено пре реда {$a}';
 $string['pluginname'] = 'CodeLab';
 $string['privacy:metadata:jobe'] = 'Програми се шаљу Jobe серверу који је подесио администратор, да се преведу и изврше. Сервер враћа излаз; у Moodle-у се ништа не чува.';

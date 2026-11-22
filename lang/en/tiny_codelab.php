@@ -253,6 +253,7 @@ $string['noassist'] = 'No typing help (for tests)';
 $string['nooutput'] = '(the program printed nothing)';
 $string['novariables'] = '(no variables yet)';
 $string['output'] = 'Output';
+$string['outputannounce'] = 'Output: {$a}';
 $string['paused'] = 'Paused before line {$a}';
 $string['pluginname'] = 'CodeLab';
 $string['privacy:metadata:jobe'] = 'Programs are sent to the Jobe server set by the administrator to be compiled and run. The server returns the output; nothing is kept in Moodle.';
