@@ -50,6 +50,9 @@ Jobe client.
   It needs a browser with JavaScript Promise Integration (Chrome and Edge 137+). Other browsers use Jobe.
 - **Default input** of an example: readers start from it.
 - Rate limit of runs per user, and a size limit of programs.
+- **Accessibility**: Windows high contrast, more contrast and reduced motion are followed by every panel; screen readers
+  hear the end of a run with the start of its output; the console, the trace table, the call tree and the memory view
+  can be scrolled with the keyboard.
 
 ## Markup
 
