@@ -91,6 +91,18 @@ final class interactive_test extends \advanced_testcase {
         \curl::mock_response(json_encode(['status' => 'busy', 'stdout' => '', 'stderr' => '', 'cmpinfo' => '']));
         $this->assertSame('busy', $client->run('python', 'print(1)')['status']);
 
+        // The time of the run (runner 0.9.0) is passed on; without it, or when it is not a number, the result has none.
+        \curl::mock_response(json_encode(['status' => 'ok', 'stdout' => '1', 'stderr' => '', 'cmpinfo' => '', 'time' => 0.125]));
+        $this->assertSame(0.125, $client->run('python', 'print(1)')['time']);
+        \curl::mock_response(json_encode(['status' => 'runtime', 'stdout' => '', 'stderr' => 'x', 'cmpinfo' => '', 'time' => 2]));
+        $this->assertSame(2.0, $client->run('python', 'print(1)')['time']);
+        \curl::mock_response(json_encode(['status' => 'ok', 'stdout' => '1', 'stderr' => '', 'cmpinfo' => '']));
+        $this->assertArrayNotHasKey('time', $client->run('python', 'print(1)'));
+        \curl::mock_response(json_encode(['status' => 'ok', 'stdout' => '1', 'stderr' => '', 'cmpinfo' => '', 'time' => 'fast']));
+        $this->assertArrayNotHasKey('time', $client->run('python', 'print(1)'));
+        $this->assertArrayNotHasKey('time', $client->parse(200, json_encode(['status' => 'ok', 'time' => -1])));
+        $this->assertSame(0.5, $client->parse(200, json_encode(['status' => 'ok', 'time' => 0.5]))['time']);
+
         // The languages and their versions from a signed /health (runner 0.8.0).
         \curl::mock_response(json_encode(['ok' => true, 'languages' => ['c', 'python', 'mysql', 'unknown'],
             'versions' => ['c' => '13.3.0', 'python' => '3.12.3']]));

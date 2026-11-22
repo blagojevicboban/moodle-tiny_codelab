@@ -161,7 +161,7 @@ class runner_client extends jobe {
      * @param string $lang
      * @param string $code
      * @param string $stdin
-     * @return array status, outcome, cmpinfo, stdout, stderr
+     * @return array status, outcome, cmpinfo, stdout, stderr, and time (seconds of the run) when the runner sends it
      */
     public function run(string $lang, string $code, string $stdin = ''): array {
         $result = ['status' => 'error', 'outcome' => 0, 'cmpinfo' => '', 'stdout' => '', 'stderr' => ''];
@@ -210,7 +210,7 @@ class runner_client extends jobe {
      *
      * @param int $httpcode
      * @param string $body
-     * @return array status, outcome, cmpinfo, stdout, stderr
+     * @return array status, outcome, cmpinfo, stdout, stderr, and time when the runner sends it
      */
     public function parse(int $httpcode, string $body): array {
         return self::parse_data($httpcode, json_decode($body, true));
@@ -221,7 +221,7 @@ class runner_client extends jobe {
      *
      * @param int $httpcode
      * @param mixed $data
-     * @return array status, outcome, cmpinfo, stdout, stderr
+     * @return array status, outcome, cmpinfo, stdout, stderr, and time when the runner sends it
      */
     protected static function parse_data(int $httpcode, $data): array {
         $result = ['status' => 'error', 'outcome' => 0, 'cmpinfo' => '', 'stdout' => '', 'stderr' => ''];
@@ -233,6 +233,12 @@ class runner_client extends jobe {
         }
         $statuses = ['ok', 'compile', 'runtime', 'time', 'memory', 'toolong', 'busy', 'quota', 'suspended', 'expired'];
         $result['status'] = in_array($data['status'], $statuses, true) ? $data['status'] : 'error';
+        // Runner 0.9.0 sends the seconds the program ran (wall time, without the compilation). Older runners and Jobe
+        // send none: then the result has no time key at all.
+        $time = $data['time'] ?? null;
+        if ((is_int($time) || is_float($time)) && $time >= 0) {
+            $result['time'] = round((float) $time, 3);
+        }
         return $result;
     }
 }
