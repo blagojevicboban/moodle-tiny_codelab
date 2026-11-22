@@ -24,6 +24,7 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+$string['addfile'] = 'Dodaj datoteko';
 $string['aihint'] = 'Pojasni napako (UI)';
 $string['aihintasking'] = 'Sprašujem umetno inteligenco...';
 $string['aihintfailed'] = 'Umetna inteligenca ni mogla odgovoriti: {$a}';
@@ -42,6 +43,7 @@ $string['backend_auto'] = 'Samodejno: Jobe, če je nastavljen, sicer CodeLab run
 $string['backend_desc'] = 'Kje se programi izvajajo do konca (Zaženi brez interaktivnega strežnika) in kje se ocenjujejo vprašanja. Samodejno uporabi Jobe, ko je njegov naslov nastavljen, in CodeLab runner, ko Jobe ni nastavljen ali ni dosegljiv. Interaktivna izvajanja, Korak in razhroščevalnik vedno uporabljajo CodeLab runner, SQL pa se izvaja samo tam.';
 $string['backend_jobe'] = 'Jobe';
 $string['backend_runner'] = 'CodeLab runner (Jobe ni potreben)';
+$string['badfilename'] = 'Ime datoteke ima črke, števke in _, z največ eno piko (input.txt), in največ 40 znakov.';
 $string['browserpython'] = 'Python v brskalniku';
 $string['browserpython_desc'] = 'Programi Python v primerih se izvajajo v bralčevem brskalniku (Pyodide): input() zahteva vnos med izvajanjem programa, Korak pa prikaže program vrstico za vrstico z njegovimi spremenljivkami. Ocene v kvizih še vedno daje strežnik za izvajanje in ocenjevanje. Potreben je brskalnik z JavaScript Promise Integration (Chrome, Edge 137+); drugi brskalniki izvajajo programe na tem strežniku.';
 $string['button'] = 'CodeLab';
@@ -95,6 +97,15 @@ $string['editedcopy'] = 'Vaše spremembe so shranjene v tem brskalniku.';
 $string['editorlabel'] = 'Koda programa';
 $string['endinput'] = 'Konec vnosa (Ctrl+D)';
 $string['exitfullscreen'] = 'Zapri celozaslonski način';
+$string['filecut'] = 'Prikazanih je le prvih {$a} znakov.';
+$string['filelines'] = '{$a->name} (vrstic: {$a->lines})';
+$string['filename'] = 'Ime';
+$string['files'] = 'Datoteke';
+$string['filesafter'] = 'Datoteke po zagonu';
+$string['filescount'] = 'Datoteke ({$a})';
+$string['filesnote'] = 'Datoteke za zdaj uporablja le Python v brskalniku.';
+$string['filetext'] = 'Besedilo datoteke {$a}';
+$string['filetoolarge'] = 'Datoteka {$a} je večja od 64 KB.';
 $string['flowchart'] = 'Diagram poteka';
 $string['flowchartfailed'] = 'Diagrama poteka ni bilo mogoče narediti: {$a}';
 $string['flowchartwarnings'] = 'Vrstice, ki niso narisane kot bloki (postale so komentarji): {$a}';
@@ -269,6 +280,7 @@ $string['pyodideurl'] = 'Naslov Pyodide';
 $string['pyodideurl_desc'] = 'Mapa z datotekami Pyodide (pyodide.mjs in ostale). Prazno: {$a} (jsDelivr; bralčev brskalnik jih tedaj naloži od tam). Kopija na vašem strežniku prepreči, da bi brskalniki bralcev dostopali do drugih strežnikov.';
 $string['ratelimit'] = 'Izvajanja na minuto';
 $string['ratelimit_desc'] = 'Kolikokrat sme en uporabnik zagnati programe v eni minuti (0: brez omejitve).';
+$string['removefile'] = 'Odstrani';
 $string['reset'] = 'Obnovi izvirnik';
 $string['run'] = 'Zaženi';
 $string['runnable'] = 'Bralci ga lahko zaženejo';
@@ -287,6 +299,7 @@ $string['runnerurl_desc'] = 'Naslov WebSocket, na primer wss://runner.example.or
 $string['running'] = 'Izvajanje…';
 $string['running_browser'] = 'Izvajanje v vašem brskalniku…';
 $string['running_server'] = 'Izvajanje: spodaj vtipkajte vhod in pritisnite Enter.';
+$string['samefilename'] = 'Dve datoteki imata ime {$a}.';
 $string['servertest'] = 'Preizkusi strežnike';
 $string['servertest_answers'] = 'Strežnik se odziva ({$a} ms).';
 $string['servertest_backend'] = 'Strežnik za izvajanje in ocenjevanje: {$a}.';

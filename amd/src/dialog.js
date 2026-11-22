@@ -25,9 +25,9 @@ import ModalEvents from 'core/modal_events';
 import Templates from 'core/templates';
 import {getString, getStrings} from 'core/str';
 import {getContextId} from 'editor_tiny/options';
-import {component, languages, defaultLanguage, setupLanguages, defaultTheme} from './common';
+import {component, languages, defaultLanguage, setupLanguages, defaultTheme, MAX_FILES, filesProblem} from './common';
 import {TEMPLATE_KEYS, templatesFor} from './codetemplates';
-import {readBlock, blockHtml, isBlock, stdinOf, setupOf, newBlockId} from './embed';
+import {readBlock, blockHtml, isBlock, stdinOf, setupOf, filesOf, newBlockId} from './embed';
 import {createEditor} from './monaco';
 import {run} from './runner';
 import {showRunning, showResult, showError} from './console';
@@ -106,6 +106,66 @@ export const openDialog = async(editor) => {
     };
     showSetup();
 
+    // Files the program reads (Python in the browser for now): a name and a text per file, at most MAX_FILES.
+    const fileStrings = await getStrings(['filename', 'filetext', 'removefile', 'filescount'].map((key) => ({key, component})));
+    const [fileNameLabel, fileTextLabel, removeLabel, countLabel] = fileStrings;
+    const fileRows = () => [...region('files').querySelectorAll('.tiny_codelab-file')];
+    const files = () => fileRows().map((row) => ({name: row.querySelector('input').value.trim(),
+        text: row.querySelector('textarea').value})).filter((f) => f.name !== '' || f.text !== '');
+    const showFiles = () => {
+        const count = fileRows().length;
+        region('filessummary').textContent = countLabel.replace('{$a}', count);
+        root.querySelector('[data-action="addfile"]').disabled = count >= MAX_FILES;
+        region('filesnote').hidden = langSelect.value === 'python' || count === 0;
+    };
+    const addFile = (file) => {
+        const n = ++counter;
+        const row = document.createElement('div');
+        row.className = 'tiny_codelab-file border rounded p-2 mb-2';
+        const head = document.createElement('div');
+        head.className = 'd-flex align-items-center gap-2 mb-1';
+        const label = document.createElement('label');
+        label.className = 'mb-0';
+        label.htmlFor = `${uniqid}-file${n}`;
+        label.textContent = fileNameLabel;
+        const name = document.createElement('input');
+        name.type = 'text';
+        name.id = label.htmlFor;
+        name.className = 'form-control form-control-sm font-monospace w-auto';
+        name.maxLength = 40;
+        name.spellcheck = false;
+        name.value = file.name;
+        const remove = document.createElement('button');
+        remove.type = 'button';
+        remove.className = 'btn btn-outline-danger btn-sm ms-auto';
+        remove.textContent = removeLabel;
+        remove.addEventListener('click', () => {
+            row.remove();
+            showFiles();
+            root.querySelector('[data-action="addfile"]').focus();
+        });
+        head.append(label, name, remove);
+        const text = document.createElement('textarea');
+        text.className = 'form-control font-monospace';
+        text.rows = 4;
+        text.spellcheck = false;
+        text.value = file.text;
+        const textName = () => text.setAttribute('aria-label', fileTextLabel.replace('{$a}', name.value.trim()));
+        textName();
+        name.addEventListener('input', textName);
+        row.append(head, text);
+        region('files').append(row);
+        showFiles();
+        return name;
+    };
+    (block.files || []).forEach(addFile);
+    region('filesfield').open = (block.files || []).length > 0;
+    root.querySelector('[data-action="addfile"]').addEventListener('click', () => {
+        if (fileRows().length < MAX_FILES) {
+            addFile({name: fileRows().length ? '' : 'input.txt', text: ''}).focus();
+        }
+    });
+
     const runButton = root.querySelector('[data-action="run"]');
     const stepButton = root.querySelector('[data-action="step"]');
     const stopButton = root.querySelector('[data-action="stop"]');
@@ -172,6 +232,7 @@ export const openDialog = async(editor) => {
         panel,
         vars: region('vars'),
         onState,
+        files,
     });
     remoteSession = new RemoteSession({
         lang: () => langSelect.value,
@@ -229,6 +290,7 @@ export const openDialog = async(editor) => {
         showPythonButtons();
         showSetup();
         showTemplates();
+        showFiles();
     });
     themeSelect.addEventListener('change', () => {
         code.setTheme(themeSelect.value);
@@ -256,7 +318,16 @@ export const openDialog = async(editor) => {
         remoteSession.stop();
         code.dispose();
     });
-    modal.getRoot().on(ModalEvents.save, () => {
+    modal.getRoot().on(ModalEvents.save, async(e) => {
+        // A file the block cannot keep: the dialog stays open and says why.
+        const problem = filesProblem(files());
+        if (problem) {
+            e.preventDefault();
+            region('filesfield').open = true;
+            region('fileerror').hidden = false;
+            region('fileerror').textContent = await getString(problem.key, component, problem.a);
+            return;
+        }
         const html = blockHtml({
             // A block keeps its id; a new or older block gets one, so the readers' copies stay with it when it moves.
             id: block.id || newBlockId(),
@@ -267,9 +338,10 @@ export const openDialog = async(editor) => {
             code: code.getValue(),
             stdin: region('stdin').value,
             setup: setupLanguages.includes(langSelect.value) ? region('setup').value : '',
+            files: files(),
         });
         if (existing) {
-            for (const old of [stdinOf(existing), setupOf(existing)]) {
+            for (const old of [stdinOf(existing), setupOf(existing), ...filesOf(existing).map((f) => f.element)]) {
                 if (old) {
                     editor.dom.remove(old);
                 }

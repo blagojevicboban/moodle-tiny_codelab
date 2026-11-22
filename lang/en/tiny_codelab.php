@@ -24,6 +24,7 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+$string['addfile'] = 'Add file';
 $string['aihint'] = 'Explain the error (AI)';
 $string['aihintasking'] = 'Asking the AI...';
 $string['aihintfailed'] = 'The AI could not answer: {$a}';
@@ -42,6 +43,7 @@ $string['backend_auto'] = 'Automatic: Jobe when it is set, otherwise the CodeLab
 $string['backend_desc'] = 'Where programs run to their end (Run without the interactive server) and where questions are graded. Automatic uses Jobe when its address is set, and the CodeLab runner when Jobe is not set or cannot be reached. Interactive runs, Step and the debugger always use the CodeLab runner, and SQL runs only there.';
 $string['backend_jobe'] = 'Jobe';
 $string['backend_runner'] = 'CodeLab runner (no Jobe needed)';
+$string['badfilename'] = 'A file name has letters, digits and _, with at most one dot (input.txt), and at most 40 characters.';
 $string['browserpython'] = 'Python in the browser';
 $string['browserpython_desc'] = 'Python programs of examples run in the reader\'s browser (Pyodide): input() asks for the input while the program runs, and Step shows the program line by line with its variables. Quiz grades still come from the server for running and grading. Needs a browser with JavaScript Promise Integration (Chrome, Edge 137+); other browsers run the programs on that server.';
 $string['button'] = 'CodeLab';
@@ -95,6 +97,15 @@ $string['editedcopy'] = 'Your changes are kept in this browser.';
 $string['editorlabel'] = 'Program code';
 $string['endinput'] = 'End of input (Ctrl+D)';
 $string['exitfullscreen'] = 'Exit full screen';
+$string['filecut'] = 'Only the first {$a} characters are shown.';
+$string['filelines'] = '{$a->name} ({$a->lines} lines)';
+$string['filename'] = 'Name';
+$string['files'] = 'Files';
+$string['filesafter'] = 'Files after the run';
+$string['filescount'] = 'Files ({$a})';
+$string['filesnote'] = 'Files are used only by Python in the browser for now.';
+$string['filetext'] = 'Text of {$a}';
+$string['filetoolarge'] = 'The file {$a} is larger than 64 KB.';
 $string['flowchart'] = 'Flowchart';
 $string['flowchartfailed'] = 'The flowchart could not be made: {$a}';
 $string['flowchartwarnings'] = 'Lines that are not drawn as blocks (they became comments): {$a}';
@@ -269,6 +280,7 @@ $string['pyodideurl'] = 'Address of Pyodide';
 $string['pyodideurl_desc'] = 'Folder with the Pyodide files (pyodide.mjs and the rest). Empty: {$a} (jsDelivr; the reader\'s browser then loads them from there). A copy on your own server keeps the readers\' browsers off other servers.';
 $string['ratelimit'] = 'Runs per minute';
 $string['ratelimit_desc'] = 'How many times one user may run programs in a minute (0: no limit).';
+$string['removefile'] = 'Remove';
 $string['reset'] = 'Restore original';
 $string['run'] = 'Run';
 $string['runnable'] = 'Readers can run it';
@@ -287,6 +299,7 @@ $string['runnerurl_desc'] = 'WebSocket address, for example wss://runner.example
 $string['running'] = 'Running…';
 $string['running_browser'] = 'Running in your browser…';
 $string['running_server'] = 'Running: type the input below and press Enter.';
+$string['samefilename'] = 'Two files have the name {$a}.';
 $string['servertest'] = 'Test the servers';
 $string['servertest_answers'] = 'The server answers ({$a} ms).';
 $string['servertest_backend'] = 'Server for running and grading: {$a}.';

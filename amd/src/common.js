@@ -37,6 +37,74 @@ export const stdinClass = 'codelab-stdin';
 /** Hidden code run before the block (the tables and data of SQL): <pre class="codelab-setup"> right after the block. */
 export const setupClass = 'codelab-setup';
 
+/**
+ * Files of a block (read by a Python program in the browser): <pre class="codelab-file codelab-file-input-txt"> after
+ * the block and its input, one per file. The name is in a class, because Moodle's cleaning removes data-* attributes:
+ * a name has no hyphen, so the hyphen in the class stands for the dot.
+ */
+export const fileClass = 'codelab-file';
+export const filePrefix = 'codelab-file-';
+/** At most this many files per block. */
+export const MAX_FILES = 5;
+/** At most this many characters per file. */
+export const MAX_FILE_SIZE = 65536;
+
+/**
+ * Whether a file name can be kept in a class: letters, digits and _, with at most one dot (input.txt, my_data.csv,
+ * data), at most 40 characters, no folders.
+ *
+ * @param {string} name
+ * @returns {boolean}
+ */
+export const validFileName = (name) => typeof name === 'string' && name.length <= 40 &&
+    /^[A-Za-z0-9_]+(\.[A-Za-z0-9_]+)?$/.test(name);
+
+/**
+ * The class of a file name: input.txt is codelab-file-input-txt.
+ *
+ * @param {string} name a valid name (see validFileName)
+ * @returns {string}
+ */
+export const fileClassOf = (name) => filePrefix + name.replace('.', '-');
+
+/**
+ * The file name of a class, or null when the class is not the name of a file.
+ *
+ * @param {string} className
+ * @returns {?string}
+ */
+export const fileNameOf = (className) => {
+    if (!className.startsWith(filePrefix)) {
+        return null;
+    }
+    const name = className.slice(filePrefix.length).replace('-', '.');
+    return validFileName(name) && fileClassOf(name) === className ? name : null;
+};
+
+/**
+ * What is wrong with the files of the dialog, or null: a name that cannot be kept in a class, a name used twice, a file
+ * that is too large. Empty rows (no name and no text) are left out when the block is saved.
+ *
+ * @param {Array<{name: string, text: string}>} files
+ * @returns {?{key: string, a?: string}} a string of tiny_codelab with its parameter
+ */
+export const filesProblem = (files) => {
+    const seen = new Set();
+    for (const file of files) {
+        if (!validFileName(file.name)) {
+            return {key: 'badfilename'};
+        }
+        if (seen.has(file.name)) {
+            return {key: 'samefilename', a: file.name};
+        }
+        seen.add(file.name);
+        if (file.text.length > MAX_FILE_SIZE) {
+            return {key: 'filetoolarge', a: file.name};
+        }
+    }
+    return null;
+};
+
 /** Supported Monaco themes. */
 export const themes = {
     auto: 'auto',

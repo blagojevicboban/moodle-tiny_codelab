@@ -24,6 +24,7 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+$string['addfile'] = 'Додај фајл';
 $string['aihint'] = 'Објасни грешку (AI)';
 $string['aihintasking'] = 'Питам AI...';
 $string['aihintfailed'] = 'AI није могао да одговори: {$a}';
@@ -42,6 +43,7 @@ $string['backend_auto'] = 'Аутоматски: Jobe када је подеше
 $string['backend_desc'] = 'Где се програми извршавају до краја (Покрени без интерактивног сервера) и где се оцењују питања. Аутоматски користи Jobe када је његова адреса подешена, а CodeLab runner када Jobe није подешен или не одговара. Интерактивно покретање, Корак и дебагер увек користе CodeLab runner, а SQL ради само на њему.';
 $string['backend_jobe'] = 'Jobe';
 $string['backend_runner'] = 'CodeLab runner (Jobe није потребан)';
+$string['badfilename'] = 'Име фајла има слова, цифре и _, са највише једном тачком (input.txt), и највише 40 знакова.';
 $string['browserpython'] = 'Python у прегледачу';
 $string['browserpython_desc'] = 'Python програми примера извршавају се у прегледачу читаоца (Pyodide): input() тражи улаз док програм ради, а Корак приказује програм ред по ред са променљивим. Оцене у квизу и даље даје сервер за извршавање и оцењивање. Потребан је прегледач са JavaScript Promise Integration (Chrome, Edge 137+); остали прегледачи извршавају програме на том серверу.';
 $string['button'] = 'CodeLab';
@@ -95,6 +97,15 @@ $string['editedcopy'] = 'Ваше измене се чувају у овом п�
 $string['editorlabel'] = 'Код програма';
 $string['endinput'] = 'Крај уноса (Ctrl+D)';
 $string['exitfullscreen'] = 'Изађи из целог екрана';
+$string['filecut'] = 'Приказано је само првих {$a} знакова.';
+$string['filelines'] = '{$a->name} (редова: {$a->lines})';
+$string['filename'] = 'Име';
+$string['files'] = 'Фајлови';
+$string['filesafter'] = 'Фајлови после покретања';
+$string['filescount'] = 'Фајлови ({$a})';
+$string['filesnote'] = 'Фајлове за сада користи само Python у прегледачу.';
+$string['filetext'] = 'Текст фајла {$a}';
+$string['filetoolarge'] = 'Фајл {$a} је већи од 64 KB.';
 $string['flowchart'] = 'Дијаграм тока';
 $string['flowchartfailed'] = 'Дијаграм тока није могао да се направи: {$a}';
 $string['flowchartwarnings'] = 'Линије које нису нацртане као блокови (постале су коментари): {$a}';
@@ -269,6 +280,7 @@ $string['pyodideurl'] = 'Адреса Pyodide-а';
 $string['pyodideurl_desc'] = 'Фолдер са Pyodide фајловима (pyodide.mjs и остали). Празно: {$a} (jsDelivr; прегледач читаоца их тада учитава одатле). Копија на вашем серверу чува прегледаче читалаца од других сервера.';
 $string['ratelimit'] = 'Покретања у минути';
 $string['ratelimit_desc'] = 'Колико пута један корисник може да покрене програме у минути (0: без ограничења).';
+$string['removefile'] = 'Уклони';
 $string['reset'] = 'Врати оригинал';
 $string['run'] = 'Покрени';
 $string['runnable'] = 'Читаоци могу да га покрену';
@@ -287,6 +299,7 @@ $string['runnerurl_desc'] = 'WebSocket адреса, на пример wss://run
 $string['running'] = 'Извршава се…';
 $string['running_browser'] = 'Извршава се у вашем прегледачу…';
 $string['running_server'] = 'Програм ради: укуцајте улаз испод и притисните Enter.';
+$string['samefilename'] = 'Два фајла имају име {$a}.';
 $string['servertest'] = 'Провера сервера';
 $string['servertest_answers'] = 'Сервер одговара ({$a} ms).';
 $string['servertest_backend'] = 'Сервер за извршавање и оцењивање: {$a}.';

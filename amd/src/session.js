@@ -30,7 +30,7 @@ import {DebugPanel} from './debugpanel';
 import {TurtleView} from './turtle';
 
 const KEYS = ['loadingpython', 'running_browser', 'paused', 'status_ok', 'status_runtime', 'status_stopped',
-    'status_toolong', 'inputline', 'inputok', 'turtle', 'turtlelimit'];
+    'status_toolong', 'inputline', 'inputok', 'turtle', 'turtlelimit', 'filesafter', 'filelines', 'filecut'];
 let strings = null;
 
 /**
@@ -44,6 +44,47 @@ const loadStrings = async() => {
         strings = Object.fromEntries(KEYS.map((key, i) => [key, values[i]]));
     }
     return strings;
+};
+
+/**
+ * Number of lines of a text, as a reader counts them (a new line at the end does not start another line).
+ *
+ * @param {string} text
+ * @returns {number}
+ */
+export const lineCount = (text) => (text === '' ? 0 : text.replace(/\n$/, '').split('\n').length);
+
+/**
+ * The files a run made or changed, under the console: each name with its number of lines, its text shown on a click.
+ *
+ * @param {Object<string, string>} s strings
+ * @param {Array<{name: string, text: string, size: number}>} files
+ * @returns {HTMLElement}
+ */
+export const filesAfterRun = (s, files) => {
+    const box = document.createElement('div');
+    box.className = 'tiny_codelab-files-after mt-2';
+    const title = document.createElement('div');
+    title.className = 'fw-bold';
+    title.textContent = s.filesafter;
+    box.append(title);
+    for (const file of files) {
+        const details = document.createElement('details');
+        const summary = document.createElement('summary');
+        summary.textContent = s.filelines.replace('{$a->name}', file.name).replace('{$a->lines}', lineCount(file.text));
+        const pre = document.createElement('pre');
+        pre.className = 'mb-1';
+        pre.textContent = file.text;
+        details.append(summary, pre);
+        if (file.size > file.text.length) {
+            const cut = document.createElement('div');
+            cut.className = 'small';
+            cut.textContent = s.filecut.replace('{$a}', file.text.length);
+            details.append(cut);
+        }
+        box.append(details);
+    }
+    return box;
 };
 
 /**
@@ -74,9 +115,12 @@ export class PythonSession {
      * @param {function(): string} [options.program] the whole program (default: the code of the editor)
      * @param {number} [options.offset] lines of hidden code before the editor's code in the program; Step passes over
      *     the hidden lines and marks the editor's lines
+     * @param {function(): Array<{name: string, text: string}>} [options.files] the files put in the working folder before
+     *     each run (tiny_codelab 1.22)
      */
-    constructor({base, editor, panel, vars, onState, program = null, offset = 0}) {
+    constructor({base, editor, panel, vars, onState, program = null, offset = 0, files = null}) {
         this.base = base;
+        this.files = files || (() => []);
         this.editor = editor;
         this.program = program || (() => editor.getValue());
         this.offset = offset;
@@ -131,6 +175,11 @@ export class PythonSession {
             onLoading: () => terminal.setStatus(s.loadingpython, 'running'),
             onStarted: () => terminal.setStatus(s.running_browser, 'running'),
             onOutput: (text, stream) => terminal.write(text, stream),
+            onFiles: (files) => {
+                if (files.length) {
+                    this.panel.append(filesAfterRun(s, files));
+                }
+            },
             onTurtle: (events) => {
                 if (!turtle) {
                     turtle = new TurtleView(s);
@@ -177,7 +226,7 @@ export class PythonSession {
                 this.setState('idle');
                 this.debug.finish();
             },
-        }, step, breakpoints);
+        }, step, breakpoints, this.files());
     }
 
     /**

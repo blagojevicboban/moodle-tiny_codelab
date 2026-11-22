@@ -25,6 +25,7 @@
  */
 
 import {TURTLE_PY} from './turtle';
+import {MAX_FILE_SIZE} from './common';
 
 /** Most characters of output passed on; then the program is stopped (an endless print would freeze the page). */
 const MAX_OUTPUT = 200000;
@@ -260,7 +261,20 @@ let pyodide = null;
 let pendingLine = null;
 let pendingStep = null;
 let written = 0;
+let given = null;
 const decoder = new TextDecoder();
+// After a run: the files it made or changed, also after an error (a program may write a file and then fail).
+const postFiles = () => {
+    if (!pyodide || !given) {
+        return;
+    }
+    try {
+        postMessage({type: 'files', files: changedFiles(given)});
+    } catch (err) {
+        postMessage({type: 'files', files: []});
+    }
+    given = null;
+};
 // Step by step: mode step (every line), next (not deeper than refDepth), out (above refDepth), continue (only at
 // breakpoints).
 let breakpoints = new Set();
@@ -291,6 +305,39 @@ const writer = (stream) => ({
         return buffer.length;
     },
 });
+// Files of the block in the working folder: emptied first, so a run does not see the files of the run before.
+const putFiles = (files) => {
+    const FS = pyodide.FS;
+    const cwd = FS.cwd();
+    for (const name of FS.readdir(cwd)) {
+        if (name !== '.' && name !== '..' && FS.isFile(FS.stat(cwd + '/' + name).mode)) {
+            FS.unlink(cwd + '/' + name);
+        }
+    }
+    const given = {};
+    for (const file of files || []) {
+        FS.writeFile(cwd + '/' + file.name, file.text);
+        given[file.name] = file.text;
+    }
+    return given;
+};
+// The files the program made or changed (as text, at most ${MAX_FILE_SIZE} characters each, at most 20).
+const changedFiles = (given) => {
+    const FS = pyodide.FS;
+    const cwd = FS.cwd();
+    const out = [];
+    for (const name of FS.readdir(cwd).sort()) {
+        const path = cwd + '/' + name;
+        if (name === '.' || name === '..' || !FS.isFile(FS.stat(path).mode) || out.length >= 20) {
+            continue;
+        }
+        const text = FS.readFile(path, {encoding: 'utf8'});
+        if (given[name] !== text) {
+            out.push({name, text: text.slice(0, ${MAX_FILE_SIZE}), size: text.length});
+        }
+    }
+    return out;
+};
 onmessage = async(e) => {
     const m = e.data;
     if (m.type === 'line' && pendingLine) {
@@ -337,10 +384,13 @@ onmessage = async(e) => {
             pyodide.globals.set('__codelab_turtle_src', TURTLE);
             // The tracer slows the program down: only when it may stop.
             pyodide.globals.set('__codelab_step', m.step || breakpoints.size > 0);
+            given = putFiles(m.files);
             postMessage({type: 'started'});
             const status = await pyodide.runPythonAsync(HARNESS + '\\n__codelab_run(__codelab_code, __codelab_step)');
+            postFiles();
             postMessage({type: 'done', status: status === undefined ? 'ok' : String(status)});
         } catch (err) {
+            postFiles();
             postMessage({type: 'done', status: 'error', message: String(err && err.message || err)});
         }
     }
@@ -385,6 +435,8 @@ const stopWorker = () => {
  * @property {function(number, string, Object<string, string>, Array, Object, ?string): void} [onLine] Step: line,
  *     function, variables, the call stack (frames of the program, innermost first: func, line, vars, refs), the heap of
  *     the memory view (tiny_codelab/memview) and, at a stop right after a return, the value returned (for the call tree)
+ * @property {function(Array<{name: string, text: string, size: number}>): void} [onFiles] after the run, before onDone:
+ *     the files the program made or changed in its working folder (text cut at MAX_FILE_SIZE; size is the whole length)
  * @property {function({status: string, message?: string}): void} onDone status ok, error, stopped or toolong
  */
 
@@ -396,10 +448,11 @@ const stopWorker = () => {
  * @param {PythonHandlers} handlers
  * @param {boolean} step stop before the first line
  * @param {number[]} [breakpoints] lines to stop at
+ * @param {Array<{name: string, text: string}>} [files] files put in the working folder before the run
  * @returns {{sendInput: function(string): void, resume: function(string): void, setBreakpoints: function(number[]): void,
  *     stop: function(): void}} resume with step, next, out or continue
  */
-export const runPython = (base, code, handlers, step = false, breakpoints = []) => {
+export const runPython = (base, code, handlers, step = false, breakpoints = [], files = []) => {
     // A program still running is stopped; an idle worker keeps Pyodide loaded for the next run.
     if (current) {
         stopWorker();
@@ -436,6 +489,8 @@ export const runPython = (base, code, handlers, step = false, breakpoints = []) 
             handlers.onLine(m.line, m.scope, JSON.parse(m.vars), memory.frames, memory.heap, memory.ret);
         } else if (m.type === 'turtle') {
             handlers.onTurtle?.(JSON.parse(m.events));
+        } else if (m.type === 'files') {
+            handlers.onFiles?.(m.files);
         } else if (m.type === 'toolong') {
             toolong = true;
         } else if (m.type === 'done') {
@@ -443,7 +498,7 @@ export const runPython = (base, code, handlers, step = false, breakpoints = []) 
             handlers.onDone(toolong ? {status: 'toolong'} : {status: m.status, message: m.message});
         }
     };
-    own.postMessage({type: 'run', code, step, breakpoints});
+    own.postMessage({type: 'run', code, step, breakpoints, files});
     return {
         sendInput: (text) => own.postMessage({type: 'line', text}),
         resume: (mode) => own.postMessage({type: 'resume', mode}),

@@ -24,6 +24,7 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+$string['addfile'] = 'Přidat soubor';
 $string['aihint'] = 'Vysvětlit chybu (AI)';
 $string['aihintasking'] = 'Ptám se AI...';
 $string['aihintfailed'] = 'AI nemohla odpovědět: {$a}';
@@ -42,6 +43,7 @@ $string['backend_auto'] = 'Automaticky: Jobe, pokud je nastaven, jinak CodeLab r
 $string['backend_desc'] = 'Kde programy běží až do konce (Spustit bez interaktivního serveru) a kde se hodnotí otázky. Automaticky použije Jobe, když je nastavena jeho adresa, a CodeLab runner, když Jobe není nastaven nebo není dosažitelný. Interaktivní spuštění, Krok a ladicí program vždy používají CodeLab runner a SQL běží jen tam.';
 $string['backend_jobe'] = 'Jobe';
 $string['backend_runner'] = 'CodeLab runner (bez Jobe)';
+$string['badfilename'] = 'Název souboru má písmena, číslice a _, s nejvýše jednou tečkou (input.txt), a nejvýše 40 znaků.';
 $string['browserpython'] = 'Python v prohlížeči';
 $string['browserpython_desc'] = 'Programy v Pythonu v příkladech běží v prohlížeči čtenáře (Pyodide): input() žádá o vstup během běhu programu a Krok ukazuje program řádek po řádku s jeho proměnnými. Známky v testech dál dává server pro spouštění a hodnocení. Vyžaduje prohlížeč s JavaScript Promise Integration (Chrome, Edge 137+); ostatní prohlížeče spouštějí programy na tomto serveru.';
 $string['button'] = 'CodeLab';
@@ -95,6 +97,15 @@ $string['editedcopy'] = 'Vaše změny se uchovávají v tomto prohlížeči.';
 $string['editorlabel'] = 'Kód programu';
 $string['endinput'] = 'Konec vstupu (Ctrl+D)';
 $string['exitfullscreen'] = 'Ukončit celou obrazovku';
+$string['filecut'] = 'Zobrazeno je jen prvních {$a} znaků.';
+$string['filelines'] = '{$a->name} (řádků: {$a->lines})';
+$string['filename'] = 'Název';
+$string['files'] = 'Soubory';
+$string['filesafter'] = 'Soubory po spuštění';
+$string['filescount'] = 'Soubory ({$a})';
+$string['filesnote'] = 'Soubory zatím používá jen Python v prohlížeči.';
+$string['filetext'] = 'Text souboru {$a}';
+$string['filetoolarge'] = 'Soubor {$a} je větší než 64 KB.';
 $string['flowchart'] = 'Vývojový diagram';
 $string['flowchartfailed'] = 'Vývojový diagram se nepodařilo vytvořit: {$a}';
 $string['flowchartwarnings'] = 'Řádky, které nejsou nakresleny jako bloky (staly se komentáři): {$a}';
@@ -269,6 +280,7 @@ $string['pyodideurl'] = 'Adresa Pyodide';
 $string['pyodideurl_desc'] = 'Složka se soubory Pyodide (pyodide.mjs a ostatní). Prázdné: {$a} (jsDelivr; prohlížeč čtenáře je pak načítá odtud). Kopie na vašem vlastním serveru zajistí, že se prohlížeče čtenářů nepřipojují k jiným serverům.';
 $string['ratelimit'] = 'Spuštění za minutu';
 $string['ratelimit_desc'] = 'Kolikrát smí jeden uživatel spustit programy za minutu (0: bez omezení).';
+$string['removefile'] = 'Odebrat';
 $string['reset'] = 'Obnovit původní';
 $string['run'] = 'Spustit';
 $string['runnable'] = 'Čtenáři ho mohou spustit';
@@ -287,6 +299,7 @@ $string['runnerurl_desc'] = 'Adresa WebSocket, například wss://runner.example.
 $string['running'] = 'Běží…';
 $string['running_browser'] = 'Běží ve vašem prohlížeči…';
 $string['running_server'] = 'Běží: napište vstup níže a stiskněte Enter.';
+$string['samefilename'] = 'Dva soubory mají název {$a}.';
 $string['servertest'] = 'Otestovat servery';
 $string['servertest_answers'] = 'Server odpovídá ({$a} ms).';
 $string['servertest_backend'] = 'Server pro spouštění a hodnocení: {$a}.';

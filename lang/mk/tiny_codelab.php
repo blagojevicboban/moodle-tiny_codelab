@@ -24,6 +24,7 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+$string['addfile'] = 'Додај датотека';
 $string['aihint'] = 'Објасни ја грешката (ВИ)';
 $string['aihintasking'] = 'Се прашува вештачката интелигенција...';
 $string['aihintfailed'] = 'Вештачката интелигенција не можеше да одговори: {$a}';
@@ -42,6 +43,7 @@ $string['backend_auto'] = 'Автоматски: Jobe кога е поставе
 $string['backend_desc'] = 'Каде програмите се извршуваат до крај (Изврши без интерактивниот сервер) и каде се оценуваат прашањата. Автоматски го користи Jobe кога неговата адреса е поставена, а CodeLab runner кога Jobe не е поставен или не е достапен. Интерактивните извршувања, Чекор и дебагерот секогаш го користат CodeLab runner, а SQL се извршува само таму.';
 $string['backend_jobe'] = 'Jobe';
 $string['backend_runner'] = 'CodeLab runner (без Jobe)';
+$string['badfilename'] = 'Името на датотеката има букви, цифри и _, со најмногу една точка (input.txt), и најмногу 40 знаци.';
 $string['browserpython'] = 'Python во прелистувачот';
 $string['browserpython_desc'] = 'Python програмите од примерите се извршуваат во прелистувачот на читателот (Pyodide): input() бара влез додека програмата работи, а Чекор ја прикажува програмата ред по ред со нејзините променливи. Оценките во квизовите и понатаму ги дава серверот за извршување и оценување. Потребен е прелистувач со JavaScript Promise Integration (Chrome, Edge 137+); другите прелистувачи ги извршуваат програмите на тој сервер.';
 $string['button'] = 'CodeLab';
@@ -95,6 +97,15 @@ $string['editedcopy'] = 'Вашите промени се чуваат во ов
 $string['editorlabel'] = 'Код на програмата';
 $string['endinput'] = 'Крај на влезот (Ctrl+D)';
 $string['exitfullscreen'] = 'Излези од цел екран';
+$string['filecut'] = 'Прикажани се само првите {$a} знаци.';
+$string['filelines'] = '{$a->name} (редови: {$a->lines})';
+$string['filename'] = 'Име';
+$string['files'] = 'Датотеки';
+$string['filesafter'] = 'Датотеки по извршувањето';
+$string['filescount'] = 'Датотеки ({$a})';
+$string['filesnote'] = 'Датотеките засега ги користи само Python во прелистувачот.';
+$string['filetext'] = 'Текст на {$a}';
+$string['filetoolarge'] = 'Датотеката {$a} е поголема од 64 KB.';
 $string['flowchart'] = 'Дијаграм на тек';
 $string['flowchartfailed'] = 'Дијаграмот на тек не можеше да се направи: {$a}';
 $string['flowchartwarnings'] = 'Редови што не се нацртани како блокови (станаа коментари): {$a}';
@@ -269,6 +280,7 @@ $string['pyodideurl'] = 'Адреса на Pyodide';
 $string['pyodideurl_desc'] = 'Папка со датотеките на Pyodide (pyodide.mjs и останатите). Празно: {$a} (jsDelivr; прелистувачот на читателот тогаш ги вчитува оттаму). Копија на вашиот сервер ги држи прелистувачите на читателите подалеку од други сервери.';
 $string['ratelimit'] = 'Извршувања во минута';
 $string['ratelimit_desc'] = 'Колку пати еден корисник смее да извршува програми во една минута (0: без ограничување).';
+$string['removefile'] = 'Отстрани';
 $string['reset'] = 'Врати го оригиналот';
 $string['run'] = 'Изврши';
 $string['runnable'] = 'Читателите можат да ја извршат';
@@ -287,6 +299,7 @@ $string['runnerurl_desc'] = 'WebSocket адреса, на пример wss://run
 $string['running'] = 'Се извршува…';
 $string['running_browser'] = 'Се извршува во вашиот прелистувач…';
 $string['running_server'] = 'Се извршува: напишете го влезот подолу и притиснете Enter.';
+$string['samefilename'] = 'Две датотеки го имаат името {$a}.';
 $string['servertest'] = 'Тестирај ги серверите';
 $string['servertest_answers'] = 'Серверот одговара ({$a} ms).';
 $string['servertest_backend'] = 'Сервер за извршување и оценување: {$a}.';
