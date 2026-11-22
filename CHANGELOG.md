@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.20.0 (2026-11-22)
+
+- Accessibility: in Windows high contrast the console, the debugger, the memory view, the call tree, the trace table,
+  the AI explanation and the complexity panel follow the system colours, and what only a colour showed (changed
+  variables, the current step, repeated calls, the bars of an array) gets a border or a dashed line. More contrast and
+  reduced motion are followed too; with reduced motion the turtle draws at once.
+- Screen readers hear the end of a run with the start of its output, instead of every line while it is written. The
+  console of the dialog, the trace table and the memory view can be reached and scrolled with the keyboard.
+- The requests to the CodeLab runner (health, grading, status and usage) all go through one helper, so a runner on a
+  private address or localhost works the same for each of them.
+- README: MySQL (MariaDB) is listed among the languages.
+
 ## 1.19.0 (2026-11-22)
 
 - AI explanations of errors in quizzes: allowed only for a CodeLab question of that quiz with the option AI
