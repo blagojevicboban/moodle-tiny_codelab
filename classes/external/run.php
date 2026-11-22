@@ -129,6 +129,8 @@ class run extends external_api {
             'cmpinfo' => new external_value(PARAM_RAW, 'Compiler messages'),
             'stdout' => new external_value(PARAM_RAW, 'Standard output'),
             'stderr' => new external_value(PARAM_RAW, 'Standard error'),
+            // Only from the CodeLab runner 0.9.0 and later; Jobe gives no time.
+            'time' => new external_value(PARAM_FLOAT, 'Seconds the program ran, without the compilation', VALUE_OPTIONAL),
         ]);
     }
 }

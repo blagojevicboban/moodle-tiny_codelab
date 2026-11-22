@@ -49,6 +49,23 @@ final class run_test extends \advanced_testcase {
         $this->assertSame('notconfigured', $result['status']);
     }
 
+    public function test_time_of_the_runner(): void {
+        $this->resetAfterTest();
+        set_config('jobeserver', '', 'tiny_codelab');
+        set_config('cloudkey', '', 'tiny_codelab');
+        set_config('runnerurl', 'wss://runner.example.org', 'tiny_codelab');
+        set_config('runnersecret', 'my-secret-0123456789', 'tiny_codelab');
+        $context = $this->student_context();
+        // Runner 0.9.0 sends the time of the run; it reaches the browser.
+        \curl::mock_response(json_encode(['status' => 'ok', 'stdout' => '1', 'stderr' => '', 'cmpinfo' => '', 'time' => 0.25]));
+        $result = external_api::clean_returnvalue(run::execute_returns(), run::execute($context->id, 'c', 'int x;', ''));
+        $this->assertSame(['ok', 0.25], [$result['status'], $result['time']]);
+        // An older runner sends none: the answer has no time.
+        \curl::mock_response(json_encode(['status' => 'ok', 'stdout' => '1', 'stderr' => '', 'cmpinfo' => '']));
+        $result = external_api::clean_returnvalue(run::execute_returns(), run::execute($context->id, 'c', 'int x;', ''));
+        $this->assertArrayNotHasKey('time', $result);
+    }
+
     public function test_too_large(): void {
         $this->resetAfterTest();
         $context = $this->student_context();
