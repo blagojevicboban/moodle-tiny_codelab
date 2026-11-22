@@ -315,6 +315,8 @@ class jobe {
      * @param string $code
      * @param string $stdin
      * @param array $files input files, each ['name' => string, 'text' => string]
+     * @param string $compiler C/C++ compiler profile
+     * @param string $std C/C++ language standard
      * @return array status (ok, compile, runtime, time, memory, illegal, busy, error, notconfigured, nolanguage),
      *     outcome, cmpinfo, stdout, stderr
      */

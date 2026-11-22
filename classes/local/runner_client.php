@@ -162,6 +162,8 @@ class runner_client extends jobe {
      * @param string $code
      * @param string $stdin
      * @param array $files input files, each ['name' => string, 'text' => string]
+     * @param string $compiler C/C++ compiler profile
+     * @param string $std C/C++ language standard
      * @return array status, outcome, cmpinfo, stdout, stderr, and time/files when the runner sends them
      */
     public function run(
@@ -202,6 +204,8 @@ class runner_client extends jobe {
      * @param string $code
      * @param string $stdin
      * @param array $files input files, each ['name' => string, 'text' => string]
+     * @param string $compiler C/C++ compiler profile
+     * @param string $std C/C++ language standard
      * @return array url, headers, body
      */
     public function request(
