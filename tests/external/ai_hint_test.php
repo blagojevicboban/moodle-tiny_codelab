@@ -45,7 +45,10 @@ final class ai_hint_test extends \advanced_testcase {
         set_config('aihintlimit', 2, 'tiny_codelab');
         $manager = $this->createMock(\core_ai\manager::class);
         $manager->method('is_action_available')->willReturn(true);
-        $manager->method('is_action_enabled_in_context')->willReturn(true);
+        // Moodle 5.1 and newer only (ai_hint::available() checks for it too).
+        if (method_exists(\core_ai\manager::class, 'is_action_enabled_in_context')) {
+            $manager->method('is_action_enabled_in_context')->willReturn(true);
+        }
         $manager->method('process_action')->willReturnCallback(function ($action) use ($success) {
             $this->prompt = $action->get_configuration('prompttext');
             $response = new \core_ai\aiactions\responses\response_generate_text(success: $success);
