@@ -24,6 +24,7 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+$string['addfile'] = 'Dodaj plik';
 $string['aihint'] = 'Wyjaśnij błąd (AI)';
 $string['aihintasking'] = 'Pytanie do AI...';
 $string['aihintfailed'] = 'AI nie mogła odpowiedzieć: {$a}';
@@ -42,6 +43,7 @@ $string['backend_auto'] = 'Automatycznie: Jobe, jeśli jest ustawiony, w przeciw
 $string['backend_desc'] = 'Gdzie programy działają do końca (Uruchom bez serwera interaktywnego) i gdzie oceniane są pytania. Automatycznie używa Jobe, gdy jego adres jest ustawiony, a CodeLab runner, gdy Jobe nie jest ustawiony lub jest nieosiągalny. Uruchomienia interaktywne, Krok i debuger zawsze używają CodeLab runner, a SQL działa tylko tam.';
 $string['backend_jobe'] = 'Jobe';
 $string['backend_runner'] = 'CodeLab runner (bez Jobe)';
+$string['badfilename'] = 'Nazwa pliku ma litery, cyfry i _, z najwyżej jedną kropką (input.txt), i najwyżej 40 znaków.';
 $string['browserpython'] = 'Python w przeglądarce';
 $string['browserpython_desc'] = 'Programy Python w przykładach działają w przeglądarce czytelnika (Pyodide): input() pyta o dane w trakcie działania programu, a Krok pokazuje program wiersz po wierszu z jego zmiennymi. Oceny w quizach nadal pochodzą z serwera uruchamiania i oceniania. Wymaga przeglądarki z JavaScript Promise Integration (Chrome, Edge 137+); inne przeglądarki uruchamiają programy na tym serwerze.';
 $string['button'] = 'CodeLab';
@@ -95,6 +97,15 @@ $string['editedcopy'] = 'Twoje zmiany są zachowane w tej przeglądarce.';
 $string['editorlabel'] = 'Kod programu';
 $string['endinput'] = 'Koniec danych (Ctrl+D)';
 $string['exitfullscreen'] = 'Zamknij pełny ekran';
+$string['filecut'] = 'Pokazano tylko pierwsze {$a} znaków.';
+$string['filelines'] = '{$a->name} (wierszy: {$a->lines})';
+$string['filename'] = 'Nazwa';
+$string['files'] = 'Pliki';
+$string['filesafter'] = 'Pliki po uruchomieniu';
+$string['filescount'] = 'Pliki ({$a})';
+$string['filesnote'] = 'Na razie pliki wykorzystuje tylko Python w przeglądarce.';
+$string['filetext'] = 'Tekst pliku {$a}';
+$string['filetoolarge'] = 'Plik {$a} jest większy niż 64 KB.';
 $string['flowchart'] = 'Schemat blokowy';
 $string['flowchartfailed'] = 'Nie udało się utworzyć schematu blokowego: {$a}';
 $string['flowchartwarnings'] = 'Wiersze, które nie są rysowane jako bloki (stały się komentarzami): {$a}';
@@ -269,6 +280,7 @@ $string['pyodideurl'] = 'Adres Pyodide';
 $string['pyodideurl_desc'] = 'Folder z plikami Pyodide (pyodide.mjs i pozostałe). Puste: {$a} (jsDelivr; przeglądarka czytelnika wczytuje je wtedy stamtąd). Kopia na własnym serwerze sprawia, że przeglądarki czytelników nie łączą się z innymi serwerami.';
 $string['ratelimit'] = 'Uruchomienia na minutę';
 $string['ratelimit_desc'] = 'Ile razy jeden użytkownik może uruchomić programy w ciągu minuty (0: bez limitu).';
+$string['removefile'] = 'Usuń';
 $string['reset'] = 'Przywróć oryginał';
 $string['run'] = 'Uruchom';
 $string['runnable'] = 'Czytelnicy mogą go uruchomić';
@@ -287,6 +299,7 @@ $string['runnerurl_desc'] = 'Adres WebSocket, na przykład wss://runner.example.
 $string['running'] = 'Działa…';
 $string['running_browser'] = 'Działa w Twojej przeglądarce…';
 $string['running_server'] = 'Działa: wpisz dane poniżej i naciśnij Enter.';
+$string['samefilename'] = 'Dwa pliki mają nazwę {$a}.';
 $string['servertest'] = 'Przetestuj serwery';
 $string['servertest_answers'] = 'Serwer odpowiada ({$a} ms).';
 $string['servertest_backend'] = 'Serwer uruchamiania i oceniania: {$a}.';

@@ -83,4 +83,11 @@
             <div class="tiny_codelab-vars mt-2" data-region="vars" hidden></div>
         </div>
     </div>
+    <details class="tiny_codelab-files mt-2" data-region="filesfield">
+        <summary data-region="filessummary">{{#str}}files, tiny_codelab{{/str}}</summary>
+        <div class="form-text mb-1" data-region="filesnote" hidden>{{#str}}filesnote, tiny_codelab{{/str}}</div>
+        <div data-region="files"></div>
+        <button type="button" class="btn btn-secondary btn-sm" data-action="addfile">{{#str}}addfile, tiny_codelab{{/str}}</button>
+        <div class="text-danger mt-1" role="alert" data-region="fileerror" hidden></div>
+    </details>
 </div>

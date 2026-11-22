@@ -21,7 +21,7 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 import {blockClass, langPrefix, themePrefix, runClass, noAssistClass, stdinClass, setupClass, languages, defaultLanguage,
-    themes, defaultTheme} from './common';
+    themes, defaultTheme, fileClass, fileClassOf, fileNameOf, validFileName} from './common';
 
 /** Class of the id of a block: codelab-id- and eight letters or digits, kept when the block is edited. */
 export const idPrefix = 'codelab-id-';
@@ -75,10 +75,35 @@ export const stdinOf = (pre) => companionOf(pre, stdinClass);
 export const setupOf = (pre) => companionOf(pre, setupClass);
 
 /**
+ * The files of a CodeLab block: the <pre class="codelab-file codelab-file-<name>"> elements that follow it, after its
+ * setup and input, up to the next element that is none of these.
+ *
+ * @param {HTMLElement} pre the <pre class="codelab"> element
+ * @returns {Array<{name: string, text: string, element: HTMLElement}>} in the order of the page
+ */
+export const filesOf = (pre) => {
+    const files = [];
+    let next = pre.nextElementSibling;
+    while (next && next.nodeName === 'PRE' && !next.classList.contains(blockClass)) {
+        if (next.classList.contains(fileClass)) {
+            const name = [...next.classList].map(fileNameOf).find(Boolean);
+            if (name && !files.some((f) => f.name === name)) {
+                files.push({name, text: next.textContent, element: next});
+            }
+        } else if (!next.classList.contains(stdinClass) && !next.classList.contains(setupClass)) {
+            break;
+        }
+        next = next.nextElementSibling;
+    }
+    return files;
+};
+
+/**
  * Settings of a CodeLab block, read from its classes.
  *
  * @param {HTMLElement} pre the <pre class="codelab"> element
- * @returns {{lang: string, run: boolean, noassist: boolean, code: string, stdin: string, setup: string, id: string}}
+ * @returns {{lang: string, run: boolean, noassist: boolean, code: string, stdin: string, setup: string, id: string,
+ *     files: Array<{name: string, text: string}>}}
  */
 export const readBlock = (pre) => {
     const idClass = [...pre.classList].find((c) => c.startsWith(idPrefix) && /^[a-z0-9]{8}$/.test(c.slice(idPrefix.length)));
@@ -97,14 +122,16 @@ export const readBlock = (pre) => {
         setup: setupOf(pre) ? setupOf(pre).textContent : '',
         // Stable across moves of the block on the page (tiny_codelab 1.18); '' for older blocks.
         id: idClass ? idClass.slice(idPrefix.length) : '',
+        // Input files of a Python program (tiny_codelab 1.22).
+        files: filesOf(pre).map(({name, text}) => ({name, text})),
     };
 };
 
 /**
- * HTML of a CodeLab block, followed by its setup and its input block when it has them.
+ * HTML of a CodeLab block, followed by its setup, its input block and its files when it has them.
  *
  * @param {{lang: string, theme?: string, run: boolean, noassist: boolean, code: string, stdin?: string, setup?: string,
- *     id?: string}} block
+ *     id?: string, files?: Array<{name: string, text: string}>}} block
  * @returns {string}
  */
 export const blockHtml = (block) => {
@@ -130,6 +157,14 @@ export const blockHtml = (block) => {
             const companion = document.createElement('pre');
             companion.className = className;
             companion.textContent = text;
+            html += companion.outerHTML;
+        }
+    }
+    for (const file of block.files || []) {
+        if (validFileName(file.name)) {
+            const companion = document.createElement('pre');
+            companion.className = `${fileClass} ${fileClassOf(file.name)}`;
+            companion.textContent = file.text;
             html += companion.outerHTML;
         }
     }

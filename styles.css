@@ -422,6 +422,27 @@ pre.codelab-stdin::before {
     color: #475569;
 }
 
+pre.codelab-file {
+    margin-top: -1.25rem;
+    margin-bottom: 1.5rem;
+    padding: .5rem .75rem;
+    background: #f8fafc;
+    border: 1px dashed #cbd5e1;
+    border-top: none;
+    border-bottom-left-radius: .375rem;
+    border-bottom-right-radius: .375rem;
+    font-size: .8125rem;
+    color: #64748b;
+}
+
+pre.codelab-file::before {
+    content: "File:";
+    display: block;
+    font-weight: 600;
+    margin-bottom: .25rem;
+    color: #475569;
+}
+
 /* Dark theme cards */
 pre.codelab.codelab-theme-vs-dark {
     background-color: #1e1e1e;
