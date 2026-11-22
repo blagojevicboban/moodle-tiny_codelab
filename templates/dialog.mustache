@@ -43,6 +43,19 @@
             <option value="{{value}}"{{#selected}} selected{{/selected}}>{{name}}</option>
             {{/languages}}
         </select>
+        <span class="d-inline-flex align-items-center gap-2" data-region="compilerfield" hidden>
+            <label for="{{uniqid}}-compiler" class="mb-0">{{#str}}compiler, tiny_codelab{{/str}}</label>
+            <select id="{{uniqid}}-compiler" class="form-select w-auto" data-region="compiler">
+                <option value="">{{#str}}compiler_default, tiny_codelab{{/str}}</option>
+                <option value="gcc">{{#str}}compiler_gcc, tiny_codelab{{/str}}</option>
+                <option value="msvc">{{#str}}compiler_msvc, tiny_codelab{{/str}}</option>
+                <option value="clang">{{#str}}compiler_clang, tiny_codelab{{/str}}</option>
+            </select>
+            <label for="{{uniqid}}-std" class="mb-0">{{#str}}standard, tiny_codelab{{/str}}</label>
+            <select id="{{uniqid}}-std" class="form-select w-auto" data-region="std">
+                <option value="">{{#str}}standard_default, tiny_codelab{{/str}}</option>
+            </select>
+        </span>
         <label for="{{uniqid}}-theme" class="mb-0">{{#str}}theme, tiny_codelab{{/str}}</label>
         <select id="{{uniqid}}-theme" class="form-select w-auto" data-region="theme">
             {{#themes}}

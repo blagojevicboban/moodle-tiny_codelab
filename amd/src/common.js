@@ -30,8 +30,37 @@ export const icon = `${component}_icon`;
 export const blockClass = 'codelab';
 export const langPrefix = 'codelab-lang-';
 export const themePrefix = 'codelab-theme-';
+export const ccPrefix = 'codelab-cc-';
+export const stdPrefix = 'codelab-std-';
 export const runClass = 'codelab-run';
 export const noAssistClass = 'codelab-noassist';
+
+/** Whitelisted C/C++ compilers and standards. */
+export const compilers = ['gcc', 'msvc', 'clang'];
+export const cStandards = ['c99', 'c11', 'c17', 'c23'];
+export const cppStandards = ['c++11', 'c++14', 'c++17', 'c++20', 'c++23'];
+
+/**
+ * Convert a standard string to a safe CSS class suffix (c++17 -> codelab-std-cpp17).
+ *
+ * @param {string} std
+ * @returns {string}
+ */
+export const stdClassOf = (std) => stdPrefix + std.replace('c++', 'cpp');
+
+/**
+ * Extract a whitelisted C/C++ standard from a CSS class name, or empty string.
+ *
+ * @param {string} className
+ * @returns {string}
+ */
+export const stdFromClass = (className) => {
+    if (!className.startsWith(stdPrefix)) {
+        return '';
+    }
+    const raw = className.slice(stdPrefix.length).replace(/^cpp/, 'c++');
+    return cStandards.includes(raw) || cppStandards.includes(raw) ? raw : '';
+};
 /** Input readers start from: <pre class="codelab-stdin"> right after the block. */
 export const stdinClass = 'codelab-stdin';
 /** Hidden code run before the block (the tables and data of SQL): <pre class="codelab-setup"> right after the block. */

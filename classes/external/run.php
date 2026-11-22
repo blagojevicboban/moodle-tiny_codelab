@@ -54,6 +54,8 @@ class run extends external_api {
                 VALUE_DEFAULT,
                 []
             ),
+            'compiler' => new external_value(PARAM_ALPHANUMEXT, 'C/C++ compiler profile (gcc, msvc, clang)', VALUE_DEFAULT, ''),
+            'std' => new external_value(PARAM_RAW_TRIMMED, 'C/C++ language standard', VALUE_DEFAULT, ''),
         ]);
     }
 
@@ -65,13 +67,31 @@ class run extends external_api {
      * @param string $code
      * @param string $stdin
      * @param array $files
+     * @param string $compiler
+     * @param string $std
      * @return array
      */
-    public static function execute(int $contextid, string $lang, string $code, string $stdin = '', array $files = []): array {
+    public static function execute(
+        int $contextid,
+        string $lang,
+        string $code,
+        string $stdin = '',
+        array $files = [],
+        string $compiler = '',
+        string $std = ''
+    ): array {
         global $USER;
         $params = self::validate_parameters(
             self::execute_parameters(),
-            ['contextid' => $contextid, 'lang' => $lang, 'code' => $code, 'stdin' => $stdin, 'files' => $files]
+            [
+                'contextid' => $contextid,
+                'lang' => $lang,
+                'code' => $code,
+                'stdin' => $stdin,
+                'files' => $files,
+                'compiler' => $compiler,
+                'std' => $std,
+            ]
         );
         $context = \context::instance_by_id($params['contextid']);
         self::validate_context($context);
@@ -109,7 +129,14 @@ class run extends external_api {
             return self::result(['status' => 'ratelimit']);
         }
         $client = backend::on_runner($params['lang']) ? new runner_client() : new jobe();
-        return self::result($client->run($params['lang'], $params['code'], $params['stdin'], $cleanfiles));
+        return self::result($client->run(
+            $params['lang'],
+            $params['code'],
+            $params['stdin'],
+            $cleanfiles,
+            $params['compiler'],
+            $params['std']
+        ));
     }
 
     /**

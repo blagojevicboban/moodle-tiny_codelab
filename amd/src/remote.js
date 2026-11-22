@@ -89,11 +89,15 @@ export class RemoteSession {
      * @param {number} [options.offset] lines of hidden code before the editor's code; Step passes over hidden lines
      * @param {function(): string} [options.setup] SQL run before the program without showing its output
      * @param {function(): Array<{name: string, text: string}>} [options.files] input files in the working folder
+     * @param {function(): string} [options.compiler] C/C++ compiler profile (gcc, msvc, clang)
+     * @param {function(): string} [options.std] C/C++ language standard
      */
     constructor({lang, program, panel, onState, contextid = M.cfg.contextid, editor = null, vars = null, offset = 0,
-            setup = () => '', files = null}) {
+            setup = () => '', files = null, compiler = null, std = null}) {
         this.setup = setup;
         this.files = files || (() => []);
+        this.compiler = compiler || (() => '');
+        this.std = std || (() => '');
         this.editor = editor;
         this.vars = vars;
         this.offset = offset;
@@ -163,8 +167,13 @@ export class RemoteSession {
         let finished = false;
         ws.onopen = () => {
             const inputFiles = this.files();
+            const cc = this.compiler();
+            const std = this.std();
             ws.send(JSON.stringify({type: 'start', lang: this.lang(), code: this.program(), stdin,
-                debug, step, breakpoints, setup: this.setup(), ...(inputFiles.length ? {files: inputFiles} : {})}));
+                debug, step, breakpoints, setup: this.setup(),
+                ...(inputFiles.length ? {files: inputFiles} : {}),
+                ...(cc ? {compiler: cc} : {}),
+                ...(std ? {std} : {})}));
         };
         ws.onmessage = (event) => {
             const message = JSON.parse(event.data);

@@ -164,14 +164,21 @@ class runner_client extends jobe {
      * @param array $files input files, each ['name' => string, 'text' => string]
      * @return array status, outcome, cmpinfo, stdout, stderr, and time/files when the runner sends them
      */
-    public function run(string $lang, string $code, string $stdin = '', array $files = []): array {
+    public function run(
+        string $lang,
+        string $code,
+        string $stdin = '',
+        array $files = [],
+        string $compiler = '',
+        string $std = ''
+    ): array {
         $result = ['status' => 'error', 'outcome' => 0, 'cmpinfo' => '', 'stdout' => '', 'stderr' => ''];
         if (!$this->is_configured()) {
             return ['status' => 'notconfigured'] + $result;
         }
         global $CFG;
         require_once($CFG->libdir . '/filelib.php');
-        ['url' => $url, 'body' => $body] = $this->request($lang, $code, $stdin, $files);
+        ['url' => $url, 'body' => $body] = $this->request($lang, $code, $stdin, $files, $compiler, $std);
         $sent = $this->post_run($url, $body, true);
         // A runner older than 0.6.0 does not know the nonce and refuses its signature: then once more without it.
         if ($sent['error'] === '' && $sent['code'] === 401) {
@@ -197,13 +204,29 @@ class runner_client extends jobe {
      * @param array $files input files, each ['name' => string, 'text' => string]
      * @return array url, headers, body
      */
-    public function request(string $lang, string $code, string $stdin = '', array $files = []): array {
+    public function request(
+        string $lang,
+        string $code,
+        string $stdin = '',
+        array $files = [],
+        string $compiler = '',
+        string $std = ''
+    ): array {
         $payload = ['lang' => $lang, 'code' => $code, 'stdin' => $stdin, 'cputime' => $this->cputime];
         if ($this->memorylimit > 0) {
             $payload['memory'] = $this->memorylimit;
         }
         if (!empty($files)) {
             $payload['files'] = array_values($files);
+        }
+        if ($lang === 'c' || $lang === 'cpp') {
+            $norm = compiler::normalize($lang, $compiler, $std);
+            if ($norm['compiler'] !== 'gcc') {
+                $payload['compiler'] = $norm['compiler'];
+            }
+            if ($norm['std'] !== compiler::DEFAULT_STD[$lang]) {
+                $payload['std'] = $norm['std'];
+            }
         }
         $body = json_encode($payload);
         return ['url' => preg_replace('~^ws~', 'http', interactive::url()) . '/run',

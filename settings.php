@@ -109,6 +109,17 @@ if ($ADMIN->fulltree) {
         array_fill_keys(array_keys($names), 1),
         $names
     ));
+    $settings->add(new admin_setting_configselect(
+        'tiny_codelab/compiler',
+        get_string('compiler', 'tiny_codelab'),
+        get_string('compiler_desc', 'tiny_codelab'),
+        'gcc',
+        [
+            'gcc' => get_string('compiler_gcc', 'tiny_codelab'),
+            'msvc' => get_string('compiler_msvc', 'tiny_codelab'),
+            'clang' => get_string('compiler_clang', 'tiny_codelab'),
+        ]
+    ));
     $settings->add(new admin_setting_configtext(
         'tiny_codelab/cputime',
         get_string('cputime', 'tiny_codelab'),

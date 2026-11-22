@@ -200,15 +200,47 @@ class jobe {
      * @param string $code
      * @param string $stdin
      * @param array $files input files, each ['name' => string, 'text' => string]
+     * @param string $compiler C/C++ compiler profile (gcc, msvc, clang; empty for site default)
+     * @param string $std C/C++ standard (empty for default)
      * @return array
      */
-    public function run_spec(string $lang, string $code, string $stdin = '', array $files = []): array {
+    public function run_spec(
+        string $lang,
+        string $code,
+        string $stdin = '',
+        array $files = [],
+        string $compiler = '',
+        string $std = ''
+    ): array {
+        $params = ['cputime' => $this->cputime] + (self::PARAMETERS[$lang] ?? []);
+        if ($lang === 'c' || $lang === 'cpp') {
+            $norm = compiler::normalize($lang, $compiler, $std);
+            if ($norm['compiler'] === 'msvc') {
+                $args = ['-std=' . $norm['std']];
+                if ($lang === 'c') {
+                    $args[] = '-D_GNU_SOURCE';
+                }
+                $args = array_merge($args, ['-w', '-I', '.', '-include', 'codelab_msvc.h']);
+                $params['compileargs'] = $args;
+                $files = array_merge(compiler::msvc_headers(), $files);
+            } else {
+                $args = ['-std=' . $norm['std']];
+                if ($lang === 'c') {
+                    $args[] = '-D_GNU_SOURCE';
+                }
+                $args = array_merge($args, [
+                    '-w', '-Dscanf_s=scanf', '-Dfscanf_s=fscanf', '-Dsscanf_s=sscanf',
+                    '-Dprintf_s=printf', '-Dfprintf_s=fprintf',
+                ]);
+                $params['compileargs'] = $args;
+            }
+        }
         $spec = [
             'language_id' => self::LANGUAGES[$lang],
             'sourcecode' => $code,
             'sourcefilename' => self::source_file_name($lang, $code),
             'input' => $stdin,
-            'parameters' => ['cputime' => $this->cputime] + (self::PARAMETERS[$lang] ?? []),
+            'parameters' => $params,
         ];
         if (!empty($files)) {
             $spec['file_list'] = array_values(array_map(
@@ -226,11 +258,20 @@ class jobe {
      * @param string $code
      * @param string $stdin
      * @param array $files input files, each ['name' => string, 'text' => string]
+     * @param string $compiler
+     * @param string $std
      * @return array url, headers, body
      */
-    public function request(string $lang, string $code, string $stdin = '', array $files = []): array {
+    public function request(
+        string $lang,
+        string $code,
+        string $stdin = '',
+        array $files = [],
+        string $compiler = '',
+        string $std = ''
+    ): array {
         return ['url' => $this->runs_url(), 'headers' => $this->headers(),
-            'body' => json_encode($this->run_spec($lang, $code, $stdin, $files))];
+            'body' => json_encode($this->run_spec($lang, $code, $stdin, $files, $compiler, $std))];
     }
 
     /**
@@ -277,7 +318,14 @@ class jobe {
      * @return array status (ok, compile, runtime, time, memory, illegal, busy, error, notconfigured, nolanguage),
      *     outcome, cmpinfo, stdout, stderr
      */
-    public function run(string $lang, string $code, string $stdin = '', array $files = []): array {
+    public function run(
+        string $lang,
+        string $code,
+        string $stdin = '',
+        array $files = [],
+        string $compiler = '',
+        string $std = ''
+    ): array {
         if (!isset(self::LANGUAGES[$lang])) {
             throw new \invalid_parameter_exception('Unknown language: ' . $lang);
         }
@@ -289,7 +337,11 @@ class jobe {
         }
         global $CFG;
         require_once($CFG->libdir . '/filelib.php');
-        foreach ($files as $file) {
+        $uploadfiles = $files;
+        if (($lang === 'c' || $lang === 'cpp') && compiler::normalize($lang, $compiler, $std)['compiler'] === 'msvc') {
+            $uploadfiles = array_merge(compiler::msvc_headers(), $files);
+        }
+        foreach ($uploadfiles as $file) {
             $put = new \curl();
             $put->setHeader($this->headers());
             $put->put(
@@ -300,14 +352,25 @@ class jobe {
         }
         $curl = new \curl();
         $curl->setHeader($this->headers());
-        $body = $curl->post($this->runs_url(), json_encode($this->run_spec($lang, $code, $stdin, $files)), [
-            'CURLOPT_TIMEOUT' => $this->cputime + 30,
-            'CURLOPT_CONNECTTIMEOUT' => 10,
-        ]);
+        $body = $curl->post(
+            $this->runs_url(),
+            json_encode($this->run_spec($lang, $code, $stdin, $files, $compiler, $std)),
+            [
+                'CURLOPT_TIMEOUT' => $this->cputime + 30,
+                'CURLOPT_CONNECTTIMEOUT' => 10,
+            ]
+        );
         $httpcode = (int) ($curl->get_info()['http_code'] ?? 0);
         // Jobe cannot be reached or is broken: with the setting Auto, the runner runs the program instead.
         if (($curl->get_errno() || $httpcode >= 500) && !($this instanceof runner_client) && backend::fallback()) {
-            return (new runner_client($this->cputime, $this->fallback_memory()))->run($lang, $code, $stdin, $files);
+            return (new runner_client($this->cputime, $this->fallback_memory()))->run(
+                $lang,
+                $code,
+                $stdin,
+                $files,
+                $compiler,
+                $std
+            );
         }
         if ($curl->get_errno()) {
             return ['status' => 'error', 'outcome' => 0, 'cmpinfo' => '', 'stdout' => '',

@@ -20,8 +20,9 @@
  * @copyright  2026 Boban Blagojević
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-import {blockClass, langPrefix, themePrefix, runClass, noAssistClass, stdinClass, setupClass, languages, defaultLanguage,
-    themes, defaultTheme, fileClass, fileClassOf, fileNameOf, validFileName} from './common';
+import {blockClass, langPrefix, themePrefix, ccPrefix, compilers, stdClassOf, stdFromClass, runClass, noAssistClass,
+    stdinClass, setupClass, languages, defaultLanguage, themes, defaultTheme, fileClass, fileClassOf, fileNameOf,
+    validFileName} from './common';
 
 /** Class of the id of a block: codelab-id- and eight letters or digits, kept when the block is edited. */
 export const idPrefix = 'codelab-id-';
@@ -111,9 +112,14 @@ export const readBlock = (pre) => {
     const lang = langClass ? langClass.slice(langPrefix.length) : '';
     const themeClass = [...pre.classList].find((c) => c.startsWith(themePrefix));
     const theme = themeClass ? themeClass.slice(themePrefix.length) : '';
+    const ccClass = [...pre.classList].find((c) => c.startsWith(ccPrefix));
+    const cc = ccClass ? ccClass.slice(ccPrefix.length) : '';
+    const std = [...pre.classList].map(stdFromClass).find(Boolean) || '';
     return {
         lang: Object.prototype.hasOwnProperty.call(languages, lang) ? lang : defaultLanguage,
         theme: Object.prototype.hasOwnProperty.call(themes, theme) ? theme : defaultTheme,
+        compiler: compilers.includes(cc) ? cc : '',
+        std,
         run: pre.classList.contains(runClass),
         noassist: pre.classList.contains(noAssistClass),
         // A block ends with a new line (so the closing tag is on its own line in the HTML source); the editor does not need it.
@@ -138,6 +144,12 @@ export const blockHtml = (block) => {
     const classes = [blockClass, langPrefix + block.lang];
     if (block.theme && block.theme !== defaultTheme) {
         classes.push(themePrefix + block.theme);
+    }
+    if ((block.lang === 'c' || block.lang === 'cpp') && block.compiler && compilers.includes(block.compiler)) {
+        classes.push(ccPrefix + block.compiler);
+    }
+    if ((block.lang === 'c' || block.lang === 'cpp') && block.std) {
+        classes.push(stdClassOf(block.std));
     }
     if (block.run) {
         classes.push(runClass);

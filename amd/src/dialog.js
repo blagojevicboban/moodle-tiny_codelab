@@ -25,7 +25,8 @@ import ModalEvents from 'core/modal_events';
 import Templates from 'core/templates';
 import {getString, getStrings} from 'core/str';
 import {getContextId} from 'editor_tiny/options';
-import {component, languages, defaultLanguage, setupLanguages, defaultTheme, MAX_FILES, filesProblem} from './common';
+import {component, languages, defaultLanguage, setupLanguages, defaultTheme, MAX_FILES, filesProblem,
+    cStandards, cppStandards} from './common';
 import {TEMPLATE_KEYS, templatesFor} from './codetemplates';
 import {readBlock, blockHtml, isBlock, stdinOf, setupOf, filesOf, newBlockId} from './embed';
 import {createEditor} from './monaco';
@@ -38,6 +39,42 @@ import {RemoteSession, runsInteractively, stepsInteractively} from './remote';
 import {takeImport} from './importcode';
 
 let counter = 0;
+
+/**
+ * Wire the C/C++ compiler profile and language standard dropdowns in the dialog.
+ *
+ * @param {HTMLElement} root
+ * @param {HTMLSelectElement} langSelect
+ * @param {Object} block
+ * @returns {{update: function(): void, compiler: function(): string, std: function(): string}}
+ */
+const wireCompiler = (root, langSelect, block) => {
+    const field = root.querySelector('[data-region="compilerfield"]');
+    const ccSelect = root.querySelector('[data-region="compiler"]');
+    const stdSelect = root.querySelector('[data-region="std"]');
+    ccSelect.value = block.compiler || '';
+    const update = () => {
+        const lang = langSelect.value;
+        const isC = lang === 'c' || lang === 'cpp';
+        field.hidden = !isC;
+        const prev = stdSelect.value || block.std || '';
+        stdSelect.querySelectorAll('option:not([value=""])').forEach((o) => o.remove());
+        const list = {c: cStandards, cpp: cppStandards}[lang] || [];
+        list.forEach((s) => {
+            const opt = document.createElement('option');
+            opt.value = s;
+            opt.textContent = s.toUpperCase();
+            stdSelect.append(opt);
+        });
+        stdSelect.value = list.includes(prev) ? prev : '';
+    };
+    update();
+    return {
+        update,
+        compiler: () => (langSelect.value === 'c' || langSelect.value === 'cpp' ? ccSelect.value : ''),
+        std: () => (langSelect.value === 'c' || langSelect.value === 'cpp' ? stdSelect.value : ''),
+    };
+};
 
 /**
  * Open the dialog for the selected CodeLab block, or for a new one with the selected text as its code.
@@ -89,6 +126,7 @@ export const openDialog = async(editor) => {
     const region = (name) => root.querySelector(`[data-region="${name}"]`);
     const langSelect = region('lang');
     const themeSelect = region('theme');
+    const cc = wireCompiler(root, langSelect, block);
     if (imported) {
         const notice = document.createElement('div');
         notice.className = 'alert alert-info py-2 mb-2';
@@ -202,7 +240,7 @@ export const openDialog = async(editor) => {
         await showRunning(panel);
         try {
             await showResult(panel, await run(langSelect.value, code.getValue(), region('stdin').value,
-                getContextId(editor), files()));
+                getContextId(editor), files(), cc.compiler(), cc.std()));
         } catch (e) {
             await showError(panel, e);
         }
@@ -245,6 +283,8 @@ export const openDialog = async(editor) => {
         vars: region('vars'),
         setup: () => (setupLanguages.includes(langSelect.value) ? region('setup').value : ''),
         files,
+        compiler: () => cc.compiler(),
+        std: () => cc.std(),
     });
     const showPythonButtons = () => {
         stepButton.hidden = !browser() && !remoteStep();
@@ -293,6 +333,7 @@ export const openDialog = async(editor) => {
         showSetup();
         showTemplates();
         showFiles();
+        cc.update();
     });
     themeSelect.addEventListener('change', () => {
         code.setTheme(themeSelect.value);
@@ -335,6 +376,8 @@ export const openDialog = async(editor) => {
             id: block.id || newBlockId(),
             lang: langSelect.value,
             theme: themeSelect.value,
+            compiler: cc.compiler(),
+            std: cc.std(),
             run: region('run').checked,
             noassist: region('noassist').checked,
             code: code.getValue(),

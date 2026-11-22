@@ -42,9 +42,12 @@ import Ajax from 'core/ajax';
  * @param {string} stdin
  * @param {number} [contextid] context of the page, the current page's by default
  * @param {Array<{name: string, text: string}>} [files] input files in the working folder
+ * @param {string} [compiler] C/C++ compiler profile
+ * @param {string} [std] C/C++ language standard
  * @returns {Promise<RunResult>}
  */
-export const run = (lang, code, stdin = '', contextid = M.cfg.contextid, files = []) => Ajax.call([{
+export const run = (lang, code, stdin = '', contextid = M.cfg.contextid, files = [], compiler = '', std = '') => Ajax.call([{
     methodname: 'tiny_codelab_run',
-    args: {contextid, lang, code, stdin, ...(files && files.length ? {files} : {})},
+    args: {contextid, lang, code, stdin, ...(files && files.length ? {files} : {}),
+        ...(compiler ? {compiler} : {}), ...(std ? {std} : {})},
 }])[0];
