@@ -23,6 +23,22 @@
 import {blockClass, langPrefix, themePrefix, runClass, noAssistClass, stdinClass, setupClass, languages, defaultLanguage,
     themes, defaultTheme} from './common';
 
+/** Class of the id of a block: codelab-id- and eight letters or digits, kept when the block is edited. */
+export const idPrefix = 'codelab-id-';
+
+/**
+ * A new id for a block.
+ *
+ * @returns {string} eight lowercase letters and digits
+ */
+export const newBlockId = () => {
+    let id = '';
+    while (id.length < 8) {
+        id += Math.random().toString(36).slice(2);
+    }
+    return id.slice(0, 8);
+};
+
 /**
  * A companion of a CodeLab block among the two elements right after it: <pre class="codelab-setup"> and
  * <pre class="codelab-stdin">, in this order when both are there.
@@ -62,9 +78,10 @@ export const setupOf = (pre) => companionOf(pre, setupClass);
  * Settings of a CodeLab block, read from its classes.
  *
  * @param {HTMLElement} pre the <pre class="codelab"> element
- * @returns {{lang: string, run: boolean, noassist: boolean, code: string, stdin: string, setup: string}}
+ * @returns {{lang: string, run: boolean, noassist: boolean, code: string, stdin: string, setup: string, id: string}}
  */
 export const readBlock = (pre) => {
+    const idClass = [...pre.classList].find((c) => c.startsWith(idPrefix) && /^[a-z0-9]{8}$/.test(c.slice(idPrefix.length)));
     const langClass = [...pre.classList].find((c) => c.startsWith(langPrefix));
     const lang = langClass ? langClass.slice(langPrefix.length) : '';
     const themeClass = [...pre.classList].find((c) => c.startsWith(themePrefix));
@@ -78,13 +95,16 @@ export const readBlock = (pre) => {
         code: pre.textContent.replace(/\n$/, ''),
         stdin: stdinOf(pre) ? stdinOf(pre).textContent : '',
         setup: setupOf(pre) ? setupOf(pre).textContent : '',
+        // Stable across moves of the block on the page (tiny_codelab 1.18); '' for older blocks.
+        id: idClass ? idClass.slice(idPrefix.length) : '',
     };
 };
 
 /**
  * HTML of a CodeLab block, followed by its setup and its input block when it has them.
  *
- * @param {{lang: string, theme?: string, run: boolean, noassist: boolean, code: string, stdin?: string, setup?: string}} block
+ * @param {{lang: string, theme?: string, run: boolean, noassist: boolean, code: string, stdin?: string, setup?: string,
+ *     id?: string}} block
  * @returns {string}
  */
 export const blockHtml = (block) => {
@@ -97,6 +117,9 @@ export const blockHtml = (block) => {
     }
     if (block.noassist) {
         classes.push(noAssistClass);
+    }
+    if (block.id && /^[a-z0-9]{8}$/.test(block.id)) {
+        classes.push(idPrefix + block.id);
     }
     const pre = document.createElement('pre');
     pre.className = classes.join(' ');

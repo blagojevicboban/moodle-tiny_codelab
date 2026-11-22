@@ -27,7 +27,7 @@ import {getString, getStrings} from 'core/str';
 import {getContextId} from 'editor_tiny/options';
 import {component, languages, defaultLanguage, setupLanguages, defaultTheme} from './common';
 import {TEMPLATE_KEYS, templatesFor} from './codetemplates';
-import {readBlock, blockHtml, isBlock, stdinOf, setupOf} from './embed';
+import {readBlock, blockHtml, isBlock, stdinOf, setupOf, newBlockId} from './embed';
 import {createEditor} from './monaco';
 import {run} from './runner';
 import {showRunning, showResult, showError} from './console';
@@ -258,6 +258,8 @@ export const openDialog = async(editor) => {
     });
     modal.getRoot().on(ModalEvents.save, () => {
         const html = blockHtml({
+            // A block keeps its id; a new or older block gets one, so the readers' copies stay with it when it moves.
+            id: block.id || newBlockId(),
             lang: langSelect.value,
             theme: themeSelect.value,
             run: region('run').checked,

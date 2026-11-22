@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.18.0 (2026-11-22)
+
+- Every block saved with the dialog gets an id (class codelab-id- and eight letters or digits), kept when the block is
+  edited. filter_codelab 1.13 keys the readers' copies by it, so they stay with their example when examples are added
+  or moved on the page.
+
 ## 1.17.0 (2026-11-22)
 
 - AI explanations of errors (optional, off by default): with an AI provider of the site (Site administration, General,
