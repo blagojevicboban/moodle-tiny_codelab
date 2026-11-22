@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.21.0 (2026-11-22)
+
+- The interface in 12 more languages: German, French, Spanish, Italian, Portuguese, Polish, Croatian, Bosnian,
+  Slovenian, Macedonian, Slovak and Czech (15 with English and Serbian). The Serbian files got the 7 strings of the
+  editor theme that they lacked.
+- Runs for grading on the CodeLab runner 0.9.0 keep the time of the run, and the run service returns it, so
+  qtype_codelab can show the time of each test and apply a time limit per test. Jobe gives no time; nothing else
+  changes.
+- devtools/demo-video: scripts that record the demo reel of the plugins (not in the ZIP).
+
 ## 1.20.0 (2026-11-22)
 
 - Accessibility: in Windows high contrast the console, the debugger, the memory view, the call tree, the trace table,
