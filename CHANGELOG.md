@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.22.0 (2026-11-23)
+
+- Files of an example: teachers can attach up to 5 input files (64 KB each) to a CodeLab block in the dialog. They are
+  written into the working folder before each run in Python in the browser (Pyodide), on the CodeLab runner (0.10.0,
+  both interactive sessions and `POST /run`) and on Jobe (`file_list`).
+- Output files: regular files created or changed by the program in Pyodide or on the CodeLab runner are listed under
+  the console with their line count and text.
+
 ## 1.21.0 (2026-11-22)
 
 - The interface in 12 more languages: German, French, Spanish, Italian, Portuguese, Polish, Croatian, Bosnian,
