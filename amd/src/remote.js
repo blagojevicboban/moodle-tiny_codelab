@@ -29,11 +29,13 @@ import {component} from './common';
 import {Terminal} from './terminal';
 import {DebugPanel} from './debugpanel';
 import {editorStack, filesAfterRun} from './session';
+import {parseSanitizer, formatSanitizer} from './sanitizer';
 
 const KEYS = ['compiling', 'running', 'running_server', 'inputline', 'inputok', 'endinput', 'status_ok', 'status_runtime',
     'status_time', 'status_memory', 'status_toolong', 'status_stopped', 'status_compile', 'status_error', 'status_notconfigured',
     'status_nolanguage', 'status_ratelimit', 'status_busy', 'status_quota', 'status_suspended', 'status_expired',
-    'status_disconnected', 'status_unreachable', 'paused', 'filesafter', 'filelines', 'filecut'];
+    'status_disconnected', 'status_unreachable', 'paused', 'filesafter', 'filelines', 'filecut',
+    'san_index_oob', 'san_buffer_overflow', 'san_use_after_free', 'san_null_pointer', 'san_int_overflow', 'san_div_zero'];
 
 /** Languages that run step by step on the interactive server. */
 const STEP_LANGUAGES = ['c', 'cpp'];
@@ -91,13 +93,16 @@ export class RemoteSession {
      * @param {function(): Array<{name: string, text: string}>} [options.files] input files in the working folder
      * @param {function(): string} [options.compiler] C/C++ compiler profile (gcc, msvc, clang)
      * @param {function(): string} [options.std] C/C++ language standard
+     * @param {function(): boolean} [options.sanitize] safe mode (ASan/UBSan)
      */
     constructor({lang, program, panel, onState, contextid = M.cfg.contextid, editor = null, vars = null, offset = 0,
-            setup = () => '', files = null, compiler = null, std = null}) {
+            setup = () => '', files = null, compiler = null, std = null, sanitize = null}) {
         this.setup = setup;
         this.files = files || (() => []);
         this.compiler = compiler || (() => '');
         this.std = std || (() => '');
+        this.sanitize = sanitize || (() => false);
+        this.stderrText = '';
         this.editor = editor;
         this.vars = vars;
         this.offset = offset;
@@ -165,15 +170,18 @@ export class RemoteSession {
         }
         const ws = this.ws = new WebSocket(`${grant.url}?token=${encodeURIComponent(grant.token)}`);
         let finished = false;
+        this.stderrText = '';
         ws.onopen = () => {
             const inputFiles = this.files();
             const cc = this.compiler();
             const std = this.std();
+            const san = this.sanitize();
             ws.send(JSON.stringify({type: 'start', lang: this.lang(), code: this.program(), stdin,
                 debug, step, breakpoints, setup: this.setup(),
                 ...(inputFiles.length ? {files: inputFiles} : {}),
                 ...(cc ? {compiler: cc} : {}),
-                ...(std ? {std} : {})}));
+                ...(std ? {std} : {}),
+                ...(san ? {sanitize: true} : {})}));
         };
         ws.onmessage = (event) => {
             const message = JSON.parse(event.data);
@@ -196,14 +204,7 @@ export class RemoteSession {
                     break;
                 case 'out':
                 case 'err':
-                    this.terminal.write(message.data, message.type);
-                    if (this.terminal.field) {
-                        // Keep the input line after the newest output.
-                        this.terminal.output.append(this.terminal.field);
-                        if (this.terminal.eofButton) {
-                            this.terminal.output.append(this.terminal.eofButton);
-                        }
-                    }
+                    this.writeStream(message);
                     break;
                 case 'paused':
                     this.paused(message);
@@ -215,7 +216,7 @@ export class RemoteSession {
                     break;
                 case 'exit':
                     finished = true;
-                    this.end(s[`status_${message.status}`] || s.status_runtime, message.status === 'ok' ? 'ok' : 'error');
+                    this.finishExit(message, s);
                     break;
                 case 'error':
                     finished = true;
@@ -354,6 +355,60 @@ export class RemoteSession {
             this.ws.send(JSON.stringify({type: 'stop'}));
         } else if (this.state === 'running') {
             this.ws?.close();
+        }
+    }
+
+    /**
+     * Write an stdout or stderr chunk to the terminal and keep the input line at the bottom.
+     *
+     * @param {{type: string, data: string}} message
+     */
+    writeStream(message) {
+        if (message.type === 'err' && this.stderrText.length < 16384) {
+            this.stderrText += message.data;
+        }
+        this.terminal.write(message.data, message.type);
+        if (this.terminal.field) {
+            this.terminal.output.append(this.terminal.field);
+            if (this.terminal.eofButton) {
+                this.terminal.output.append(this.terminal.eofButton);
+            }
+        }
+    }
+
+    /**
+     * Handle program exit, showing a sanitizer summary when safe mode caught an error.
+     *
+     * @param {{status: string}} message
+     * @param {Object<string, string>} s
+     */
+    finishExit(message, s) {
+        this.end(s[`status_${message.status}`] || s.status_runtime, message.status === 'ok' ? 'ok' : 'error');
+        if (message.status !== 'ok' && this.sanitize()) {
+            this.showSanitizer(s);
+        }
+    }
+
+    /**
+     * Show a translated ASan/UBSan summary banner and highlight the offending line in the editor.
+     *
+     * @param {Object<string, string>} s strings
+     */
+    showSanitizer(s) {
+        const info = parseSanitizer(this.stderrText);
+        if (!info) {
+            return;
+        }
+        const shown = info.line > this.offset ? info.line - this.offset : info.line;
+        const msg = formatSanitizer({...info, line: shown}, s);
+        if (msg && this.panel) {
+            const note = document.createElement('div');
+            note.className = 'alert alert-warning py-1 px-2 mt-2 mb-1 small';
+            note.textContent = msg;
+            this.panel.prepend(note);
+        }
+        if (shown > 0) {
+            this.editor?.highlightLine(shown);
         }
     }
 
