@@ -144,8 +144,14 @@ const realClickBtn = async(label, idx = 0) => {
         return {x: r.left + r.width / 2, y: r.top + r.height / 2};
     })()`);
     if (pos) {
-        await b.moveTo(pos.x, pos.y, 7);
-        await b.click('.filter_codelab-viewer button', label);
+        // Click at the position of that button: b.click() would take the first button with the label on the page.
+        await b.moveTo(pos.x, pos.y);
+        await b.ripple();
+        b.clicks.push(Date.now() / 1000);
+        for (const type of ['mousePressed', 'mouseReleased']) {
+            await b.send('Input.dispatchMouseEvent', {type, x: pos.x, y: pos.y, button: 'left', clickCount: 1});
+        }
+        await sleep(250);
     }
 };
 
@@ -162,7 +168,11 @@ const findDemoIds = () => b.eval(`(async() => {
         .find((a) => a.textContent.trim().startsWith('Features one by one'));
     if (!section) throw new Error('No section "Features one by one"');
     const page = await get(section.href + '&lang=en');
-    const ids = {section: new URL(section.href).searchParams.get('id'), pages: {}, quiz: null};
+    const ids = {section: new URL(section.href).searchParams.get('id'), pages: {}, quiz: null, named: {}};
+    // Pages of other sections by their name, for example "Turtle graphics" and "Call tree: recursion".
+    for (const a of view.querySelectorAll('a[href*="/mod/page/view.php?id="]')) {
+        ids.named[a.textContent.trim().split('\\n')[0].trim()] = new URL(a.href).searchParams.get('id');
+    }
     for (const a of page.querySelectorAll('a[href*="/mod/"][href*="view.php?id="]')) {
         const id = new URL(a.href).searchParams.get('id');
         // A template literal drops single backslashes, so the regex is written with doubled ones.
@@ -173,6 +183,22 @@ const findDemoIds = () => b.eval(`(async() => {
     if (!ids.quiz || Object.keys(ids.pages).length < 15) throw new Error('Pages not found: ' + JSON.stringify(ids));
     return ids;
 })()`);
+
+// Id of a page of the course whose name starts with the given text.
+const namedPage = (ids, name) => {
+    const found = Object.entries(ids.named).find(([n]) => n.startsWith(name));
+    if (!found) {
+        throw new Error(`No page "${name}" in the course`);
+    }
+    return found[1];
+};
+
+// Leaving the form of a page after the CodeLab dialog could ask "Leave site?": accept it, so the run never hangs.
+b.on((m) => {
+    if (m.method === 'Page.javascriptDialogOpening') {
+        b.send('Page.handleJavaScriptDialog', {accept: true});
+    }
+});
 
 const scrollDown = (px) => b.eval(`window.scrollBy({top: ${px}, behavior: 'smooth'}); true`);
 
@@ -190,7 +216,7 @@ try {
     await b.goto(card('runners'));
     await hideCursor();
     setRecording(true);
-    await hold(5800);
+    await hold(5000);
 
     // 2. Site Access & Login as Teacher on codelab.tsp.edu.rs -> section "Features one by one" (~7.5s)
     setRecording(false);
@@ -222,7 +248,7 @@ try {
     await b.goto(card('admin'));
     await hideCursor();
     setRecording(true);
-    await hold(4200);
+    await hold(3600);
 
     setRecording(false);
     await b.goto(`${BASE}/mod/page/view.php?id=${ids.pages[15]}&lang=en`, '!!document.querySelector("#region-main")');
@@ -246,17 +272,41 @@ try {
         await stripChrome('#id_generalheader, #region-main');
         setRecording(true);
         await caption('Teacher configures languages, test cases, hidden tests & Algorithm link', 'TEACHER');
-        await hold(1400);
+        await hold(1200);
         await scrollDown(360);
-        await hold(2200);
+        await hold(1800);
         await scrollDown(360);
-        await hold(2000);
+        await hold(1600);
     } else {
         await preparePage(ids.pages[14]);
         setRecording(true);
         await caption('Teacher creates interactive pages & auto-graded coding questions', 'TEACHER');
         await hold(3500);
     }
+
+    // 4b. Teacher: the template library of the CodeLab dialog in the editor of a page (~8s)
+    setRecording(false);
+    await b.goto(`${BASE}/course/modedit.php?update=${namedPage(ids, 'Turtle graphics')}&lang=en`,
+        '!!window.tinymce?.get("id_introeditor")?.initialized');
+    await sleep(500);
+    await b.eval(`(() => { document.querySelector('#id_introeditor')?.closest('.fitem')?.scrollIntoView({block: 'center'});
+        return true; })()`);
+    b.cursor = {x: 800, y: 420};
+    await b.installCursor();
+    setRecording(true);
+    await caption('Template library: ready programs in every language, one click away', 'TEACHER');
+    await hold(500);
+    await b.click('.tox-tbtn[aria-label="CodeLab"]');
+    await b.waitFor('!!document.querySelector(".tiny_codelab-dialog [data-region=template] option[value=binary]")', 30000);
+    await hold(600);
+    await b.click('.tiny_codelab-dialog [data-region="lang"]');
+    await b.eval(`(() => { const s = document.querySelector('.tiny_codelab-dialog [data-region=lang]');
+        s.value = 'python'; s.dispatchEvent(new Event('change', {bubbles: true})); return true; })()`);
+    await hold(400);
+    await b.click('.tiny_codelab-dialog [data-region="template"]');
+    await b.eval(`(() => { const s = document.querySelector('.tiny_codelab-dialog [data-region=template]');
+        s.value = 'binary'; s.dispatchEvent(new Event('change', {bubbles: true})); return true; })()`);
+    await hold(2600);
 
     // 5. Teacher: Class Work View (page 13) (~6.5s)
     setRecording(false);
@@ -286,6 +336,19 @@ try {
     await hold(2000);
     await scrollDown(260);
     await hold(2600);
+
+    // 7b. Student: Turtle graphics, the star filled with colour (page "Turtle graphics", second example) (~7s)
+    setRecording(false);
+    await preparePage(namedPage(ids, 'Turtle graphics'));
+    await b.eval(`(() => { document.querySelectorAll('.filter_codelab-viewer')[1].scrollIntoView({block: 'start'});
+        window.scrollBy(0, -12); return true; })()`);
+    setRecording(true);
+    await caption('Turtle graphics in Python: the drawing appears while the program runs', 'STUDENT');
+    await hold(600);
+    await realClickBtn('Run', 1);
+    await hold(1200);
+    await scrollDown(300);
+    await hold(4200);
 
     // Start Hero GIF capture here (Debugger + Step Back + Memory + Complexity + Flowchart + SQL)
     gifRange.start = frames.length;
@@ -330,6 +393,26 @@ try {
     }
     await hold(1500);
 
+    // 9b. Student: Call tree of a recursion (page "Call tree: recursion") (~8s)
+    setRecording(false);
+    await preparePage(namedPage(ids, 'Call tree: recursion'));
+    setRecording(true);
+    await caption('Call tree: every recursive call drawn under the call that made it', 'STUDENT');
+    await hold(500);
+    await realClickBtn('Step');
+    await b.waitFor(`!![...document.querySelectorAll('.filter_codelab-viewer button')]
+        .find((e) => e.textContent.trim() === 'Auto step' && e.getClientRects().length)`, 20000);
+    // The fastest speed, so the whole tree of fib(4) grows during the scene.
+    await b.eval(`(() => { const r = document.querySelector('.filter_codelab-viewer input[type=range]');
+        if (r) { r.value = r.max; r.dispatchEvent(new Event('input', {bubbles: true})); r.dispatchEvent(new Event('change', {bubbles: true})); }
+        return true; })()`);
+    await hold(500);
+    await realClickBtn('Auto step');
+    await hold(600);
+    await b.eval(`(() => { const top = document.querySelector('.filter_codelab-viewer').getBoundingClientRect().top;
+        window.scrollBy({top: top + 300, behavior: 'smooth'}); return true; })()`);
+    await hold(5600);
+
     // 10. Student: Complexity Growth Chart (page 8) (~8.5s)
     setRecording(false);
     await preparePage(ids.pages[8]);
@@ -339,7 +422,7 @@ try {
     await realClickBtn('Complexity');
     await hold(1800);
     await scrollDown(220);
-    await hold(3600);
+    await hold(3000);
 
     // 11. CodeLab <-> Algorithm Plugin Integration: Flowchart button (page 9) (~11.5s)
     setRecording(false);
@@ -350,7 +433,7 @@ try {
     await realClickBtn('Flowchart');
     await hold(2200);
     await scrollDown(250);
-    await hold(4500);
+    await hold(3600);
 
     // 12. Student: SQL with Hidden Tables (page 10) (~7.5s)
     setRecording(false);
@@ -361,7 +444,7 @@ try {
     await realClickBtn('Run');
     await hold(1800);
     await scrollDown(200);
-    await hold(2600);
+    await hold(2000);
 
     gifRange.end = frames.length;
 
