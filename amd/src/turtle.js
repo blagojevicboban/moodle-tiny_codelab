@@ -19,7 +19,8 @@
  *
  * The module follows the standard one: the turtle starts at (0, 0) looking east, y goes up, angles in degrees, and the
  * usual functions and Turtle / Screen methods (forward, left, circle, goto, penup, color, begin_fill, dot, write,
- * speed, bgcolor ...). Lines are drawn with a short animation that follows speed() (0: at once).
+ * speed, bgcolor ...). Lines are drawn with a short animation that follows speed() (0: at once; always at once when
+ * the reader asked for reduced motion).
  *
  * @module     tiny_codelab/turtle
  * @copyright  2026 Boban Blagojević
@@ -359,6 +360,14 @@ export const cssColor = (c) => (typeof c === 'string' && /^(#[0-9a-fA-F]{3,8}|[a
  */
 export const linesPerFrame = (speed) => (speed > 0 ? Math.max(1, Math.round(speed)) : Infinity);
 
+/**
+ * Whether the reader asked for less motion (prefers-reduced-motion): the drawing then comes at once, without the
+ * animation of its lines.
+ *
+ * @returns {boolean}
+ */
+export const reducedMotion = () => typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
+
 export class TurtleView {
     /**
      * The drawing panel (not on the page until the first event).
@@ -409,7 +418,7 @@ export class TurtleView {
         while (this.queue.length) {
             const ev = this.queue[0];
             if (ev.t === 'line') {
-                budget = budget === null ? linesPerFrame(ev.s) : budget;
+                budget = budget === null ? linesPerFrame(reducedMotion() ? 0 : ev.s) : budget;
                 if (budget <= 0) {
                     break;
                 }

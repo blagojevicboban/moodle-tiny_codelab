@@ -679,3 +679,155 @@ tr.tiny_codelab-mem-changed td {
     width: auto;
     margin-top: .5rem;
 }
+
+/* Scrolling regions take the keyboard focus (the console, the trace table, the call tree, the memory view). */
+.tiny_codelab-console:focus-visible,
+.tiny_codelab-trace-scroll:focus-visible,
+.tiny_codelab-calltree-scroll:focus-visible,
+.tiny_codelab-mem:focus-visible {
+    outline: 2px solid #0f6cbf;
+    outline-offset: 2px;
+}
+
+/* Less motion when the reader asks for it: no animated memory bars and no smooth scrolling (the turtle draws at once,
+   tiny_codelab/turtle). */
+@media (prefers-reduced-motion: reduce) {
+    [class*="tiny_codelab-"] {
+        transition: none;
+        animation: none;
+        scroll-behavior: auto;
+    }
+}
+
+/* Forced colours (Windows high contrast): the browser sets the text and border colours to the system ones. Shapes are
+   drawn in the text colour (currentcolor) on the page background; what colour alone marked gets a border, an outline
+   or a dash: the changed variables, the current step, the repeated and waiting calls, the bars of an array. The
+   turtle drawing and the complexity chart keep their own colours, as pictures. */
+@media (forced-colors: active) {
+    .tiny_codelab-console,
+    .tiny_codelab-aihint-box,
+    .tiny_codelab-cx,
+    .tiny_codelab-mem-frame,
+    .tiny_codelab-mem-object,
+    .tiny_codelab-mem-content {
+        border: 1px solid currentcolor;
+    }
+
+    .tiny_codelab-console-error,
+    .tiny_codelab-console-compile,
+    .tiny_codelab-console-status {
+        font-weight: bold;
+    }
+
+    .tiny_codelab-vars-table tr.tiny_codelab-vars-changed td,
+    .tiny_codelab-trace-table td.tiny_codelab-vars-changed,
+    tr.tiny_codelab-mem-changed td,
+    .tiny_codelab-mem-changed .tiny_codelab-mem-content {
+        outline: 2px dashed currentcolor;
+        outline-offset: -2px;
+    }
+
+    .tiny_codelab-trace-table tr.tiny_codelab-trace-current td {
+        outline: 3px solid currentcolor;
+    }
+
+    .tiny_codelab-calltree-edge {
+        stroke: currentcolor;
+    }
+
+    .tiny_codelab-calltree-node rect {
+        fill: transparent;
+        stroke: currentcolor;
+    }
+
+    .tiny_codelab-calltree-node text,
+    .tiny_codelab-calltree-svg .tiny_codelab-calltree-value {
+        fill: currentcolor;
+        stroke: none;
+    }
+
+    .tiny_codelab-calltree-current rect {
+        stroke-width: 4;
+    }
+
+    .tiny_codelab-calltree-repeated rect {
+        stroke-dasharray: 6 3;
+    }
+
+    .tiny_codelab-calltree-waiting rect {
+        stroke-dasharray: 2 2;
+    }
+
+    .tiny_codelab-mem-arrows {
+        color: inherit;
+    }
+
+    .tiny_codelab-mem-arrows path {
+        stroke: currentcolor;
+    }
+
+    .tiny_codelab-mem-arrows marker path {
+        fill: currentcolor;
+    }
+
+    .tiny_codelab-mem-bar {
+        outline: 2px solid currentcolor;
+        outline-offset: -2px;
+    }
+
+    .tiny_codelab-console-past {
+        border-left-style: double;
+    }
+
+    .tiny_codelab-turtle-svg,
+    .tiny_codelab-cx-chart {
+        forced-color-adjust: none;
+    }
+}
+
+/* More contrast when the reader asks for it: darker borders, lines and secondary texts. */
+@media (prefers-contrast: more) {
+    .tiny_codelab-console-empty,
+    .tiny_codelab-vars-empty,
+    .tiny_codelab-calltree-summary,
+    .tiny_codelab-aihint-note,
+    .tiny_codelab-aihint-wait,
+    .tiny_codelab-turtle-note,
+    .tiny_codelab-mem-title,
+    .tiny_codelab-mem-type,
+    .tiny_codelab-mem-index,
+    .tiny_codelab-mem-more {
+        color: #111827;
+    }
+
+    .tiny_codelab-console,
+    .tiny_codelab-cx,
+    .tiny_codelab-turtle-svg,
+    .tiny_codelab-mem-frame,
+    .tiny_codelab-mem-object,
+    .tiny_codelab-mem-content {
+        border-color: #343a40;
+    }
+
+    .tiny_codelab-calltree-edge {
+        stroke: #334155;
+        stroke-width: 1.5;
+    }
+
+    .tiny_codelab-calltree-node:not(.tiny_codelab-calltree-repeated):not(.tiny_codelab-calltree-waiting) rect {
+        stroke: #1f2937;
+    }
+
+    .tiny_codelab-mem-arrows path {
+        stroke-width: 2;
+    }
+
+    .tiny_codelab-cx-tick,
+    .tiny_codelab-cx-reflabel {
+        fill: #2f2e2b;
+    }
+
+    .tiny_codelab-cx-grid {
+        stroke: #9b9a93;
+    }
+}

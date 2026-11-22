@@ -587,6 +587,10 @@ export class DebugPanel {
         });
         const scroll = document.createElement('div');
         scroll.className = 'tiny_codelab-trace-scroll';
+        // A scrolling region takes the keyboard focus, so the table can be scrolled with the arrow keys.
+        scroll.tabIndex = 0;
+        scroll.setAttribute('role', 'region');
+        scroll.setAttribute('aria-label', s.tracetable);
         scroll.append(table);
         details.append(summary, scroll);
         return details;

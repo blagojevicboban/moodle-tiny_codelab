@@ -431,6 +431,10 @@ export class MemoryView {
         this.view = view;
         this.numbers = Object.fromEntries(view.order.map((id, i) => [id, i + 1]));
         const box = el('div', 'tiny_codelab-mem');
+        // It scrolls sideways when the objects do not fit: reachable by the keyboard, with a name.
+        box.tabIndex = 0;
+        box.setAttribute('role', 'region');
+        box.setAttribute('aria-label', this.s.memory);
         const left = el('div', 'tiny_codelab-mem-frames');
         view.frames.forEach((frame) => {
             if (!frame.rows.length) {

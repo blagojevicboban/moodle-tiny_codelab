@@ -21,6 +21,10 @@
  * @copyright  2026 Boban Blagojević
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+import {announceEnd, announceStart} from './announce';
+
+/** Characters of the output kept for the announcement at the end of a run (only its start is read). */
+const KEPT = 2000;
 
 export class Terminal {
     /**
@@ -49,10 +53,12 @@ export class Terminal {
         this.output.className = 'tiny_codelab-console-output tiny_codelab-terminal';
         this.panel.append(this.status, this.output);
         this.panel.hidden = false;
+        this.written = '';
+        announceStart(this.panel);
     }
 
     /**
-     * Status line above the output.
+     * Status line above the output; the end of a run (ok or error) is also read by screen readers with the output.
      *
      * @param {string} text
      * @param {string} kind running, ok or error
@@ -60,6 +66,9 @@ export class Terminal {
     setStatus(text, kind) {
         this.status.textContent = text;
         this.status.className = `tiny_codelab-console-status tiny_codelab-status-${kind}`;
+        if (kind !== 'running') {
+            announceEnd(this.panel, text, this.written);
+        }
     }
 
     /**
@@ -69,6 +78,9 @@ export class Terminal {
      * @param {string} stream out or err
      */
     write(text, stream = 'out') {
+        if (this.written.length < KEPT) {
+            this.written += text.slice(0, KEPT - this.written.length);
+        }
         if (stream === 'err') {
             const span = document.createElement('span');
             span.className = 'tiny_codelab-console-error';

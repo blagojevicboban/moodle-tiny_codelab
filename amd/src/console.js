@@ -22,6 +22,7 @@
  */
 import {getStrings} from 'core/str';
 import {component} from './common';
+import {announceEnd, announceStart} from './announce';
 
 const STATUSES = ['ok', 'compile', 'runtime', 'time', 'memory', 'illegal', 'busy', 'error', 'notconfigured', 'nolanguage',
     'toolarge', 'ratelimit'];
@@ -69,12 +70,14 @@ export const showRunning = async(panel) => {
     status.textContent = s.running;
     panel.append(status);
     panel.hidden = false;
+    announceStart(panel);
 };
 
 /**
  * Show the result of a run.
  *
- * @param {HTMLElement} panel element with role="status" (or aria-live), so screen readers hear the status
+ * @param {HTMLElement} panel the console; the status and the start of the output are read by screen readers at the end
+ *     (tiny_codelab/announce), or the whole panel when it is live itself (role="status")
  * @param {import('./runner').RunResult} result
  */
 export const showResult = async(panel, result) => {
@@ -96,6 +99,7 @@ export const showResult = async(panel, result) => {
         panel.append(block(result.stderr, 'error'));
     }
     panel.hidden = false;
+    await announceEnd(panel, status.textContent, [result.cmpinfo, result.stdout, result.stderr].filter(Boolean).join('\n'));
 };
 
 /**
