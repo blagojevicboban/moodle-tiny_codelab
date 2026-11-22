@@ -23,6 +23,7 @@
 import {getStrings} from 'core/str';
 import {component} from './common';
 import {announceEnd, announceStart} from './announce';
+import {filesAfterRun} from './session';
 
 const STATUSES = ['ok', 'compile', 'runtime', 'time', 'memory', 'illegal', 'busy', 'error', 'notconfigured', 'nolanguage',
     'toolarge', 'ratelimit'];
@@ -36,7 +37,7 @@ let strings = null;
  */
 const loadStrings = async() => {
     if (!strings) {
-        const keys = STATUSES.map((s) => `status_${s}`).concat(['running', 'nooutput']);
+        const keys = STATUSES.map((s) => `status_${s}`).concat(['running', 'nooutput', 'filesafter', 'filelines', 'filecut']);
         const values = await getStrings(keys.map((key) => ({key, component})));
         strings = Object.fromEntries(keys.map((key, i) => [key, values[i]]));
     }
@@ -97,6 +98,9 @@ export const showResult = async(panel, result) => {
     }
     if (result.stderr) {
         panel.append(block(result.stderr, 'error'));
+    }
+    if (Array.isArray(result.files) && result.files.length) {
+        panel.append(filesAfterRun(s, result.files));
     }
     panel.hidden = false;
     await announceEnd(panel, status.textContent, [result.cmpinfo, result.stdout, result.stderr].filter(Boolean).join('\n'));

@@ -161,16 +161,17 @@ class runner_client extends jobe {
      * @param string $lang
      * @param string $code
      * @param string $stdin
-     * @return array status, outcome, cmpinfo, stdout, stderr, and time (seconds of the run) when the runner sends it
+     * @param array $files input files, each ['name' => string, 'text' => string]
+     * @return array status, outcome, cmpinfo, stdout, stderr, and time/files when the runner sends them
      */
-    public function run(string $lang, string $code, string $stdin = ''): array {
+    public function run(string $lang, string $code, string $stdin = '', array $files = []): array {
         $result = ['status' => 'error', 'outcome' => 0, 'cmpinfo' => '', 'stdout' => '', 'stderr' => ''];
         if (!$this->is_configured()) {
             return ['status' => 'notconfigured'] + $result;
         }
         global $CFG;
         require_once($CFG->libdir . '/filelib.php');
-        ['url' => $url, 'body' => $body] = $this->request($lang, $code, $stdin);
+        ['url' => $url, 'body' => $body] = $this->request($lang, $code, $stdin, $files);
         $sent = $this->post_run($url, $body, true);
         // A runner older than 0.6.0 does not know the nonce and refuses its signature: then once more without it.
         if ($sent['error'] === '' && $sent['code'] === 401) {
@@ -193,12 +194,16 @@ class runner_client extends jobe {
      * @param string $lang
      * @param string $code
      * @param string $stdin
+     * @param array $files input files, each ['name' => string, 'text' => string]
      * @return array url, headers, body
      */
-    public function request(string $lang, string $code, string $stdin = ''): array {
+    public function request(string $lang, string $code, string $stdin = '', array $files = []): array {
         $payload = ['lang' => $lang, 'code' => $code, 'stdin' => $stdin, 'cputime' => $this->cputime];
         if ($this->memorylimit > 0) {
             $payload['memory'] = $this->memorylimit;
+        }
+        if (!empty($files)) {
+            $payload['files'] = array_values($files);
         }
         $body = json_encode($payload);
         return ['url' => preg_replace('~^ws~', 'http', interactive::url()) . '/run',
@@ -238,6 +243,21 @@ class runner_client extends jobe {
         $time = $data['time'] ?? null;
         if ((is_int($time) || is_float($time)) && $time >= 0) {
             $result['time'] = round((float) $time, 3);
+        }
+        if (is_array($data['files'] ?? null)) {
+            $outfiles = [];
+            foreach ($data['files'] as $file) {
+                if (is_array($file) && is_string($file['name'] ?? null) && is_string($file['text'] ?? null)) {
+                    $outfiles[] = [
+                        'name' => $file['name'],
+                        'text' => $file['text'],
+                        'size' => is_int($file['size'] ?? null) ? $file['size'] : strlen($file['text']),
+                    ];
+                }
+            }
+            if (!empty($outfiles)) {
+                $result['files'] = $outfiles;
+            }
         }
         return $result;
     }

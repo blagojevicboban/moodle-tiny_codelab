@@ -18,6 +18,7 @@ namespace tiny_codelab\external;
 
 use core_external\external_api;
 use core_external\external_function_parameters;
+use core_external\external_multiple_structure;
 use core_external\external_single_structure;
 use core_external\external_value;
 use tiny_codelab\local\backend;
@@ -44,6 +45,15 @@ class run extends external_api {
             'lang' => new external_value(PARAM_ALPHA, 'Language: c, cpp, python, java, csharp, javascript, pascal or php'),
             'code' => new external_value(PARAM_RAW, 'Program'),
             'stdin' => new external_value(PARAM_RAW, 'Standard input', VALUE_DEFAULT, ''),
+            'files' => new external_multiple_structure(
+                new external_single_structure([
+                    'name' => new external_value(PARAM_RAW, 'File name'),
+                    'text' => new external_value(PARAM_RAW, 'File text'),
+                ]),
+                'Input files in the working folder',
+                VALUE_DEFAULT,
+                []
+            ),
         ]);
     }
 
@@ -54,13 +64,14 @@ class run extends external_api {
      * @param string $lang
      * @param string $code
      * @param string $stdin
+     * @param array $files
      * @return array
      */
-    public static function execute(int $contextid, string $lang, string $code, string $stdin = ''): array {
+    public static function execute(int $contextid, string $lang, string $code, string $stdin = '', array $files = []): array {
         global $USER;
         $params = self::validate_parameters(
             self::execute_parameters(),
-            ['contextid' => $contextid, 'lang' => $lang, 'code' => $code, 'stdin' => $stdin]
+            ['contextid' => $contextid, 'lang' => $lang, 'code' => $code, 'stdin' => $stdin, 'files' => $files]
         );
         $context = \context::instance_by_id($params['contextid']);
         self::validate_context($context);
@@ -77,11 +88,28 @@ class run extends external_api {
         if (strlen($params['code']) > jobe::MAX_SIZE || strlen($params['stdin']) > jobe::MAX_SIZE) {
             return self::result(['status' => 'toolarge']);
         }
+        $cleanfiles = [];
+        $seen = [];
+        if (count($params['files']) > 5) {
+            return self::result(['status' => 'toolarge']);
+        }
+        foreach ($params['files'] as $file) {
+            $name = (string) $file['name'];
+            $text = (string) $file['text'];
+            if (strlen($name) > 40 || !preg_match('/^[A-Za-z0-9_]+(\.[A-Za-z0-9_]+)?$/', $name) || isset($seen[$name])) {
+                throw new \invalid_parameter_exception('Invalid file name');
+            }
+            if (strlen($text) > jobe::MAX_SIZE) {
+                return self::result(['status' => 'toolarge']);
+            }
+            $seen[$name] = true;
+            $cleanfiles[] = ['name' => $name, 'text' => $text];
+        }
         if (!self::allow_run((int) $USER->id)) {
             return self::result(['status' => 'ratelimit']);
         }
         $client = backend::on_runner($params['lang']) ? new runner_client() : new jobe();
-        return self::result($client->run($params['lang'], $params['code'], $params['stdin']));
+        return self::result($client->run($params['lang'], $params['code'], $params['stdin'], $cleanfiles));
     }
 
     /**
@@ -131,6 +159,15 @@ class run extends external_api {
             'stderr' => new external_value(PARAM_RAW, 'Standard error'),
             // Only from the CodeLab runner 0.9.0 and later; Jobe gives no time.
             'time' => new external_value(PARAM_FLOAT, 'Seconds the program ran, without the compilation', VALUE_OPTIONAL),
+            'files' => new external_multiple_structure(
+                new external_single_structure([
+                    'name' => new external_value(PARAM_RAW, 'File name'),
+                    'text' => new external_value(PARAM_RAW, 'File text'),
+                    'size' => new external_value(PARAM_INT, 'Full character or byte size'),
+                ]),
+                'Files created or changed by the program',
+                VALUE_OPTIONAL
+            ),
         ]);
     }
 }

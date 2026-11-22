@@ -116,7 +116,8 @@ export const openDialog = async(editor) => {
         const count = fileRows().length;
         region('filessummary').textContent = countLabel.replace('{$a}', count);
         root.querySelector('[data-action="addfile"]').disabled = count >= MAX_FILES;
-        region('filesnote').hidden = langSelect.value === 'python' || count === 0;
+        region('filesfield').hidden = setupLanguages.includes(langSelect.value) && count === 0;
+        region('filesnote').hidden = true;
     };
     const addFile = (file) => {
         const n = ++counter;
@@ -201,7 +202,7 @@ export const openDialog = async(editor) => {
         await showRunning(panel);
         try {
             await showResult(panel, await run(langSelect.value, code.getValue(), region('stdin').value,
-                getContextId(editor)));
+                getContextId(editor), files()));
         } catch (e) {
             await showError(panel, e);
         }
@@ -243,6 +244,7 @@ export const openDialog = async(editor) => {
         editor: code,
         vars: region('vars'),
         setup: () => (setupLanguages.includes(langSelect.value) ? region('setup').value : ''),
+        files,
     });
     const showPythonButtons = () => {
         stepButton.hidden = !browser() && !remoteStep();

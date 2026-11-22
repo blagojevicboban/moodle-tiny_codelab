@@ -103,6 +103,16 @@ final class interactive_test extends \advanced_testcase {
         $this->assertArrayNotHasKey('time', $client->parse(200, json_encode(['status' => 'ok', 'time' => -1])));
         $this->assertSame(0.5, $client->parse(200, json_encode(['status' => 'ok', 'time' => 0.5]))['time']);
 
+        // Input files are sent in the request payload and output files are parsed from the response.
+        $req = $client->request('c', 'int main(){}', '', [['name' => 'in.txt', 'text' => "1 2\n"]]);
+        $decoded = json_decode($req['body'], true);
+        $this->assertSame([['name' => 'in.txt', 'text' => "1 2\n"]], $decoded['files']);
+        $parsed = $client->parse(200, json_encode([
+            'status' => 'ok',
+            'files' => [['name' => 'out.txt', 'text' => "3\n", 'size' => 2]],
+        ]));
+        $this->assertSame([['name' => 'out.txt', 'text' => "3\n", 'size' => 2]], $parsed['files']);
+
         // The languages and their versions from a signed /health (runner 0.8.0).
         \curl::mock_response(json_encode(['ok' => true, 'languages' => ['c', 'python', 'mysql', 'unknown'],
             'versions' => ['c' => '13.3.0', 'python' => '3.12.3']]));

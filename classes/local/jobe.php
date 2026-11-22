@@ -199,16 +199,24 @@ class jobe {
      * @param string $lang CodeLab language
      * @param string $code
      * @param string $stdin
+     * @param array $files input files, each ['name' => string, 'text' => string]
      * @return array
      */
-    public function run_spec(string $lang, string $code, string $stdin = ''): array {
-        return ['run_spec' => [
+    public function run_spec(string $lang, string $code, string $stdin = '', array $files = []): array {
+        $spec = [
             'language_id' => self::LANGUAGES[$lang],
             'sourcecode' => $code,
             'sourcefilename' => self::source_file_name($lang, $code),
             'input' => $stdin,
             'parameters' => ['cputime' => $this->cputime] + (self::PARAMETERS[$lang] ?? []),
-        ]];
+        ];
+        if (!empty($files)) {
+            $spec['file_list'] = array_values(array_map(
+                fn($f) => [md5((string) $f['text']), (string) $f['name']],
+                $files
+            ));
+        }
+        return ['run_spec' => $spec];
     }
 
     /**
@@ -217,11 +225,12 @@ class jobe {
      * @param string $lang
      * @param string $code
      * @param string $stdin
+     * @param array $files input files, each ['name' => string, 'text' => string]
      * @return array url, headers, body
      */
-    public function request(string $lang, string $code, string $stdin = ''): array {
+    public function request(string $lang, string $code, string $stdin = '', array $files = []): array {
         return ['url' => $this->runs_url(), 'headers' => $this->headers(),
-            'body' => json_encode($this->run_spec($lang, $code, $stdin))];
+            'body' => json_encode($this->run_spec($lang, $code, $stdin, $files))];
     }
 
     /**
@@ -264,10 +273,11 @@ class jobe {
      * @param string $lang c, cpp, python, java, csharp, javascript, pascal or php
      * @param string $code
      * @param string $stdin
+     * @param array $files input files, each ['name' => string, 'text' => string]
      * @return array status (ok, compile, runtime, time, memory, illegal, busy, error, notconfigured, nolanguage),
      *     outcome, cmpinfo, stdout, stderr
      */
-    public function run(string $lang, string $code, string $stdin = ''): array {
+    public function run(string $lang, string $code, string $stdin = '', array $files = []): array {
         if (!isset(self::LANGUAGES[$lang])) {
             throw new \invalid_parameter_exception('Unknown language: ' . $lang);
         }
@@ -279,16 +289,25 @@ class jobe {
         }
         global $CFG;
         require_once($CFG->libdir . '/filelib.php');
+        foreach ($files as $file) {
+            $put = new \curl();
+            $put->setHeader($this->headers());
+            $put->put(
+                $this->rest_url('files/' . md5((string) $file['text'])),
+                json_encode(['file_contents' => base64_encode((string) $file['text'])]),
+                ['CURLOPT_TIMEOUT' => 10, 'CURLOPT_CONNECTTIMEOUT' => 5]
+            );
+        }
         $curl = new \curl();
         $curl->setHeader($this->headers());
-        $body = $curl->post($this->runs_url(), json_encode($this->run_spec($lang, $code, $stdin)), [
+        $body = $curl->post($this->runs_url(), json_encode($this->run_spec($lang, $code, $stdin, $files)), [
             'CURLOPT_TIMEOUT' => $this->cputime + 30,
             'CURLOPT_CONNECTTIMEOUT' => 10,
         ]);
         $httpcode = (int) ($curl->get_info()['http_code'] ?? 0);
         // Jobe cannot be reached or is broken: with the setting Auto, the runner runs the program instead.
         if (($curl->get_errno() || $httpcode >= 500) && !($this instanceof runner_client) && backend::fallback()) {
-            return (new runner_client($this->cputime, $this->fallback_memory()))->run($lang, $code, $stdin);
+            return (new runner_client($this->cputime, $this->fallback_memory()))->run($lang, $code, $stdin, $files);
         }
         if ($curl->get_errno()) {
             return ['status' => 'error', 'outcome' => 0, 'cmpinfo' => '', 'stdout' => '',

@@ -64,6 +64,24 @@ final class run_test extends \advanced_testcase {
         \curl::mock_response(json_encode(['status' => 'ok', 'stdout' => '1', 'stderr' => '', 'cmpinfo' => '']));
         $result = external_api::clean_returnvalue(run::execute_returns(), run::execute($context->id, 'c', 'int x;', ''));
         $this->assertArrayNotHasKey('time', $result);
+
+        // Input files are accepted and output files from the runner pass through clean_returnvalue.
+        \curl::mock_response(json_encode([
+            'status' => 'ok', 'stdout' => '3', 'stderr' => '', 'cmpinfo' => '',
+            'files' => [['name' => 'out.txt', 'text' => "3\n", 'size' => 2]],
+        ]));
+        $result = external_api::clean_returnvalue(
+            run::execute_returns(),
+            run::execute($context->id, 'c', 'int x;', '', [['name' => 'in.txt', 'text' => "1 2\n"]])
+        );
+        $this->assertSame([['name' => 'out.txt', 'text' => "3\n", 'size' => 2]], $result['files']);
+    }
+
+    public function test_invalid_file_name_refused(): void {
+        $this->resetAfterTest();
+        $context = $this->student_context();
+        $this->expectException(\invalid_parameter_exception::class);
+        run::execute($context->id, 'c', 'int x;', '', [['name' => '../etc', 'text' => 'x']]);
     }
 
     public function test_too_large(): void {

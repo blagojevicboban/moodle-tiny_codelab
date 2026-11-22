@@ -41,9 +41,10 @@ import Ajax from 'core/ajax';
  * @param {string} code
  * @param {string} stdin
  * @param {number} [contextid] context of the page, the current page's by default
+ * @param {Array<{name: string, text: string}>} [files] input files in the working folder
  * @returns {Promise<RunResult>}
  */
-export const run = (lang, code, stdin = '', contextid = M.cfg.contextid) => Ajax.call([{
+export const run = (lang, code, stdin = '', contextid = M.cfg.contextid, files = []) => Ajax.call([{
     methodname: 'tiny_codelab_run',
-    args: {contextid, lang, code, stdin},
+    args: {contextid, lang, code, stdin, ...(files && files.length ? {files} : {})},
 }])[0];

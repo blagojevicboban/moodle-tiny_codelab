@@ -28,12 +28,12 @@ import {getStrings} from 'core/str';
 import {component} from './common';
 import {Terminal} from './terminal';
 import {DebugPanel} from './debugpanel';
-import {editorStack} from './session';
+import {editorStack, filesAfterRun} from './session';
 
 const KEYS = ['compiling', 'running', 'running_server', 'inputline', 'inputok', 'endinput', 'status_ok', 'status_runtime',
     'status_time', 'status_memory', 'status_toolong', 'status_stopped', 'status_compile', 'status_error', 'status_notconfigured',
     'status_nolanguage', 'status_ratelimit', 'status_busy', 'status_quota', 'status_suspended', 'status_expired',
-    'status_disconnected', 'status_unreachable', 'paused'];
+    'status_disconnected', 'status_unreachable', 'paused', 'filesafter', 'filelines', 'filecut'];
 
 /** Languages that run step by step on the interactive server. */
 const STEP_LANGUAGES = ['c', 'cpp'];
@@ -88,10 +88,12 @@ export class RemoteSession {
      * @param {HTMLElement} [options.vars] variables panel of Step
      * @param {number} [options.offset] lines of hidden code before the editor's code; Step passes over hidden lines
      * @param {function(): string} [options.setup] SQL run before the program without showing its output
+     * @param {function(): Array<{name: string, text: string}>} [options.files] input files in the working folder
      */
     constructor({lang, program, panel, onState, contextid = M.cfg.contextid, editor = null, vars = null, offset = 0,
-            setup = () => ''}) {
+            setup = () => '', files = null}) {
         this.setup = setup;
+        this.files = files || (() => []);
         this.editor = editor;
         this.vars = vars;
         this.offset = offset;
@@ -159,8 +161,11 @@ export class RemoteSession {
         }
         const ws = this.ws = new WebSocket(`${grant.url}?token=${encodeURIComponent(grant.token)}`);
         let finished = false;
-        ws.onopen = () => ws.send(JSON.stringify({type: 'start', lang: this.lang(), code: this.program(), stdin,
-            debug, step, breakpoints, setup: this.setup()}));
+        ws.onopen = () => {
+            const inputFiles = this.files();
+            ws.send(JSON.stringify({type: 'start', lang: this.lang(), code: this.program(), stdin,
+                debug, step, breakpoints, setup: this.setup(), ...(inputFiles.length ? {files: inputFiles} : {})}));
+        };
         ws.onmessage = (event) => {
             const message = JSON.parse(event.data);
             switch (message.type) {
@@ -193,6 +198,11 @@ export class RemoteSession {
                     break;
                 case 'paused':
                     this.paused(message);
+                    break;
+                case 'files':
+                    if (Array.isArray(message.files) && message.files.length) {
+                        this.panel.append(filesAfterRun(s, message.files));
+                    }
                     break;
                 case 'exit':
                     finished = true;
