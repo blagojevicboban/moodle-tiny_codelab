@@ -10,12 +10,10 @@
   <p><strong>Live demo:</strong> try the CodeLab plugins on <a href="https://codelab.tsp.edu.rs" target="_blank" rel="noreferrer noopener">codelab.tsp.edu.rs</a>. Look around as a guest (Python runs in the browser), or use the demo accounts <strong>teacher</strong> and <strong>student</strong> (password <strong>Demo-2026</strong>) to run every language, the debugger and SQL. Everything is reset every night.</p>
 
   <hr>
-  <p><strong>What's New in v1.13.4</strong></p>
+  <p><strong>What's New in v1.14.0</strong></p>
   <ul>
-    <li><strong>Review fixes:</strong> the speed test uses Moodle's HTTP client, so proxy settings apply.</li>
-    <li><strong>From 1.13.3, zoom:</strong> Ctrl and the mouse wheel, plus or minus, or 0 for the default size; all editors follow, which helps on a projector. Alt+Z turns word wrap on and off.</li>
-    <li><strong>From 1.13.3, tooltips:</strong> rest the mouse on a variable while stepping to see its value, on a keyword, an operator or a printf / scanf format such as %5.2lf for a short explanation, and on a number to see it in hexadecimal, binary and octal.</li>
-    <li><strong>From 1.13.3, easier to read code:</strong> sticky scroll keeps the enclosing function and loop on top, and bracket pairs are coloured with a guide line.</li>
+    <li><strong>Call tree:</strong> while a program is followed step by step, every call of a function is drawn under the call that made it, with its arguments and, in Python, the value it returned. Calls made again with the same arguments are amber, so the repeated work of a recursive Fibonacci is easy to see. Python and C/C++, and it follows step back.</li>
+    <li><strong>From 1.13.3:</strong> zoom with Ctrl and the mouse wheel, word wrap with Alt+Z, sticky scroll, coloured bracket pairs, and tooltips with the value of a variable while stepping, help on keywords, operators and printf / scanf formats, and numbers in other bases. 1.13.4 sends the speed test through Moodle's HTTP client.</li>
   </ul>
 
   <hr>
@@ -26,7 +24,7 @@
     <li><strong>Run on Jobe or the CodeLab runner:</strong> choose the server for running and grading, with a page that tests the servers. Rate and size limits per user.</li>
     <li><strong>Interactive runs:</strong> with the CodeLab runner, programs ask for their input while they run, as in a terminal.</li>
     <li><strong>Python in the browser:</strong> with Pyodide, input asks for the input while the program runs. Step goes line by line with the variables, and Stop also ends an endless loop.</li>
-    <li><strong>Debugger:</strong> breakpoints, Step over and out, call stack, step back and a timeline, for Python and C/C++.</li>
+    <li><strong>Debugger:</strong> breakpoints, Step over and out, call stack and call tree, step back and a timeline, for Python and C/C++.</li>
     <li><strong>Memory view:</strong> frames and the objects their variables point to, with arrows; C and C++ pointers too, down a linked list to NULL.</li>
     <li><strong>Complexity:</strong> a Python example runs for sizes n from 10 to 500, its steps are drawn beside n, n log n and n&sup2;, and the growth is named.</li>
     <li><strong>Flowchart bridge:</strong> with the Algorithm plugins, Python examples are drawn as flowcharts, and a flowchart opens as a CodeLab example.</li>

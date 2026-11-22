@@ -161,6 +161,75 @@ html.tiny_codelab-noscroll body {
     outline-offset: -2px;
 }
 
+/* Call tree of a Step run (tiny_codelab/calltree). */
+.tiny_codelab-calltree-summary {
+    margin: 0 0 .25rem;
+    color: #4b5563;
+    font-size: .85rem;
+}
+
+.tiny_codelab-calltree-scroll {
+    overflow: auto;
+    max-height: 22rem;
+}
+
+.tiny_codelab-calltree-svg {
+    display: block;
+    font-family: SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 12px;
+}
+
+.tiny_codelab-calltree-edge {
+    stroke: #94a3b8;
+    stroke-width: 1.2;
+}
+
+.tiny_codelab-calltree-node {
+    cursor: pointer;
+}
+
+.tiny_codelab-calltree-node rect {
+    fill: #fff;
+    stroke: #64748b;
+    stroke-width: 1.2;
+}
+
+.tiny_codelab-calltree-node text {
+    fill: #1f2937;
+}
+
+.tiny_codelab-calltree-done rect {
+    fill: #f1f5f9;
+}
+
+.tiny_codelab-calltree-repeated rect {
+    fill: #fde68a;
+    stroke: #b45309;
+}
+
+.tiny_codelab-calltree-waiting rect {
+    fill: #dbeafe;
+    stroke: #2563eb;
+}
+
+.tiny_codelab-calltree-current rect {
+    fill: #2563eb;
+    stroke: #1e40af;
+    stroke-width: 2;
+}
+
+.tiny_codelab-calltree-current text {
+    fill: #fff;
+}
+
+.tiny_codelab-calltree-svg .tiny_codelab-calltree-value {
+    fill: #047857;
+    font-size: 11px;
+    paint-order: stroke;
+    stroke: #fff;
+    stroke-width: 3px;
+}
+
 /* Slider over the record of a Step run, and the console as it was at an older stop (tiny_codelab/timeline). */
 .tiny_codelab-timeline-range {
     flex: 1 1 10rem;

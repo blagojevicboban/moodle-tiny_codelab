@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.14.0 (2026-11-22)
+
+- Call tree in the debugger: while a program is followed step by step (Python in the browser, C and C++ under gdb on
+  the CodeLab runner), every call of a function is drawn under the call that made it, with its arguments read from the
+  function's parameters. In Python a finished call shows the value it returned. The running call is blue, the calls
+  waiting for it light blue, and a call made again with the same arguments is amber, so repeated work (fib(2) in
+  fib(4)) is easy to see. A summary counts the calls, the repeated ones and the deepest level; after 200 calls the rest
+  are only counted.
+- The tree follows Step back and the slider of the timeline, and a click on a call goes to its first stop.
+- The filter and the question type use this debugger, so they get the call tree with this version.
+
 ## 1.13.4 (2026-11-21)
 
 Fixes for the Moodle Plugins review:

@@ -114,7 +114,7 @@ const HARNESS = [
     '        frame = frame.f_back',
     '    return depth',
     '',
-    'def __codelab_stack(frame):',
+    'def __codelab_stack(frame, ret=None):',
     '    stack = []',
     '    heap = {}',
     '    while frame is not None and len(stack) < 30:',
@@ -122,7 +122,10 @@ const HARNESS = [
     '            stack.append({"func": frame.f_code.co_name, "line": frame.f_lineno,',
     '                          "vars": json.loads(__codelab_vars(frame)), "refs": __codelab_refs(frame, heap)})',
     '        frame = frame.f_back',
-    '    return json.dumps({"frames": stack, "heap": heap})',
+    '    out = {"frames": stack, "heap": heap}',
+    '    if ret is not None:',
+    '        out["ret"] = ret',
+    '    return json.dumps(out)',
     '',
     'def __codelab_trace(frame, event, arg):',
     '    if frame.f_code.co_filename != "<program>":',
@@ -147,7 +150,7 @@ const HARNESS = [
     '            depth = __codelab_depth(frame)',
     '            if depth == c.refDepth or (c.mode != "out" and depth < c.refDepth):',
     '                run_sync(c.step(caller.f_lineno, caller.f_code.co_name, __codelab_vars(caller),',
-    '                                __codelab_stack(caller), depth - 1))',
+    '                                __codelab_stack(caller, __codelab_short(arg)), depth - 1))',
     '    return __codelab_trace',
     '',
     'def __codelab_run(code, trace):',
@@ -353,9 +356,9 @@ const stopWorker = () => {
  * @property {function(): void} [onStarted] the program has started
  * @property {function(string, string): void} onOutput text and stream (out or err)
  * @property {function(): void} onInput the program waits for a line (answer with sendInput)
- * @property {function(number, string, Object<string, string>, Array, Object): void} [onLine] Step: line, function,
- *     variables, the call stack (frames of the program, innermost first: func, line, vars, refs) and the heap of the
- *     memory view (tiny_codelab/memview)
+ * @property {function(number, string, Object<string, string>, Array, Object, ?string): void} [onLine] Step: line,
+ *     function, variables, the call stack (frames of the program, innermost first: func, line, vars, refs), the heap of
+ *     the memory view (tiny_codelab/memview) and, at a stop right after a return, the value returned (for the call tree)
  * @property {function({status: string, message?: string}): void} onDone status ok, error, stopped or toolong
  */
 
@@ -404,7 +407,7 @@ export const runPython = (base, code, handlers, step = false, breakpoints = []) 
             handlers.onInput();
         } else if (m.type === 'line' && handlers.onLine) {
             const memory = JSON.parse(m.stack);
-            handlers.onLine(m.line, m.scope, JSON.parse(m.vars), memory.frames, memory.heap);
+            handlers.onLine(m.line, m.scope, JSON.parse(m.vars), memory.frames, memory.heap, memory.ret);
         } else if (m.type === 'toolong') {
             toolong = true;
         } else if (m.type === 'done') {

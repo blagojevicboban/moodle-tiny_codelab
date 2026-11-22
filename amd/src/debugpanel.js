@@ -28,6 +28,7 @@ import {getStrings} from 'core/str';
 import {component} from './common';
 import {MemoryView, buildView, indexNames} from './memview';
 import {Timeline, outputLength, outputUpTo} from './timeline';
+import {CallTree, drawCallTree} from './calltree';
 
 /**
  * Show variables in a panel; values changed since the last step are marked.
@@ -66,7 +67,7 @@ export const showVariables = (panel, vars, previous, title, empty) => {
 
 const KEYS = ['stepover', 'stepout', 'autostep', 'autostop', 'speed', 'callstack', 'tracetable', 'traceline', 'variables',
     'novariables', 'mainprogram', 'stepback', 'stepforward', 'stepagain', 'timeline', 'timelinepos', 'timelineend',
-    'timelinepast', 'timelinepastended', 'memory', 'memref', 'memmore'];
+    'timelinepast', 'timelinepastended', 'memory', 'memref', 'memmore', 'calltree', 'calltreesummary', 'calltreemore'];
 let strings = null;
 
 /** Most rows the trace table shows. */
@@ -120,6 +121,7 @@ export class DebugPanel {
         this.root = root;
         this.actions = actions;
         this.timeline = new Timeline();
+        this.calls = new CallTree(() => this.actions.source?.() || '');
         this.view = -1;
         this.ended = false;
         this.selected = 0;
@@ -136,6 +138,7 @@ export class DebugPanel {
         this.stopAuto();
         this.showConsole(true);
         this.timeline.clear();
+        this.calls.reset();
         this.actions.values?.(null);
         this.view = -1;
         this.ended = false;
@@ -170,13 +173,16 @@ export class DebugPanel {
      *     lines in the editor (0 for a line of the hidden code)
      * @param {?Object} [pause.heap] objects of the memory view (Python)
      * @param {?Object<string, string>} [pause.targets] what the pointers point to (C and C++)
+     * @param {?string} [pause.ret] the value returned by the call that just ended (Python), for the call tree
      */
-    async show({line, stack, heap = null, targets = null}) {
+    async show({line, stack, heap = null, targets = null, ret = null}) {
         const s = await loadPanelStrings();
         const terminal = this.actions.terminal?.();
         const out = terminal ? outputLength(terminal.output) : 0;
         this.view = this.timeline.record({line, stack: stack.length ? stack : [{func: '', line, vars: {}}], out, heap,
             targets});
+        const snap = this.timeline.get(this.view);
+        this.calls.add({stack: snap.stack, step: snap.step, ret});
         this.selected = 0;
         this.render(s);
         if (this.auto) {
@@ -193,6 +199,7 @@ export class DebugPanel {
             return;
         }
         const s = await loadPanelStrings();
+        this.calls.finish();
         this.ended = true;
         this.view = this.positions - 1;
         this.selected = 0;
@@ -381,6 +388,9 @@ export class DebugPanel {
         if (memory) {
             this.root.append(memory);
         }
+        if (this.calls.hasCalls) {
+            this.root.append(this.callTreeSection(s, index));
+        }
         if (this.timeline.length > 1) {
             this.root.append(this.traceTable(s, index));
         }
@@ -414,6 +424,36 @@ export class DebugPanel {
         details.addEventListener('toggle', () => {
             this.memoryOpen = details.open;
             this.memoryView?.arrows();
+        });
+        return details;
+    }
+
+    /**
+     * The call tree as it was at the shown stop (at the end: the whole run). A click on a call shows its first stop.
+     *
+     * @param {Object<string, string>} s strings
+     * @param {number} index the stop
+     * @returns {HTMLDetailsElement}
+     */
+    callTreeSection(s, index) {
+        const atEnd = this.ended && this.view === this.timeline.length;
+        const step = atEnd ? Infinity : this.timeline.get(index).step;
+        const details = document.createElement('details');
+        details.className = 'tiny_codelab-calltree mt-2';
+        details.open = this.callTreeOpen ?? true;
+        const summary = document.createElement('summary');
+        summary.textContent = s.calltree;
+        const body = document.createElement('div');
+        details.append(summary, body);
+        drawCallTree(body, this.calls.at(step), s, (start) => {
+            const position = this.timeline.items.findIndex((item) => item.step >= start);
+            if (position >= 0) {
+                this.stopAuto();
+                this.goTo(position);
+            }
+        });
+        details.addEventListener('toggle', () => {
+            this.callTreeOpen = details.open;
         });
         return details;
     }

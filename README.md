@@ -14,7 +14,7 @@ Languages: **C**, **C++**, **Python**, **Java**, **C#**, **JavaScript** (Node.js
 This plugin is also the core of the CodeLab plugins. The filter and the question type use its editor, its runner and its
 Jobe client.
 
-> Status: **stable** (1.5.0).
+> Status: **stable**.
 
 > **Live demo:** [codelab.tsp.edu.rs](https://codelab.tsp.edu.rs) (look around as a guest, or use `teacher` / `student` with password `Demo-2026`; reset every night)
 
@@ -125,7 +125,12 @@ next is marked in the editor, and the debugger panel below the console shows:
   the same input** starts a new Step run with the input of the last one;
 - **Memory**: the frames and the objects their variables point to, with arrows (Python in the browser: lists, dicts,
   sets, objects of classes, two names of one object; C and C++: arrays, matrices, structs, std::vector). Lists and
-  arrays are cells (numbers also as bars), changed cells are green, index variables (a[i]) stand under their cell.
+  arrays are cells (numbers also as bars), changed cells are green, index variables (a[i]) stand under their cell;
+- **Call tree** (when the program calls a function): every call drawn under the call that made it, with its arguments
+  and, in Python, the value it returned. The running call is blue, the calls waiting for it light blue, and calls made
+  again with the same arguments are amber (the repeated work of a recursive Fibonacci). The tree follows Step back and
+  the slider; a click on a call shows its first stop. It is built from the stops, so calls run with Step over or Run
+  without a stop inside are not drawn.
 
 **Complexity** (Python in the browser, button of the example): the program runs for sizes n = 10 … 500 with an input
 from a template (`{n}`, `{random}`, `{sorted}`, `{reversed}`), the lines it runs are counted and drawn against n beside

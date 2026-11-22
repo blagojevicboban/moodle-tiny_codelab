@@ -141,7 +141,7 @@ export class PythonSession {
                     this.run.sendInput(line);
                 }
             },
-            onLine: (programLine, scope, vars, stack, heap) => {
+            onLine: (programLine, scope, vars, stack, heap, ret) => {
                 const lines = this.editor.getValue().split('\n').length;
                 const line = programLine - this.offset;
                 if (line < 1 || line > lines) {
@@ -151,7 +151,7 @@ export class PythonSession {
                 }
                 terminal.setStatus(s.paused.replace('{$a}', line), 'running');
                 this.editor.highlightLine(line);
-                this.debug.show({line, stack: editorStack(stack, this.offset, lines), heap});
+                this.debug.show({line, stack: editorStack(stack, this.offset, lines), heap, ret});
                 this.setState('paused');
             },
             onDone: ({status, message}) => {
