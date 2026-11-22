@@ -38,8 +38,8 @@ The three plugins are one family: `tiny_codelab` (core: Monaco editor, runners, 
 3. **Every string exists in all 15 shipped languages**: add each key to `lang/en` and to `sr_lt`, `sr_cr`, `de`, `fr`,
    `es`, `it`, `pt`, `pl`, `hr`, `bs`, `sl`, `mk`, `sk` and `cs`, in alphabetical order, with the same keys and the
    same placeholders (a machine translation is fine as a start; say in the pull request which languages you could not
-   check). `tests/lang.test.mjs` fails when a language misses a key or a placeholder. Croatian and Bosnian are
-   ijekavian with their own words (not Serbian, not Cyrillic), Macedonian is Cyrillic. Serbian is **ekavian**: rešenje, vrednost, posle, promenljiva, menjati, ocena (never
+   check). The Node test `lang.test.mjs` fails when a language misses a key or a placeholder. Croatian and Bosnian
+   are ijekavian with their own words (not Serbian, not Cyrillic), Macedonian is Cyrillic. Serbian is **ekavian**: rešenje, vrednost, posle, promenljiva, menjati, ocena (never
    rješenje, vrijednost, poslije, promjenljiva, mijenjati, ocjena). Every capability in `db/access.php` needs
    `$string['<plugin>:<capability>']`; filters also need `pluginname` besides `filtername`.
 4. **No larger HTML built in JavaScript.** Panels, dialogs and layouts go into `templates/*.mustache` rendered with
