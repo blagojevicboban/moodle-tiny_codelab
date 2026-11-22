@@ -45,6 +45,7 @@ class ai_hint extends external_api {
             'lang' => new external_value(PARAM_ALPHANUMEXT, 'Language of the program (c, cpp, python ...)'),
             'code' => new external_value(PARAM_RAW, 'The program'),
             'problem' => new external_value(PARAM_RAW, 'What the console showed: compiler messages or the error'),
+            'questionid' => new external_value(PARAM_INT, 'The question in a quiz, 0 elsewhere', VALUE_DEFAULT, 0),
         ]);
     }
 
@@ -55,16 +56,17 @@ class ai_hint extends external_api {
      * @param string $lang
      * @param string $code
      * @param string $problem
+     * @param int $questionid
      * @return array
      */
-    public static function execute(int $contextid, string $lang, string $code, string $problem): array {
+    public static function execute(int $contextid, string $lang, string $code, string $problem, int $questionid = 0): array {
         global $USER;
         $params = self::validate_parameters(self::execute_parameters(), ['contextid' => $contextid, 'lang' => $lang,
-            'code' => $code, 'problem' => $problem]);
+            'code' => $code, 'problem' => $problem, 'questionid' => $questionid]);
         $context = \context::instance_by_id($params['contextid']);
         self::validate_context($context);
         require_capability('tiny/codelab:aihint', $context);
-        if (!hint::available($context)) {
+        if (!hint::available($context, $params['questionid'])) {
             throw new \moodle_exception('aihintoff', 'tiny_codelab');
         }
         if (!\core_ai\manager::get_user_policy_status((int) $USER->id)) {

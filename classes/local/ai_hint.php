@@ -19,7 +19,7 @@ namespace tiny_codelab\local;
 /**
  * AI help (optional): with an AI provider of the site (Site administration, General, AI) a student can ask why a
  * program did not compile or stopped with an error. The answer explains and points to the place, never gives the
- * corrected program. Off by default, and never in a quiz.
+ * corrected program. Off by default; in a quiz only for a CodeLab question that allows it (qtype_codelab 1.12).
  *
  * @package    tiny_codelab
  * @copyright  2026 Boban Blagojević
@@ -34,16 +34,18 @@ class ai_hint {
 
     /**
      * Can the current user ask for AI help here: the site setting is on, an AI provider generates text (and is allowed
-     * in this context), the user has the capability, and the page is not a quiz.
+     * in this context), the user has the capability, and the page is not a quiz, or it is a quiz with a CodeLab question
+     * that allows AI explanations.
      *
      * @param \context $context the page
+     * @param int $questionid the question the student works on in a quiz, 0 elsewhere
      * @return bool
      */
-    public static function available(\context $context): bool {
+    public static function available(\context $context, int $questionid = 0): bool {
         if (!get_config('tiny_codelab', 'aihints') || !class_exists('\core_ai\manager') || !isloggedin() || isguestuser()) {
             return false;
         }
-        if (!has_capability('tiny/codelab:aihint', $context) || self::in_quiz($context)) {
+        if (!has_capability('tiny/codelab:aihint', $context) || !self::allowed_in($context, $questionid)) {
             return false;
         }
         try {
@@ -61,19 +63,56 @@ class ai_hint {
     }
 
     /**
-     * Whether a context is a quiz or inside one: the AI does not help during a test.
+     * Outside a quiz AI help is allowed; in a quiz only for a CodeLab question of that quiz with the option AI
+     * explanations (qtype_codelab 1.12), so it cannot be asked where the teacher did not allow it.
+     *
+     * @param \context $context the page
+     * @param int $questionid the question, 0 when not known
+     * @return bool
+     */
+    public static function allowed_in(\context $context, int $questionid): bool {
+        global $DB;
+        $cm = self::quiz_of($context);
+        if (!$cm) {
+            return true;
+        }
+        if (!$questionid || !$DB->get_manager()->field_exists('qtype_codelab_options', 'aihints')) {
+            return false;
+        }
+        $sql = "SELECT 1
+                  FROM {quiz_slots} qs
+                  JOIN {question_references} qr ON qr.itemid = qs.id AND qr.component = 'mod_quiz'
+                       AND qr.questionarea = 'slot'
+                  JOIN {question_versions} qv ON qv.questionbankentryid = qr.questionbankentryid
+                  JOIN {qtype_codelab_options} o ON o.questionid = qv.questionid
+                 WHERE qs.quizid = :quizid AND qv.questionid = :questionid AND o.aihints = 1";
+        return $DB->record_exists_sql($sql, ['quizid' => $cm->instance, 'questionid' => $questionid]);
+    }
+
+    /**
+     * Whether a context is a quiz or inside one.
      *
      * @param \context $context
      * @return bool
      */
     public static function in_quiz(\context $context): bool {
+        return self::quiz_of($context) !== null;
+    }
+
+    /**
+     * The quiz a context belongs to, if any.
+     *
+     * @param \context $context
+     * @return \stdClass|null its course module
+     */
+    protected static function quiz_of(\context $context): ?\stdClass {
         foreach (array_merge([$context], $context->get_parent_contexts()) as $ctx) {
             if ($ctx->contextlevel == CONTEXT_MODULE) {
                 $cm = get_coursemodule_from_id('', $ctx->instanceid, 0, false, IGNORE_MISSING);
-                return $cm && $cm->modname === 'quiz';
+                return $cm && $cm->modname === 'quiz' ? $cm : null;
             }
         }
-        return false;
+        return null;
     }
 
     /**

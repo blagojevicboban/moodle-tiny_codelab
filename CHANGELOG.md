@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.19.0 (2026-11-22)
+
+- AI explanations of errors in quizzes: allowed only for a CodeLab question of that quiz with the option AI
+  explanations (qtype_codelab 1.12); the web service tiny_codelab_ai_hint takes the question id and checks it.
+  Everywhere else in a quiz the button is still never shown.
+
 ## 1.18.0 (2026-11-22)
 
 - Every block saved with the dialog gets an id (class codelab-id- and eight letters or digits), kept when the block is

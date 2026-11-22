@@ -136,7 +136,8 @@ next is marked in the editor, and the debugger panel below the console shows:
 General, AI) and the setting *AI explanations of errors*, a button under a compiler message or an error in the console
 of an example asks the AI to explain it. The AI gets the program and the console messages, answers in the language of
 the user and is told never to write the fix. A limit per user and hour (10 by default), the capability
-`tiny/codelab:aihint`, never in a quiz.
+`tiny/codelab:aihint`. In a quiz only for a CodeLab question with the option *AI explanations*
+(qtype_codelab 1.12).
 
 **Templates** (dialog): a list beside the language inserts a small complete program with a fitting input: reading an
 array, bubble sort, binary search, a matrix, records and recursion (C, C++, Python, Java, C#; JavaScript, PHP and

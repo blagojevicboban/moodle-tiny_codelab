@@ -81,13 +81,15 @@ export const consoleText = (panel) => {
  * @param {string} args.code
  * @param {string} args.problem
  * @param {HTMLElement} args.box
+ * @param {number} [args.questionid] the question in a quiz
  * @returns {Promise<void>}
  */
-export const ask = async({contextid, lang, code, problem, box}) => {
+export const ask = async({contextid, lang, code, problem, box, questionid = 0}) => {
     const s = await loadStrings();
     box.replaceChildren(para('tiny_codelab-aihint-wait', s.aihintasking));
     try {
-        const result = await Ajax.call([{methodname: 'tiny_codelab_ai_hint', args: {contextid, lang, code, problem}}])[0];
+        const args = {contextid, lang, code, problem, questionid};
+        const result = await Ajax.call([{methodname: 'tiny_codelab_ai_hint', args}])[0];
         const text = document.createElement('div');
         text.className = 'tiny_codelab-aihint-text';
         text.textContent = result.text;
@@ -98,7 +100,7 @@ export const ask = async({contextid, lang, code, problem, box}) => {
             box.replaceChildren();
             const modal = await PolicyModal.create();
             modal.getModal().on(CustomEvents.events.activate, modal.getActionSelector('save'), () => {
-                ask({contextid, lang, code, problem, box});
+                ask({contextid, lang, code, problem, box, questionid});
             });
             return;
         }
@@ -114,8 +116,9 @@ export const ask = async({contextid, lang, code, problem, box}) => {
  * @param {number} options.contextid the page
  * @param {function(): string} options.lang language of the program
  * @param {function(): string} options.code the program
+ * @param {number} [options.questionid] the question in a quiz (qtype_codelab)
  */
-export const watchErrors = (panel, {contextid, lang, code}) => {
+export const watchErrors = (panel, {contextid, lang, code, questionid = 0}) => {
     const offer = async() => {
         const status = panel.querySelector('.tiny_codelab-console-status');
         if (!status || !ERRORS.test(status.className) || panel.querySelector('.tiny_codelab-aihint')) {
@@ -138,7 +141,7 @@ export const watchErrors = (panel, {contextid, lang, code}) => {
         button.addEventListener('click', async() => {
             button.disabled = true;
             try {
-                await ask({contextid, lang: lang(), code: code(), problem: consoleText(panel), box});
+                await ask({contextid, lang: lang(), code: code(), problem: consoleText(panel), box, questionid});
             } finally {
                 button.disabled = false;
             }
