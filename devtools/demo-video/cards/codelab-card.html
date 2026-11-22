@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<!-- This file is part of Moodle - http://moodle.org/ (GNU GPL v3 or later). @copyright 2026 Boban Blagojević -->
+<html lang="en"><head><meta charset="utf-8"><title>codelab card</title>
+<style>
+  html, body { margin: 0; height: 100%; }
+  body { font-family: "Segoe UI", Roboto, Arial, sans-serif; color: #fff; display: flex; align-items: center;
+    justify-content: center; background: radial-gradient(circle at 25% 20%, #1d4ed8 0%, #0f172a 70%, #020617 100%); overflow: hidden; }
+  .glow { position: fixed; width: 700px; height: 700px; border-radius: 50%; background: radial-gradient(circle, rgba(56,189,248,.22), transparent 70%);
+    top: -180px; right: -120px; pointer-events: none; }
+  .wrap { text-align: center; max-width: 1420px; padding: 0 56px; opacity: 0; transform: translateY(22px) scale(.97);
+    animation: in .65s cubic-bezier(.16,1,.3,1) .08s forwards; }
+  @keyframes in { to { opacity: 1; transform: none; } }
+  .badge { display: inline-block; padding: 10px 24px; border-radius: 999px; background: rgba(56,189,248,.16);
+    border: 1.5px solid #38bdf8; color: #7dd3fc; font-size: 22px; font-weight: 700; letter-spacing: 2px; margin-bottom: 28px; }
+  .icons { display: flex; gap: 30px; justify-content: center; margin-bottom: 30px; }
+  .icons img { width: 116px; height: 116px; border-radius: 24px; box-shadow: 0 18px 45px rgba(0,0,0,.45);
+    opacity: 0; transform: scale(.8); animation: pop .5s cubic-bezier(.16,1,.3,1) forwards; }
+  .icons img:nth-child(1) { animation-delay: .18s; } .icons img:nth-child(2) { animation-delay: .3s; }
+  .icons img:nth-child(3) { animation-delay: .42s; }
+  @keyframes pop { to { opacity: 1; transform: none; } }
+  h1 { font-size: 88px; line-height: 1.04; margin: 0 0 22px; font-weight: 800; letter-spacing: -1.5px;
+    background: linear-gradient(90deg, #ffffff 0%, #93c5fd 55%, #38bdf8 100%); -webkit-background-clip: text; color: transparent; }
+  h2 { font-size: 62px; line-height: 1.1; margin: 0 0 18px; font-weight: 800; color: #fff; }
+  p { font-size: 36px; margin: 0; color: #e2e8f0; font-weight: 500; }
+  .steps { margin-top: 34px; font-size: 34px; font-weight: 700; color: #fbbf24; letter-spacing: .8px; }
+  .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; margin-top: 38px; text-align: left; }
+  .card { background: rgba(15,23,42,.78); border: 1.5px solid rgba(148,163,184,.28); border-radius: 20px; padding: 28px 30px;
+    box-shadow: 0 18px 40px rgba(0,0,0,.35); opacity: 0; transform: translateY(16px); animation: in .5s ease forwards; }
+  .card:nth-child(1) { animation-delay: .2s; border-color: #38bdf8; }
+  .card:nth-child(2) { animation-delay: .38s; border-color: #34d399; }
+  .card:nth-child(3) { animation-delay: .56s; border-color: #fbbf24; }
+  .card .tag { font-size: 16px; font-weight: 800; letter-spacing: 1.4px; text-transform: uppercase; margin-bottom: 10px; }
+  .card:nth-child(1) .tag { color: #38bdf8; } .card:nth-child(2) .tag { color: #34d399; } .card:nth-child(3) .tag { color: #fbbf24; }
+  .card h3 { font-size: 32px; margin: 0 0 12px; color: #fff; }
+  .card div.desc { font-size: 22px; line-height: 1.45; color: #cbd5e1; }
+  .links { margin-top: 34px; font-size: 31px; line-height: 1.65; color: #fff; }
+  .links b { color: #fbbf24; font-weight: 700; }
+  .small { margin-top: 28px; font-size: 26px; color: #93c5fd; font-weight: 600; }
+</style></head>
+<body><div class="glow"></div><div class="wrap" id="wrap"></div>
+<script>
+  const icons = '<div class="icons"><img src="tiny_codelab-icon.png" alt="">' +
+      '<img src="filter_codelab-icon.png" alt="">' +
+      '<img src="qtype_codelab-icon.png" alt=""></div>';
+  const cards = {
+    intro: '<div class="badge">MOODLE MARKETPLACE · OPEN SOURCE (GPL)</div>' + icons +
+        '<h1>RUN REAL CODE IN MOODLE.</h1>' +
+        '<p>Write, step, debug, visualize memory &amp; auto-grade in 8+ languages + SQL</p>' +
+        '<div class="steps">Write &nbsp;·&nbsp; Step Back &nbsp;·&nbsp; Flowchart &nbsp;·&nbsp; Auto-Grade</div>',
+    runners: '<div class="badge">FLEXIBLE EXECUTION ARCHITECTURE</div>' +
+        '<h2>Choose How Code Runs</h2>' +
+        '<p>Mix and match per course or question — zero lock-in</p>' +
+        '<div class="grid">' +
+          '<div class="card"><div class="tag">Zero Server Setup</div><h3>In-Browser</h3><div class="desc">Python (Pyodide) &amp; JS run locally in the student\'s browser with instant Step Back &amp; Memory View.</div></div>' +
+          '<div class="card"><div class="tag">Free Self-Hosted</div><h3>Jobe &amp; CodeRunner</h3><div class="desc">Connect your own free Moodle Jobe server or migrate existing CodeRunner questions in one click.</div></div>' +
+          '<div class="card"><div class="tag">Turnkey Cloud</div><h3>Hosted Paid Runner</h3><div class="desc">Managed high-speed sandbox (codelab.tsp.edu.rs) — instant setup, zero Docker/server maintenance.</div></div>' +
+        '</div>',
+    admin: '<div class="badge">SITE ADMINISTRATION · PLUGINS · CODELAB</div>' +
+        '<h2>Admin Plugin Settings</h2>' +
+        '<p>Configure once for the whole Moodle site</p>' +
+        '<div class="grid">' +
+          '<div class="card"><div class="tag">Execution</div><h3>Runner &amp; Jobe URL</h3><div class="desc">Set Jobe / Hosted Runner URL, API key, timeouts, memory limits, and allowed languages.</div></div>' +
+          '<div class="card"><div class="tag">Editor &amp; Mode</div><h3>In-Browser &amp; Exam</h3><div class="desc">Toggle client-side Python, Monaco autocomplete/hints, and strict exam mode (no typing help).</div></div>' +
+          '<div class="card"><div class="tag">Ecosystem</div><h3>Algorithm Bridge</h3><div class="desc">Enable one-click Flowchart generation linking CodeLab directly with tiny_algorithm.</div></div>' +
+        '</div>',
+    outro: icons + '<h1>Free on the Moodle Marketplace</h1>' +
+        '<div class="links"><b>tiny_codelab</b> &nbsp; Monaco code editor in Atto/TinyMCE<br><b>filter_codelab</b> &nbsp; Run, Debug, Memory, Complexity, SQL &amp; Flowchart' +
+        '<br><b>qtype_codelab</b> &nbsp; auto-graded coding, SQL &amp; Parsons quizzes</div>' +
+        '<div class="small">Try live: codelab.tsp.edu.rs &nbsp;·&nbsp; Moodle 4.5 – 5.3</div>',
+  };
+  document.getElementById('wrap').innerHTML = cards[location.hash.slice(1)] || cards.intro;
+</script></body></html>

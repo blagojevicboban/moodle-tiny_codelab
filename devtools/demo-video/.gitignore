@@ -1,0 +1,7 @@
+frames-*/
+*.mp4
+*.gif
+*.wav
+*.mp3
+*.clicks.json
+error-*.png
