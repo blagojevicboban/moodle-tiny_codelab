@@ -58,7 +58,12 @@ final class ai_hint_test extends \advanced_testcase {
             return $response;
         });
         \core\di::set(\core_ai\manager::class, $manager);
-        return \context_module::instance($page->cmid);
+        $context = \context_module::instance($page->cmid);
+        if (!\tiny_codelab\local\ai_hint::available($context)) {
+            // Moodle 4.5: the AI manager cannot be replaced like this (its checks do not go through the instance).
+            $this->markTestSkipped('The AI manager of this Moodle version cannot be replaced in a test.');
+        }
+        return $context;
     }
 
     public function test_explains_with_the_program_and_the_messages(): void {
