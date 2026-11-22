@@ -230,6 +230,32 @@ html.tiny_codelab-noscroll body {
     stroke-width: 3px;
 }
 
+/* Turtle graphics of Python in the browser, under the console (tiny_codelab/turtle). */
+.tiny_codelab-turtle {
+    margin-top: .5rem;
+}
+
+.tiny_codelab-turtle-svg {
+    display: block;
+    width: 100%;
+    height: 22rem;
+    max-height: 70vh;
+    background: #fff;
+    border: 1px solid #dee2e6;
+    border-radius: .25rem;
+}
+
+.tiny_codelab-turtle-marker {
+    stroke: #fff;
+    stroke-width: 1;
+}
+
+.tiny_codelab-turtle-note {
+    margin: .25rem 0 0;
+    color: #4b5563;
+    font-size: .85rem;
+}
+
 /* Slider over the record of a Step run, and the console as it was at an older stop (tiny_codelab/timeline). */
 .tiny_codelab-timeline-range {
     flex: 1 1 10rem;
@@ -389,8 +415,8 @@ pre.codelab.codelab-theme-vs-dark.codelab-run::after {
 
 /* High Contrast Dark theme cards */
 pre.codelab.codelab-theme-hc-black {
-    background-color: #000000;
-    color: #ffffff;
+    background-color: #000;
+    color: #fff;
     border-color: #6fc3df;
     border-left-color: #6fc3df;
 }
@@ -402,7 +428,7 @@ pre.codelab.codelab-theme-hc-black::before {
 }
 
 pre.codelab.codelab-theme-hc-black.codelab-run::after {
-    background: #000000;
+    background: #000;
     color: #6fc3df;
     border-color: #6fc3df;
 }

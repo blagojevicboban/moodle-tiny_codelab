@@ -328,5 +328,7 @@ $string['timelinepastended'] = '{$a}: prikazan je raniji korak. Program je zavr�
 $string['timelinepos'] = 'Korak {$a->n} od {$a->m}';
 $string['traceline'] = 'Red';
 $string['tracetable'] = 'Tabela praćenja';
+$string['turtle'] = 'Crtež kornjače';
+$string['turtlelimit'] = 'Nacrtano je samo prvih {$a} linija.';
 $string['variables'] = 'Promenljive';
 $string['viewerlabel'] = 'Program ({$a})';

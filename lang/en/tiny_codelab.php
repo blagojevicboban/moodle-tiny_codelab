@@ -335,5 +335,7 @@ $string['timelinepos'] = 'Step {$a->n} of {$a->m}';
 $string['toggletheme'] = 'Toggle theme (Light / Dark)';
 $string['traceline'] = 'Line';
 $string['tracetable'] = 'Trace table';
+$string['turtle'] = 'Turtle drawing';
+$string['turtlelimit'] = 'Only the first {$a} lines are drawn.';
 $string['variables'] = 'Variables';
 $string['viewerlabel'] = '{$a} program';

@@ -24,6 +24,8 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+import {TURTLE_PY} from './turtle';
+
 /** Most characters of output passed on; then the program is stopped (an endless print would freeze the page). */
 const MAX_OUTPUT = 200000;
 
@@ -33,7 +35,18 @@ const HARNESS = [
     'import js',
     'from pyodide.ffi import run_sync',
     '',
+    'def __codelab_tflush():',
+    '    m = sys.modules.get("turtle")',
+    '    if m is not None and hasattr(m, "_flush"):',
+    '        m._flush()',
+    '',
+    'def __codelab_turtle_install():',
+    '    m = types.ModuleType("turtle")',
+    '    exec(compile(__codelab_turtle_src, "<turtle>", "exec"), m.__dict__)',
+    '    sys.modules["turtle"] = m',
+    '',
     'def __codelab_input(prompt=""):',
+    '    __codelab_tflush()',
     '    if prompt:',
     '        sys.stdout.write(str(prompt))',
     '        sys.stdout.flush()',
@@ -140,6 +153,7 @@ const HARNESS = [
     '            stop = mode == "step" or (mode == "next" and depth <= c.refDepth) or (mode == "out" and depth < c.refDepth)',
     '        if stop:',
     '            depth = depth or __codelab_depth(frame)',
+    '            __codelab_tflush()',
     '            run_sync(c.step(frame.f_lineno, frame.f_code.co_name, __codelab_vars(frame), __codelab_stack(frame), depth))',
     '    elif event == "return":',
     '        # The caller goes on in the middle of its line, without a line event: stop there when the function that',
@@ -149,12 +163,16 @@ const HARNESS = [
     '        if c.mode != "continue" and caller is not None and caller.f_code.co_filename == "<program>":',
     '            depth = __codelab_depth(frame)',
     '            if depth == c.refDepth or (c.mode != "out" and depth < c.refDepth):',
+    '                __codelab_tflush()',
     '                run_sync(c.step(caller.f_lineno, caller.f_code.co_name, __codelab_vars(caller),',
     '                                __codelab_stack(caller, __codelab_short(arg)), depth - 1))',
     '    return __codelab_trace',
     '',
     'def __codelab_run(code, trace):',
     '    builtins.input = __codelab_input',
+    '    sys.modules.pop("turtle", None)',
+    '    if "turtle" in code:',
+    '        __codelab_turtle_install()',
     '    try:',
     '        compiled = compile(code, "<program>", "exec")',
     '    except SyntaxError as e:',
@@ -174,6 +192,10 @@ const HARNESS = [
     '        return "error"',
     '    finally:',
     '        sys.settrace(None)',
+    '        try:',
+    '            __codelab_tflush()',
+    '        except Exception:',
+    '            pass',
     '        sys.stdout.flush()',
     '        sys.stderr.flush()',
     '',
@@ -233,6 +255,7 @@ const HARNESS = [
 const workerSource = (base) => `
 import {loadPyodide} from ${JSON.stringify(base + 'pyodide.mjs')};
 const HARNESS = ${JSON.stringify(HARNESS)};
+const TURTLE = ${JSON.stringify(TURTLE_PY)};
 let pyodide = null;
 let pendingLine = null;
 let pendingStep = null;
@@ -242,6 +265,7 @@ const decoder = new TextDecoder();
 // breakpoints).
 let breakpoints = new Set();
 self.codelab = {
+    turtle: (events) => postMessage({type: 'turtle', events}),
     mode: 'continue',
     refDepth: 0,
     isBreakpoint: (line) => breakpoints.has(line),
@@ -310,6 +334,7 @@ onmessage = async(e) => {
             breakpoints = new Set(m.breakpoints || []);
             self.codelab.mode = m.step ? 'step' : 'continue';
             pyodide.globals.set('__codelab_code', m.code);
+            pyodide.globals.set('__codelab_turtle_src', TURTLE);
             // The tracer slows the program down: only when it may stop.
             pyodide.globals.set('__codelab_step', m.step || breakpoints.size > 0);
             postMessage({type: 'started'});
@@ -356,6 +381,7 @@ const stopWorker = () => {
  * @property {function(): void} [onStarted] the program has started
  * @property {function(string, string): void} onOutput text and stream (out or err)
  * @property {function(): void} onInput the program waits for a line (answer with sendInput)
+ * @property {function(Array<Object>): void} [onTurtle] events of turtle graphics (tiny_codelab/turtle)
  * @property {function(number, string, Object<string, string>, Array, Object, ?string): void} [onLine] Step: line,
  *     function, variables, the call stack (frames of the program, innermost first: func, line, vars, refs), the heap of
  *     the memory view (tiny_codelab/memview) and, at a stop right after a return, the value returned (for the call tree)
@@ -408,6 +434,8 @@ export const runPython = (base, code, handlers, step = false, breakpoints = []) 
         } else if (m.type === 'line' && handlers.onLine) {
             const memory = JSON.parse(m.stack);
             handlers.onLine(m.line, m.scope, JSON.parse(m.vars), memory.frames, memory.heap, memory.ret);
+        } else if (m.type === 'turtle') {
+            handlers.onTurtle?.(JSON.parse(m.events));
         } else if (m.type === 'toolong') {
             toolong = true;
         } else if (m.type === 'done') {

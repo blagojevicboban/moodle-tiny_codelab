@@ -132,6 +132,10 @@ next is marked in the editor, and the debugger panel below the console shows:
   the slider; a click on a call shows its first stop. It is built from the stops, so calls run with Step over or Run
   without a stop inside are not drawn.
 
+**Turtle graphics** (Python in the browser): `import turtle` draws under the console, as with the standard module
+(forward, left, circle, goto, penup, color, begin_fill, dot, write, Turtle objects, Screen with bgcolor). Lines are
+animated by `speed()` (0 draws at once), and Step shows the drawing line by line.
+
 **Complexity** (Python in the browser, button of the example): the program runs for sizes n = 10 … 500 with an input
 from a template (`{n}`, `{random}`, `{sorted}`, `{reversed}`), the lines it runs are counted and drawn against n beside
 n, n log n and n², and the growth is named. **Keep for comparison** puts a second version on the same chart.

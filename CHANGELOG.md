@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.15.0 (2026-11-22)
+
+- Turtle graphics for Python in the browser: `import turtle` gives a module that follows the standard one (the real
+  module needs Tk, which the browser does not have). The turtle starts at (0, 0) looking east; forward, back, left,
+  right, goto, setx, sety, setheading, home, circle (with extent and steps), penup, pendown, pencolor, fillcolor, color,
+  pensize, speed, begin_fill and end_fill, dot, write, hideturtle, showturtle, position, heading, distance, towards,
+  clear and reset, as module functions and as methods of Turtle objects; Screen with bgcolor and colormode, and done,
+  mainloop and exitonclick do nothing.
+- The drawing appears under the console while the program runs, fitted to the panel. Lines are animated by speed()
+  (0 draws at once), and Step shows the turtle draw line by line. After 20000 lines the rest is only counted.
+- Typing help knows the turtle functions.
+
 ## 1.14.0 (2026-11-22)
 
 - Call tree in the debugger: while a program is followed step by step (Python in the browser, C and C++ under gdb on

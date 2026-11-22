@@ -27,9 +27,10 @@ import {component} from './common';
 import {runPython} from './python';
 import {Terminal} from './terminal';
 import {DebugPanel} from './debugpanel';
+import {TurtleView} from './turtle';
 
 const KEYS = ['loadingpython', 'running_browser', 'paused', 'status_ok', 'status_runtime', 'status_stopped',
-    'status_toolong', 'inputline', 'inputok'];
+    'status_toolong', 'inputline', 'inputok', 'turtle', 'turtlelimit'];
 let strings = null;
 
 /**
@@ -117,6 +118,8 @@ export class PythonSession {
         // The lines the program read, for Step again with the same input.
         let given = '';
         this.terminal = new Terminal(this.panel, s.inputline, s.inputok);
+        // The console was emptied: a drawing of turtle graphics comes back with the first event of this run.
+        let turtle = null;
         this.terminal.setStatus(s.running_browser, 'running');
         this.debug.reset();
         this.editor.highlightLine(null);
@@ -128,6 +131,13 @@ export class PythonSession {
             onLoading: () => terminal.setStatus(s.loadingpython, 'running'),
             onStarted: () => terminal.setStatus(s.running_browser, 'running'),
             onOutput: (text, stream) => terminal.write(text, stream),
+            onTurtle: (events) => {
+                if (!turtle) {
+                    turtle = new TurtleView(s);
+                    this.panel.append(turtle.root);
+                }
+                turtle.add(events);
+            },
             onInput: async() => {
                 let line;
                 if (queue.length) {

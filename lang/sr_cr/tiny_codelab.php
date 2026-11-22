@@ -328,5 +328,7 @@ $string['timelinepastended'] = '{$a}: приказан је ранији кор�
 $string['timelinepos'] = 'Корак {$a->n} од {$a->m}';
 $string['traceline'] = 'Ред';
 $string['tracetable'] = 'Табела праћења';
+$string['turtle'] = 'Цртеж корњаче';
+$string['turtlelimit'] = 'Нацртано је само првих {$a} линија.';
 $string['variables'] = 'Променљиве';
 $string['viewerlabel'] = 'Програм ({$a})';
