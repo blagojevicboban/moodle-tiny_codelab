@@ -132,6 +132,12 @@ next is marked in the editor, and the debugger panel below the console shows:
   the slider; a click on a call shows its first stop. It is built from the stops, so calls run with Step over or Run
   without a stop inside are not drawn.
 
+**AI explanations of errors** (optional, off by default): with an AI provider of the site (Site administration,
+General, AI) and the setting *AI explanations of errors*, a button under a compiler message or an error in the console
+of an example asks the AI to explain it. The AI gets the program and the console messages, answers in the language of
+the user and is told never to write the fix. A limit per user and hour (10 by default), the capability
+`tiny/codelab:aihint`, never in a quiz.
+
 **Templates** (dialog): a list beside the language inserts a small complete program with a fitting input: reading an
 array, bubble sort, binary search, a matrix, records and recursion (C, C++, Python, Java, C#; JavaScript, PHP and
 Pascal the first and the last). An empty editor gets the template, otherwise it goes in at the cursor.

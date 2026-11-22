@@ -25,6 +25,13 @@
 defined('MOODLE_INTERNAL') || die();
 
 $definitions = [
+    // Times of each user's AI help requests in the last hour, for the limit per hour.
+    'aihints' => [
+        'mode' => cache_store::MODE_APPLICATION,
+        'simplekeys' => true,
+        'simpledata' => true,
+        'ttl' => 4000,
+    ],
     // Times of each user's runs in the last minute, for the limit of runs per minute.
     'runs' => [
         'mode' => cache_store::MODE_APPLICATION,

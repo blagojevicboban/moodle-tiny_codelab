@@ -25,6 +25,16 @@
  */
 
 $capabilities = [
+    'tiny/codelab:aihint' => [
+        'captype' => 'read',
+        'contextlevel' => CONTEXT_MODULE,
+        'archetypes' => [
+            'editingteacher' => CAP_ALLOW,
+            'teacher' => CAP_ALLOW,
+            'student' => CAP_ALLOW,
+            'manager' => CAP_ALLOW,
+        ],
+    ],
     'tiny/codelab:viewplugin' => [
         'captype' => 'write',
         'contextlevel' => CONTEXT_MODULE,

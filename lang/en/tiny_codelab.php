@@ -24,6 +24,17 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+$string['aihint'] = 'Explain the error (AI)';
+$string['aihintasking'] = 'Asking the AI...';
+$string['aihintfailed'] = 'The AI could not answer: {$a}';
+$string['aihintlimit'] = 'AI explanations per hour';
+$string['aihintlimit_desc'] = 'Most AI explanations one user can ask for in an hour (0: no limit).';
+$string['aihintlimitreached'] = 'You asked for {$a} explanations in the last hour, the most allowed. Try again later.';
+$string['aihintnote'] = 'The AI explains the message and points to the place; it does not write the fix. It can be wrong.';
+$string['aihintoff'] = 'AI explanations are not available here.';
+$string['aihintpolicy'] = 'Accept the AI policy of the site first.';
+$string['aihints'] = 'AI explanations of errors';
+$string['aihints_desc'] = 'With an AI provider of the site (Site administration, General, AI) readers of CodeLab examples can ask the AI to explain a compiler message or an error of their program. The AI gets the program and the messages of the console, and is told never to give the corrected program. Never offered in quizzes. Off by default.';
 $string['autostep'] = 'Auto step';
 $string['autostop'] = 'Pause';
 $string['backend'] = 'Server for running and grading';
@@ -48,6 +59,7 @@ $string['cloudkeyinvalid'] = 'The connection key is not valid, so it is not used
 $string['cloudstatus'] = 'Usage of the hosted runner';
 $string['cloudusage'] = 'Plan: {$a->plan} ({$a->status}). Used this month: {$a->used} / {$a->quota}. Expires: {$a->expires}.';
 $string['cloudusage_error'] = 'The hosted runner did not give the usage ({$a}). Check the connection key.';
+$string['codelab:aihint'] = 'Ask the AI to explain compiler messages and errors';
 $string['codelab:run'] = 'Run programs on the Jobe server';
 $string['codelab:viewplugin'] = 'Use the CodeLab editor plugin';
 $string['compiling'] = 'Compiling…';

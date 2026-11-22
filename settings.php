@@ -174,4 +174,24 @@ if ($ADMIN->fulltree) {
         get_string('runnerstatus', 'tiny_codelab'),
         $refresh ? \tiny_codelab\local\interactive::status_html() : ''
     ));
+
+    // AI help with the AI provider of the site: optional, off by default.
+    $settings->add(new admin_setting_heading(
+        'tiny_codelab/aiheading',
+        get_string('aihints', 'tiny_codelab'),
+        ''
+    ));
+    $settings->add(new admin_setting_configcheckbox(
+        'tiny_codelab/aihints',
+        get_string('aihints', 'tiny_codelab'),
+        get_string('aihints_desc', 'tiny_codelab'),
+        0
+    ));
+    $settings->add(new admin_setting_configtext(
+        'tiny_codelab/aihintlimit',
+        get_string('aihintlimit', 'tiny_codelab'),
+        get_string('aihintlimit_desc', 'tiny_codelab'),
+        10,
+        PARAM_INT
+    ));
 }

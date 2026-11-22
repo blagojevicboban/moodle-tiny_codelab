@@ -230,6 +230,35 @@ html.tiny_codelab-noscroll body {
     stroke-width: 3px;
 }
 
+/* AI help under an error in the console (tiny_codelab/aihint). */
+.tiny_codelab-aihint-box:empty {
+    display: none;
+}
+
+.tiny_codelab-aihint-box {
+    margin-top: .5rem;
+    padding: .5rem .75rem;
+    border-left: 3px solid #6f42c1;
+    background: #f8f5ff;
+    color: #1d2125;
+}
+
+.tiny_codelab-aihint-note,
+.tiny_codelab-aihint-wait {
+    margin: 0 0 .25rem;
+    color: #4b5563;
+    font-size: .85rem;
+}
+
+.tiny_codelab-aihint-text {
+    white-space: pre-wrap;
+}
+
+.tiny_codelab-aihint-error {
+    margin: 0;
+    color: #ca3120;
+}
+
 /* Turtle graphics of Python in the browser, under the console (tiny_codelab/turtle). */
 .tiny_codelab-turtle {
     margin-top: .5rem;

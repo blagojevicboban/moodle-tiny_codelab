@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.17.0 (2026-11-22)
+
+- AI explanations of errors (optional, off by default): with an AI provider of the site (Site administration, General,
+  AI), a button under a compiler message or an error in the console of an example asks the AI to explain it. The AI
+  gets the program and the messages of the console, and is told to answer in the language of the user, in a few
+  sentences, without writing the corrected program. Settings AI explanations of errors and AI explanations per hour
+  (10 by default), capability tiny/codelab:aihint, web service tiny_codelab_ai_hint. Never offered in a quiz. The AI
+  policy of Moodle is accepted first when the user has not done it yet.
+
 ## 1.16.0 (2026-11-22)
 
 - Templates in the CodeLab dialog: a list beside the language inserts a small complete program. C, C++, Python, Java

@@ -33,6 +33,14 @@ $functions = [
         'loginrequired' => true,
         'capabilities' => 'tiny/codelab:run',
     ],
+    'tiny_codelab_ai_hint' => [
+        'classname' => 'tiny_codelab\external\ai_hint',
+        'description' => 'Ask the AI of the site to explain a compiler message or an error of a program.',
+        'type' => 'write',
+        'ajax' => true,
+        'loginrequired' => true,
+        'capabilities' => 'tiny/codelab:aihint',
+    ],
     'tiny_codelab_session' => [
         'classname' => 'tiny_codelab\external\session',
         'description' => 'A token for running a program interactively on the CodeLab runner.',

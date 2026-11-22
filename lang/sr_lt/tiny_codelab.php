@@ -24,6 +24,17 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+$string['aihint'] = 'Objasni grešku (AI)';
+$string['aihintasking'] = 'Pitam AI...';
+$string['aihintfailed'] = 'AI nije mogao da odgovori: {$a}';
+$string['aihintlimit'] = 'AI objašnjenja na sat';
+$string['aihintlimit_desc'] = 'Najviše AI objašnjenja koja jedan korisnik može da zatraži za sat vremena (0: bez ograničenja).';
+$string['aihintlimitreached'] = 'Zatražili ste {$a} objašnjenja u poslednjih sat vremena, koliko je najviše dozvoljeno. Pokušajte kasnije.';
+$string['aihintnote'] = 'AI objašnjava poruku i pokazuje mesto; ne piše ispravku. Može da pogreši.';
+$string['aihintoff'] = 'AI objašnjenja ovde nisu dostupna.';
+$string['aihintpolicy'] = 'Prvo prihvatite pravila korišćenja AI na sajtu.';
+$string['aihints'] = 'AI objašnjenja grešaka';
+$string['aihints_desc'] = 'Sa AI provajderom sajta (Administracija sajta, Opšte, AI) čitaoci CodeLab primera mogu da zatraže od AI da objasni poruku kompajlera ili grešku njihovog programa. AI dobija program i poruke iz konzole, uz uputstvo da nikad ne daje ispravljen program. Nikad se ne nudi u testovima. Podrazumevano isključeno.';
 $string['autostep'] = 'Automatski korak';
 $string['autostop'] = 'Pauza';
 $string['backend'] = 'Server za izvršavanje i ocenjivanje';
@@ -48,6 +59,7 @@ $string['cloudkeyinvalid'] = 'Ključ za povezivanje nije ispravan, pa se ne kori
 $string['cloudstatus'] = 'Potrošnja hostovanog runnera';
 $string['cloudusage'] = 'Plan: {$a->plan} ({$a->status}). Iskorišćeno ovog meseca: {$a->used} / {$a->quota}. Ističe: {$a->expires}.';
 $string['cloudusage_error'] = 'Hostovani runner nije dao podatke o potrošnji ({$a}). Proverite ključ za povezivanje.';
+$string['codelab:aihint'] = 'Traženje od AI da objasni poruke kompajlera i greške';
 $string['codelab:run'] = 'Pokretanje programa na Jobe serveru';
 $string['codelab:viewplugin'] = 'Korišćenje dodatka CodeLab u editoru';
 $string['compiling'] = 'Prevođenje…';

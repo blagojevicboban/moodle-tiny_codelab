@@ -59,15 +59,20 @@ class runtime {
      *
      * @return array ['pyodide' => address of the Pyodide files ending with /, or '' when Python runs only on Jobe,
      *     'interactive' => languages that run on the interactive server, 'theme' => default editor theme,
-     *     'flowchart' => whether a Python example can be drawn as a flowchart (tiny_algorithm)]
+     *     'flowchart' => whether a Python example can be drawn as a flowchart (tiny_algorithm),
+     *     'aihints' => whether the reader can ask the AI to explain an error on this page]
      */
     public static function config(): array {
+        global $PAGE;
         $theme = (string) get_config('tiny_codelab', 'theme');
+        $context = $PAGE->context ?? \context_system::instance();
         return [
             'pyodide' => self::pyodide(),
             'interactive' => interactive::languages(),
             'theme' => $theme !== '' ? $theme : 'auto',
             'flowchart' => self::flowchart(),
+            'aihints' => ai_hint::available($context),
+            'contextid' => $context->id,
         ];
     }
 }
