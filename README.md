@@ -132,6 +132,10 @@ next is marked in the editor, and the debugger panel below the console shows:
   the slider; a click on a call shows its first stop. It is built from the stops, so calls run with Step over or Run
   without a stop inside are not drawn.
 
+**Templates** (dialog): a list beside the language inserts a small complete program with a fitting input: reading an
+array, bubble sort, binary search, a matrix, records and recursion (C, C++, Python, Java, C#; JavaScript, PHP and
+Pascal the first and the last). An empty editor gets the template, otherwise it goes in at the cursor.
+
 **Turtle graphics** (Python in the browser): `import turtle` draws under the console, as with the standard module
 (forward, left, circle, goto, penup, color, begin_fill, dot, write, Turtle objects, Screen with bgcolor). Lines are
 animated by `speed()` (0 draws at once), and Step shows the drawing line by line.

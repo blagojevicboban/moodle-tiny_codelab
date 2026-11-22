@@ -26,6 +26,7 @@ import Templates from 'core/templates';
 import {getString, getStrings} from 'core/str';
 import {getContextId} from 'editor_tiny/options';
 import {component, languages, defaultLanguage, setupLanguages, defaultTheme} from './common';
+import {TEMPLATE_KEYS, templatesFor} from './codetemplates';
 import {readBlock, blockHtml, isBlock, stdinOf, setupOf} from './embed';
 import {createEditor} from './monaco';
 import {run} from './runner';
@@ -190,10 +191,44 @@ export const openDialog = async(editor) => {
     };
     showPythonButtons();
 
+    // Templates of the language: an empty editor gets the template (and its input, when the input is empty), otherwise
+    // the template goes in at the cursor.
+    const templateNames = await getStrings(TEMPLATE_KEYS.map((key) => ({key: `tpl_${key}`, component})));
+    const templateSelect = region('template');
+    const showTemplates = () => {
+        const list = templatesFor(langSelect.value);
+        templateSelect.querySelectorAll('option:not([value=""])').forEach((o) => o.remove());
+        list.forEach(({key}) => {
+            const option = document.createElement('option');
+            option.value = key;
+            option.textContent = templateNames[TEMPLATE_KEYS.indexOf(key)];
+            templateSelect.append(option);
+        });
+        templateSelect.value = '';
+        region('templatefield').hidden = !list.length;
+    };
+    showTemplates();
+    templateSelect.addEventListener('change', () => {
+        const chosen = templatesFor(langSelect.value).find((t) => t.key === templateSelect.value);
+        templateSelect.value = '';
+        if (!chosen) {
+            return;
+        }
+        if (code.getValue().trim() === '') {
+            code.setValue(chosen.code);
+            if (region('stdin').value.trim() === '') {
+                region('stdin').value = chosen.stdin;
+            }
+        } else {
+            code.insertText(chosen.code);
+        }
+    });
+
     langSelect.addEventListener('change', () => {
         code.setLanguage(langSelect.value);
         showPythonButtons();
         showSetup();
+        showTemplates();
     });
     themeSelect.addEventListener('change', () => {
         code.setTheme(themeSelect.value);

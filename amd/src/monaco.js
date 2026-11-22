@@ -187,6 +187,7 @@ const NO_ASSIST = {
  * @typedef {Object} CodeEditor
  * @property {function(): string} getValue
  * @property {function(string): void} setValue
+ * @property {function(string): void} insertText put text at the cursor (in place of the selection), as one undo step
  * @property {function(string): void} setLanguage
  * @property {function(string): void} setTheme
  * @property {function(boolean): void} setReadOnly
@@ -375,6 +376,12 @@ export const createEditor = async(container, options = {}) => {
             editor.getModel().codelab.values = values || null;
         },
         setValue: (value) => editor.setValue(value),
+        insertText: (text) => {
+            editor.pushUndoStop();
+            editor.executeEdits('tiny_codelab', [{range: editor.getSelection(), text, forceMoveMarkers: true}]);
+            editor.pushUndoStop();
+            editor.focus();
+        },
         setLanguage: (value) => monaco.editor.setModelLanguage(editor.getModel(), languages[value] || languages[defaultLanguage]),
         setTheme: (value) => {
             const actual = resolveTheme(value);

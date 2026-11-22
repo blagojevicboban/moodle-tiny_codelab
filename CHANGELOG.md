@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.16.0 (2026-11-22)
+
+- Templates in the CodeLab dialog: a list beside the language inserts a small complete program. C, C++, Python, Java
+  and C# have six: reading an array (sum, minimum, maximum), bubble sort, binary search, a matrix with the sums of its
+  rows, records (the best student) and recursion (factorial); JavaScript, PHP and Pascal have the first and the last.
+  An empty editor gets the template and, when the input is empty, an input that fits it; otherwise the template goes
+  in at the cursor. The names are in English, Serbian Latin and Serbian Cyrillic.
+
 ## 1.15.0 (2026-11-22)
 
 - Turtle graphics for Python in the browser: `import turtle` gives a module that follows the standard one (the real
