@@ -9,7 +9,8 @@
 The example is written in the code editor of VS Code ([Monaco](https://microsoft.github.io/monaco-editor/)).
 Readers can then edit and run it on the page (with [filter_codelab](https://github.com/blagojevicboban/moodle-filter_codelab)).
 
-Languages: **C**, **C++**, **Python**, **Java**, **C#**, **JavaScript** (Node.js), **Pascal** and **PHP**.
+Languages: **C**, **C++**, **Python**, **Java**, **C#**, **JavaScript** (Node.js), **Pascal**, **PHP** and
+**MySQL (MariaDB)** (with a CodeLab runner that has MariaDB, see [SQL](#sql-optional)).
 
 This plugin is also the core of the CodeLab plugins. The filter and the question type use its editor, its runner and its
 Jobe client.
