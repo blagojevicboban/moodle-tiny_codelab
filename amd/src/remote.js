@@ -30,6 +30,7 @@ import {Terminal} from './terminal';
 import {DebugPanel} from './debugpanel';
 import {editorStack, filesAfterRun} from './session';
 import {parseSanitizer, formatSanitizer} from './sanitizer';
+import {firstErrorLine, renderCompileHints} from './compilehint';
 
 const KEYS = ['compiling', 'running', 'running_server', 'inputline', 'inputok', 'endinput', 'status_ok', 'status_runtime',
     'status_time', 'status_memory', 'status_toolong', 'status_stopped', 'status_compile', 'status_error', 'status_notconfigured',
@@ -191,8 +192,7 @@ export class RemoteSession {
                     break;
                 case 'compile':
                     finished = true;
-                    this.terminal.write(message.output, 'err');
-                    this.end(s.status_compile, 'error');
+                    this.showCompileError(message.output, s);
                     break;
                 case 'running':
                     if (NO_INPUT.includes(this.lang())) {
@@ -373,6 +373,29 @@ export class RemoteSession {
             if (this.terminal.eofButton) {
                 this.terminal.output.append(this.terminal.eofButton);
             }
+        }
+    }
+
+    /**
+     * Handle a compilation failure: print output, highlight the first error line, and append beginner hints.
+     *
+     * @param {string} output raw compiler output
+     * @param {Object<string, string>} s strings
+     */
+    async showCompileError(output, s) {
+        this.terminal.write(output, 'err');
+        this.end(s.status_compile, 'error');
+        const line = firstErrorLine(output);
+        const shown = line > this.offset ? line - this.offset : line;
+        if (shown > 0) {
+            this.editor?.highlightLine(shown);
+        }
+        const hints = await renderCompileHints(output, {
+            offset: this.offset,
+            onLine: this.editor ? (l) => this.editor.highlightLine(l) : null,
+        });
+        if (hints && this.panel) {
+            this.panel.append(hints);
         }
     }
 

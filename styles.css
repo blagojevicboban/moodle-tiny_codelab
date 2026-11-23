@@ -230,6 +230,22 @@ html.tiny_codelab-noscroll body {
     stroke-width: 3px;
 }
 
+/* Compiler error explanations under compiler output (tiny_codelab/compilehint). */
+.tiny_codelab-cmphints-list li + li {
+    margin-top: .25rem;
+}
+
+.tiny_codelab-cmphints-line {
+    font-weight: 600;
+}
+
+.tiny_codelab-code {
+    padding: 0 .25rem;
+    border-radius: .2rem;
+    background: rgba(0, 0, 0, .06);
+    font-size: .92em;
+}
+
 /* AI help under an error in the console (tiny_codelab/aihint). */
 .tiny_codelab-aihint-box:empty {
     display: none;

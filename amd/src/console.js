@@ -24,6 +24,7 @@ import {getStrings} from 'core/str';
 import {component} from './common';
 import {announceEnd, announceStart} from './announce';
 import {filesAfterRun} from './session';
+import {renderCompileHints} from './compilehint';
 
 const STATUSES = ['ok', 'compile', 'runtime', 'time', 'memory', 'illegal', 'busy', 'error', 'notconfigured', 'nolanguage',
     'toolarge', 'ratelimit'];
@@ -90,6 +91,10 @@ export const showResult = async(panel, result) => {
     panel.append(status);
     if (result.cmpinfo) {
         panel.append(block(result.cmpinfo, 'compile'));
+        const hints = await renderCompileHints(result.cmpinfo);
+        if (hints) {
+            panel.append(hints);
+        }
     }
     if (result.stdout) {
         panel.append(block(result.stdout, 'output'));
