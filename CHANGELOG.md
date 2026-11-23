@@ -6,6 +6,22 @@
   so Jobe can run it. Before, the file was `Main.java` and Jobe found no class `Main` to run. CodeLab runner 0.16.1
   names the file the same way.
 
+## 1.23.0 (2026-11-23)
+
+- Compiler profiles for C and C++: GCC, Clang, or an MSVC compatibility mode with the headers and safe functions of
+  Visual Studio (conio.h, windows.h, scanf_s with sizes, fopen_s, strcpy_s), and the language standard (C99 to C23,
+  C++11 to C++23), per example or for the whole site; Jobe gets the same headers and arguments.
+- Safe mode for C and C++ on the CodeLab runner 0.12.0: AddressSanitizer and UndefinedBehaviorSanitizer report
+  out-of-bounds access, use after free, null pointers, division by zero and integer overflow, and the editor marks the
+  line.
+- Explanations of 40 common GCC and Clang compiler and linker errors in plain language, with short examples, under the
+  compiler output, in all 15 languages.
+- Multi-file examples: companion source, header and data files open as tabs above the editor; extra C, C++, Java and C#
+  source files are compiled together on Jobe and on the runner.
+- Peak memory of a run from the CodeLab runner 0.13.0 is passed on to the test results.
+- Heap leaks: blocks not freed when a C or C++ program ends under Step (runner 0.15.0) are marked in the memory view,
+  with an alert.
+
 ## 1.22.0 (2026-11-23)
 
 - Files of an example: teachers can attach up to 5 input files (64 KB each) to a CodeLab block in the dialog. They are
