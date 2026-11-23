@@ -9,8 +9,10 @@
 The example is written in the code editor of VS Code ([Monaco](https://microsoft.github.io/monaco-editor/)).
 Readers can then edit and run it on the page (with [filter_codelab](https://github.com/blagojevicboban/moodle-filter_codelab)).
 
-Languages: **C**, **C++**, **Python**, **Java**, **C#**, **JavaScript** (Node.js), **Pascal**, **PHP** and
-**MySQL (MariaDB)** (with a CodeLab runner that has MariaDB, see [SQL](#sql-optional)).
+Languages (**27 total**): **C**, **C++**, **Python**, **Java**, **C#**, **JavaScript** (Node.js), **Pascal**, **PHP**,
+**MySQL (MariaDB)**, **HTML / CSS / JS** (sandboxed live preview in the browser), plus **TypeScript**, **Bash**, **Go**,
+**Rust**, **R**, **Ruby**, **Lua**, **Kotlin**, **Perl**, **Octave**, **Julia**, **Scheme**, **Dart**, **Scala**,
+**Elixir**, **Swift** and **Haskell** on the CodeLab runner (each offered automatically when installed on the server).
 
 This plugin is also the core of the CodeLab plugins. The filter and the question type use its editor, its runner and its
 Jobe client.
@@ -50,8 +52,9 @@ Jobe client.
   It needs a browser with JavaScript Promise Integration (Chrome and Edge 137+). Other browsers use Jobe.
 - **Default input** of an example: readers start from it.
 - Rate limit of runs per user, and a size limit of programs.
-- **Interface in 15 languages**: English, Serbian (Latin and Cyrillic), German, French, Spanish, Italian, Portuguese,
-  Polish, Croatian, Bosnian, Slovenian, Macedonian, Slovak and Czech.
+- **Interface in 29 languages**: English, Serbian (Latin and Cyrillic), German, French, Spanish, Italian, Portuguese,
+  Portuguese (Brazil), Polish, Croatian, Bosnian, Slovenian, Macedonian, Slovak, Czech, Turkish, Dutch, Russian,
+  Ukrainian, Romanian, Hungarian, Bulgarian, Greek, Albanian, Japanese, Simplified Chinese, Korean and Arabic.
 - **Accessibility**: Windows high contrast, more contrast and reduced motion are followed by every panel; screen readers
   hear the end of a run with the start of its output; the console, the trace table, the call tree and the memory view
   can be scrolled with the keyboard.

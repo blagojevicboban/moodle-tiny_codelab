@@ -1,6 +1,6 @@
 <div>
   <p><strong>CodeLab: Runnable Program Examples in the VS Code Editor</strong></p>
-  <p><em>Insert program examples in C, C++, Python, Java, C#, JavaScript, Pascal, PHP and SQL into any Moodle text, write them in the code editor of VS Code and run them on Jobe, on the CodeLab runner or in the browser.</em></p>
+  <p><em>Insert program examples in 27 languages (including C, C++, Python, Java, C#, JavaScript, TypeScript, Go, Rust, SQL and HTML/CSS/JS) into any Moodle text, edit them in Monaco and run them on Jobe, on the CodeLab runner or in the browser.</em></p>
   <div>
     <a href="https://github.com/blagojevicboban/moodle-tiny_codelab/actions/workflows/ci.yml" target="_blank" rel="noreferrer noopener"><img src="https://github.com/blagojevicboban/moodle-tiny_codelab/actions/workflows/ci.yml/badge.svg" alt="Moodle Plugin CI"></a>
     <a href="https://moodle.org" target="_blank" rel="noreferrer noopener"><img src="https://img.shields.io/badge/Moodle-4.5%20to%205.3-orange.svg" alt="Moodle 4.5 to 5.3"></a>
@@ -10,14 +10,12 @@
   <p><strong>Live demo:</strong> try CodeLab on <a href="https://codelab.tsp.edu.rs" target="_blank" rel="noreferrer noopener">codelab.tsp.edu.rs</a> as a guest (Python runs in the browser), or sign in with <strong>teacher</strong> or <strong>student</strong> (password <strong>Demo-2026</strong>) for every language, the debugger and SQL. Reset nightly.</p>
 
   <hr>
-  <p><strong>What's New in v1.23.1</strong></p>
+  <p><strong>What's New in v1.24.0</strong></p>
   <ul>
-    <li><strong>Java without a public class:</strong> the program file is named after the class with the main method, so such programs run on Jobe and on CodeLab runner 0.16.1 or newer.</li>
-    <li><strong>From 1.23.0, C and C++ compiler and standard selection:</strong> choose GCC, Clang or MSVC compatibility mode (Visual Studio headers and safe input/output helpers) and a C or C++ language standard per example or site-wide.</li>
-    <li><strong>Safe mode and heap leak detection:</strong> catches out-of-bounds access, null pointers, integer overflow and unfreed heap blocks in C and C++, highlighting the line in the editor and unfreed blocks in the Memory view in all 15 languages.</li>
-    <li><strong>Compiler error explanations:</strong> explains 40 common GCC and Clang compiler and linker errors in plain language with short examples directly under the compiler output in all 15 languages.</li>
-    <li><strong>Multi-file editor tabs and compilation:</strong> companion source, header and data files open as tabs above the Monaco editor with syntax highlighting by extension, and extra C, C++, Java and C# source files compile together.</li>
-    <li><strong>Peak memory forwarding:</strong> passes peak memory reported by CodeLab runner 0.13.0 or newer to test results.</li>
+    <li><strong>29 interface languages:</strong> added 14 new translations (Portuguese Brazil, Turkish, Dutch, Russian, Ukrainian, Romanian, Hungarian, Bulgarian, Greek, Albanian, Japanese, Simplified Chinese, Korean and Arabic).</li>
+    <li><strong>HTML / CSS / JS live preview in the browser:</strong> runs web examples with companion CSS and JS tabs inside a strictly sandboxed preview frame with a console panel and no server required.</li>
+    <li><strong>17 new programming languages on the CodeLab runner (27 total):</strong> TypeScript, Bash, Go, Rust, R, Ruby, Lua, Kotlin, Perl, Octave, Julia, Scheme, Dart, Scala, Elixir, Swift and Haskell, offered automatically when installed on the server.</li>
+    <li><strong>Updated Monaco Editor bundle:</strong> includes native syntax highlighting for the new languages, HTML, CSS and XML.</li>
   </ul>
 
   <hr>

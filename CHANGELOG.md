@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.24.0 (2026-11-23)
+
+- Interface translated into 14 more languages (29 total): added Portuguese (Brazil), Turkish, Dutch, Russian, Ukrainian,
+  Romanian, Hungarian, Bulgarian, Greek, Albanian, Japanese, Simplified Chinese, Korean and Arabic.
+- Sandboxed HTML / CSS / JS live preview in the browser (no execution server required): renders HTML with companion CSS
+  and JS tabs inside a strictly sandboxed iframe (`sandbox="allow-scripts allow-forms"`, no `allow-same-origin`) with a
+  bridged console and error panel.
+- 17 new programming languages on the CodeLab runner (27 languages total): TypeScript, Bash, Go, Rust, R, Ruby, Lua,
+  Kotlin, Perl, Octave, Julia, Scheme, Dart, Scala, Elixir, Swift and Haskell, each automatically offered when installed
+  on the runner.
+- Rebuilt the bundled Monaco Editor with native syntax highlighting for the new languages, HTML, CSS and XML.
+
 ## 1.23.1 (2026-11-23)
 
 - Java without a public class: the program file is named after the class with `main` (for example `class Zadatak`),
