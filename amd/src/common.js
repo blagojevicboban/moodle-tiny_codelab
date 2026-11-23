@@ -171,6 +171,7 @@ export const languages = {
     scala: 'scala',
     elixir: 'elixir',
     swift: 'swift',
+    haskell: 'plaintext',
     // Runs directly in the browser in a sandboxed preview iframe (no server required).
     html: 'html',
 };

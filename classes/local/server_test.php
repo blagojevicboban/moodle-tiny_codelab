@@ -57,6 +57,7 @@ class server_test {
         'scala' => "object Main extends App { println(scala.io.StdIn.readInt() * 2) }\n",
         'elixir' => "IO.gets(\"\") |> String.trim() |> String.to_integer() |> Kernel.*(2) |> IO.puts()\n",
         'swift' => "if let s = readLine(), let x = Int(s) { print(x * 2) }\n",
+        'haskell' => "main = do\n    s <- getLine\n    print (2 * (read s :: Int))\n",
     ];
 
     /** Runs sent together in the benchmark. */

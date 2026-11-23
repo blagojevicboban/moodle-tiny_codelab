@@ -49,6 +49,7 @@ const MAIN_FILES = {
     scala: 'Main.scala',
     elixir: 'main.exs',
     swift: 'main.swift',
+    haskell: 'Main.hs',
     html: 'index.html',
 };
 
@@ -86,6 +87,7 @@ const EXT_LANG = {
     ex: 'elixir',
     exs: 'elixir',
     swift: 'swift',
+    hs: 'haskell',
     html: 'html',
     htm: 'html',
     css: 'css',

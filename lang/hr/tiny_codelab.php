@@ -297,6 +297,7 @@ $string['lang_csharp'] = 'C#';
 $string['lang_dart'] = 'Dart';
 $string['lang_elixir'] = 'Elixir';
 $string['lang_go'] = 'Go';
+$string['lang_haskell'] = 'Haskell';
 $string['lang_html'] = 'HTML / CSS / JS';
 $string['lang_java'] = 'Java';
 $string['lang_javascript'] = 'JavaScript (Node.js)';

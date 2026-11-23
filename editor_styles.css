@@ -172,6 +172,11 @@ pre.codelab.codelab-lang-swift::before {
     content: "CodeLab • Swift";
 }
 
+.mce-content-body pre.codelab.codelab-lang-haskell::before,
+pre.codelab.codelab-lang-haskell::before {
+    content: "CodeLab • Haskell";
+}
+
 .mce-content-body pre.codelab.codelab-lang-html::before,
 pre.codelab.codelab-lang-html::before {
     content: "CodeLab • HTML / CSS / JS";

@@ -36,7 +36,7 @@ class ai_hint extends external_api {
         'typescript' => 'TypeScript', 'bash' => 'Bash', 'go' => 'Go', 'rust' => 'Rust', 'r' => 'R',
         'ruby' => 'Ruby', 'lua' => 'Lua', 'kotlin' => 'Kotlin', 'perl' => 'Perl', 'octave' => 'Octave',
         'julia' => 'Julia', 'scheme' => 'Scheme', 'dart' => 'Dart', 'scala' => 'Scala',
-        'elixir' => 'Elixir', 'swift' => 'Swift',
+        'elixir' => 'Elixir', 'swift' => 'Swift', 'haskell' => 'Haskell',
         'html' => 'HTML / CSS / JS'];
 
     /**
