@@ -230,6 +230,24 @@ html.tiny_codelab-noscroll body {
     stroke-width: 3px;
 }
 
+/* Live HTML/CSS/JS sandboxed preview (tiny_codelab/webpreview). */
+.tiny_codelab-webpreview {
+    display: block;
+    width: 100%;
+    min-height: 220px;
+    border: 1px solid #dee2e6;
+    border-radius: .25rem;
+    background: #fff;
+    resize: vertical;
+}
+
+.tiny_codelab-webconsole {
+    margin: .375rem 0 0;
+    padding: .25rem .5rem;
+    border-top: 1px solid #dee2e6;
+    font-size: .8125rem;
+}
+
 .tiny_codelab-mem-leaked {
     border-color: #c92a2a;
     background: #fff5f5;

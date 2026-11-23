@@ -155,10 +155,14 @@ export const languages = {
     php: 'php',
     // Only on the interactive server (CodeLab runner with MariaDB).
     mysql: 'mysql',
+    // Runs directly in the browser in a sandboxed preview iframe (no server required).
+    html: 'html',
 };
 
 /** Languages that have a hidden setup (tables and data) and no input. */
 export const setupLanguages = ['mysql'];
+/** Languages that run directly in the browser without a server and read no stdin. */
+export const browserOnlyLanguages = ['html'];
 export const defaultLanguage = 'c';
 
 export const iconSvg =

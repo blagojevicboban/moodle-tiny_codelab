@@ -25,13 +25,14 @@ import ModalEvents from 'core/modal_events';
 import Templates from 'core/templates';
 import {getString, getStrings} from 'core/str';
 import {getContextId} from 'editor_tiny/options';
-import {component, languages, defaultLanguage, setupLanguages, defaultTheme, MAX_FILES, filesProblem,
-    cStandards, cppStandards} from './common';
+import {component, languages, defaultLanguage, setupLanguages, browserOnlyLanguages, defaultTheme, MAX_FILES,
+    filesProblem, cStandards, cppStandards} from './common';
 import {TEMPLATE_KEYS, templatesFor} from './codetemplates';
 import {readBlock, blockHtml, isBlock, stdinOf, setupOf, filesOf, newBlockId} from './embed';
 import {createEditor} from './monaco';
 import {run} from './runner';
 import {showRunning, showResult, showError} from './console';
+import {showWebPreview} from './webpreview';
 import {getPyodide, getLanguages, getInteractive, getTheme} from './options';
 import {available as pythonAvailable} from './python';
 import {PythonSession} from './session';
@@ -98,7 +99,8 @@ export const openDialog = async(editor) => {
         block.lang = imported.lang;
         block.code = imported.code;
     }
-    const langs = Object.keys(languages).filter((lang) => !offered.length || offered.includes(lang) || lang === block.lang);
+    const langs = Object.keys(languages).filter((lang) => !offered.length || offered.includes(lang) ||
+        browserOnlyLanguages.includes(lang) || lang === block.lang);
     const names = await getStrings(langs.map((lang) => ({key: `lang_${lang}`, component})));
 
     const themeKeys = ['auto', 'vs', 'vs-dark', 'hc-black'];
@@ -221,6 +223,10 @@ export const openDialog = async(editor) => {
 
     let code = null;
     const doRun = async() => {
+        if (browserOnlyLanguages.includes(langSelect.value)) {
+            showWebPreview(panel, code.getValue(), files());
+            return;
+        }
         if (browser()) {
             if (session.state === 'paused') {
                 session.resume();

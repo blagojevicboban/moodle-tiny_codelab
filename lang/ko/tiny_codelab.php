@@ -293,6 +293,7 @@ $string['jobestatus_runfailed'] = '테스트 프로그램이 거부되었습니�
 $string['lang_c'] = 'C';
 $string['lang_cpp'] = 'C++';
 $string['lang_csharp'] = 'C#';
+$string['lang_html'] = 'HTML / CSS / JS';
 $string['lang_java'] = 'Java';
 $string['lang_javascript'] = 'JavaScript (Node.js)';
 $string['lang_mysql'] = 'MySQL (MariaDB)';

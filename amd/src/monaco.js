@@ -384,7 +384,7 @@ export const createEditor = async(container, options = {}) => {
         },
         setLanguage: (value) => monaco.editor.setModelLanguage(
             editor.getModel(),
-            value === 'plaintext' ? 'plaintext' : (languages[value] || languages[defaultLanguage])
+            ['plaintext', 'css', 'json', 'xml'].includes(value) ? value : (languages[value] || languages[defaultLanguage])
         ),
         setTheme: (value) => {
             const actual = resolveTheme(value);

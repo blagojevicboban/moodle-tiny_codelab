@@ -33,6 +33,7 @@ const MAIN_FILES = {
     pascal: 'main.pas',
     php: 'main.php',
     mysql: 'query.sql',
+    html: 'index.html',
 };
 
 /** CodeLab language (or 'plaintext') inferred from a file extension. */
@@ -51,6 +52,11 @@ const EXT_LANG = {
     pas: 'pascal',
     php: 'php',
     sql: 'mysql',
+    html: 'html',
+    htm: 'html',
+    css: 'css',
+    json: 'json',
+    svg: 'xml',
 };
 
 /**

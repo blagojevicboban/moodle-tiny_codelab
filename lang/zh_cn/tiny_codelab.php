@@ -293,6 +293,7 @@ $string['jobestatus_runfailed'] = '但测试程序未被接受（{$a}）。请�
 $string['lang_c'] = 'C';
 $string['lang_cpp'] = 'C++';
 $string['lang_csharp'] = 'C#';
+$string['lang_html'] = 'HTML / CSS / JS';
 $string['lang_java'] = 'Java';
 $string['lang_javascript'] = 'JavaScript (Node.js)';
 $string['lang_mysql'] = 'MySQL (MariaDB)';

@@ -293,6 +293,7 @@ $string['jobestatus_runfailed'] = 'لكن لم يُقبَل برنامج اخت�
 $string['lang_c'] = 'C';
 $string['lang_cpp'] = 'C++';
 $string['lang_csharp'] = 'C#';
+$string['lang_html'] = 'HTML / CSS / JS';
 $string['lang_java'] = 'Java';
 $string['lang_javascript'] = 'JavaScript (Node.js)';
 $string['lang_mysql'] = 'MySQL (MariaDB)';
