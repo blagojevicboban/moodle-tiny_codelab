@@ -38,6 +38,14 @@ class server_test {
         'pascal' => "var x: integer;\nbegin\n  readln(x);\n  writeln(2 * x);\nend.\n",
         'php' => "<?php echo 2 * (int) trim(fgets(STDIN)), \"\\n\";\n",
         'mysql' => "SELECT 2 * 21 AS answer;\n",
+        'typescript' => "import {readFileSync} from 'node:fs';\n" .
+            "const x: number = parseInt(readFileSync(0, 'utf8'), 10);\nconsole.log(2 * x);\n",
+        'bash' => "read x\necho \$((2 * x))\n",
+        'go' => "package main\nimport \"fmt\"\nfunc main() { var x int; fmt.Scan(&x); fmt.Println(2 * x) }\n",
+        'rust' => "use std::io;\nfn main() {\n    let mut s = String::new();\n" .
+            "    io::stdin().read_line(&mut s).unwrap();\n" .
+            "    let x: i32 = s.trim().parse().unwrap();\n    println!(\"{}\", 2 * x);\n}\n",
+        'r' => "x <- as.integer(readLines(\"stdin\", n = 1))\ncat(2 * x, \"\\n\", sep = \"\")\n",
     ];
 
     /** Runs sent together in the benchmark. */

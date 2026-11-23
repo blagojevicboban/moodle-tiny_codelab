@@ -32,7 +32,9 @@ use tiny_codelab\local\ai_hint as hint;
 class ai_hint extends external_api {
     /** Names of the languages in the prompt. */
     const LANGUAGE_NAMES = ['c' => 'C', 'cpp' => 'C++', 'python' => 'Python', 'java' => 'Java', 'csharp' => 'C#',
-        'javascript' => 'JavaScript', 'pascal' => 'Pascal', 'php' => 'PHP', 'mysql' => 'SQL (MySQL / MariaDB)'];
+        'javascript' => 'JavaScript', 'pascal' => 'Pascal', 'php' => 'PHP', 'mysql' => 'SQL (MySQL / MariaDB)',
+        'typescript' => 'TypeScript', 'bash' => 'Bash', 'go' => 'Go', 'rust' => 'Rust', 'r' => 'R',
+        'html' => 'HTML / CSS / JS'];
 
     /**
      * Parameters.

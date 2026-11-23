@@ -153,8 +153,13 @@ export const languages = {
     javascript: 'javascript',
     pascal: 'pascal',
     php: 'php',
-    // Only on the interactive server (CodeLab runner with MariaDB).
+    // Only on the interactive server (CodeLab runner).
     mysql: 'mysql',
+    typescript: 'typescript',
+    bash: 'shell',
+    go: 'go',
+    rust: 'rust',
+    r: 'r',
     // Runs directly in the browser in a sandboxed preview iframe (no server required).
     html: 'html',
 };

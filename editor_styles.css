@@ -92,6 +92,36 @@ pre.codelab.codelab-lang-mysql::before {
     content: "CodeLab • SQL (MySQL)";
 }
 
+.mce-content-body pre.codelab.codelab-lang-typescript::before,
+pre.codelab.codelab-lang-typescript::before {
+    content: "CodeLab • TypeScript";
+}
+
+.mce-content-body pre.codelab.codelab-lang-bash::before,
+pre.codelab.codelab-lang-bash::before {
+    content: "CodeLab • Bash";
+}
+
+.mce-content-body pre.codelab.codelab-lang-go::before,
+pre.codelab.codelab-lang-go::before {
+    content: "CodeLab • Go";
+}
+
+.mce-content-body pre.codelab.codelab-lang-rust::before,
+pre.codelab.codelab-lang-rust::before {
+    content: "CodeLab • Rust";
+}
+
+.mce-content-body pre.codelab.codelab-lang-r::before,
+pre.codelab.codelab-lang-r::before {
+    content: "CodeLab • R";
+}
+
+.mce-content-body pre.codelab.codelab-lang-html::before,
+pre.codelab.codelab-lang-html::before {
+    content: "CodeLab • HTML / CSS / JS";
+}
+
 .mce-content-body pre.codelab.codelab-run::after,
 pre.codelab.codelab-run::after {
     content: "▶ Run";

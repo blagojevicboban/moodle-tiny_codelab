@@ -159,8 +159,8 @@ class languages {
         $runner = interactive::url() !== '';
         foreach (self::enabled() as $lang) {
             if (in_array($lang, interactive::ONLY, true)) {
-                // SQL runs only on the interactive server.
-                if ($runner) {
+                // Runner-only languages: offer when the runner is set up and either we cannot ask it or it reports the language.
+                if ($runner && (!$info['ok'] || !backend::on_runner('c') || isset($info['versions'][$lang]))) {
                     $offered[] = $lang;
                 }
             } else if (!$info['ok'] || isset($info['versions'][$lang]) || ($lang === 'python' && $browser)) {
