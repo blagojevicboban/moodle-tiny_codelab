@@ -46,6 +46,11 @@ class server_test {
             "    io::stdin().read_line(&mut s).unwrap();\n" .
             "    let x: i32 = s.trim().parse().unwrap();\n    println!(\"{}\", 2 * x);\n}\n",
         'r' => "x <- as.integer(readLines(\"stdin\", n = 1))\ncat(2 * x, \"\\n\", sep = \"\")\n",
+        'ruby' => "puts gets.to_i * 2\n",
+        'lua' => "print(tonumber(io.read()) * 2)\n",
+        'kotlin' => "fun main() { println(readln().toInt() * 2) }\n",
+        'perl' => "my \$x = <STDIN>; chomp \$x; print \$x * 2, \"\\n\";\n",
+        'octave' => "x = scanf(\"%d\", 1); printf(\"%d\\n\", 2 * x);\n",
     ];
 
     /** Runs sent together in the benchmark. */

@@ -38,6 +38,11 @@ const MAIN_FILES = {
     go: 'main.go',
     rust: 'main.rs',
     r: 'main.R',
+    ruby: 'main.rb',
+    lua: 'main.lua',
+    kotlin: 'Main.kt',
+    perl: 'main.pl',
+    octave: 'main.m',
     html: 'index.html',
 };
 
@@ -63,6 +68,11 @@ const EXT_LANG = {
     go: 'go',
     rs: 'rust',
     r: 'r',
+    rb: 'ruby',
+    lua: 'lua',
+    kt: 'kotlin',
+    pl: 'perl',
+    m: 'octave',
     html: 'html',
     htm: 'html',
     css: 'css',

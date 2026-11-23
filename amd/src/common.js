@@ -160,6 +160,11 @@ export const languages = {
     go: 'go',
     rust: 'rust',
     r: 'r',
+    ruby: 'ruby',
+    lua: 'lua',
+    kotlin: 'kotlin',
+    perl: 'perl',
+    octave: 'plaintext',
     // Runs directly in the browser in a sandboxed preview iframe (no server required).
     html: 'html',
 };

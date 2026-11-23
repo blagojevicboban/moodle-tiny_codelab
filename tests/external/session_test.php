@@ -71,8 +71,9 @@ final class session_test extends \advanced_testcase {
         $this->resetAfterTest();
         set_config('runnerurl', 'wss://runner.example.org/', 'tiny_codelab');
         set_config('runnersecret', self::SECRET, 'tiny_codelab');
+        unset_config('languages', 'tiny_codelab');
         $context = $this->student_context();
-        $this->assertSame(['c', 'cpp', 'java', 'csharp', 'mysql'], interactive::languages());
+        $this->assertSame(interactive::LANGUAGES, interactive::languages());
 
         $result = $this->ask($context, 'cpp');
         $this->assertSame('ok', $result['status']);

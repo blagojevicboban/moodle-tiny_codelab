@@ -117,6 +117,31 @@ pre.codelab.codelab-lang-r::before {
     content: "CodeLab • R";
 }
 
+.mce-content-body pre.codelab.codelab-lang-ruby::before,
+pre.codelab.codelab-lang-ruby::before {
+    content: "CodeLab • Ruby";
+}
+
+.mce-content-body pre.codelab.codelab-lang-lua::before,
+pre.codelab.codelab-lang-lua::before {
+    content: "CodeLab • Lua";
+}
+
+.mce-content-body pre.codelab.codelab-lang-kotlin::before,
+pre.codelab.codelab-lang-kotlin::before {
+    content: "CodeLab • Kotlin";
+}
+
+.mce-content-body pre.codelab.codelab-lang-perl::before,
+pre.codelab.codelab-lang-perl::before {
+    content: "CodeLab • Perl";
+}
+
+.mce-content-body pre.codelab.codelab-lang-octave::before,
+pre.codelab.codelab-lang-octave::before {
+    content: "CodeLab • Octave";
+}
+
 .mce-content-body pre.codelab.codelab-lang-html::before,
 pre.codelab.codelab-lang-html::before {
     content: "CodeLab • HTML / CSS / JS";
