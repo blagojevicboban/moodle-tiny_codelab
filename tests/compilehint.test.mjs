@@ -74,6 +74,7 @@ const SAMPLES = [
     ['expected_bracket', "prog.c:4:12: error: expected ']' before ';' token"],
     ['expected_brace', 'prog.c:10:1: error: expected declaration or statement at end of input'],
     ['expected_expr', "prog.c:5:13: error: expected expression before ')' token"],
+    ['semicolon', "prog.c:6:5: error: expected \u2018,\u2019 or \u2018;\u2019 before \u2018printf\u2019"],
 ];
 
 test('all 40 patterns have unique keys and matching English lang strings', () => {

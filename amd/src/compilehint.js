@@ -31,7 +31,7 @@ import {component} from './common';
  * @type {Array<{key: string, re: RegExp}>}
  */
 export const PATTERNS = [
-    {key: 'semicolon', re: /expected ['`‘]?;['`’]? (?:before|after|at end of)/i},
+    {key: 'semicolon', re: /expected (?:['`‘],['`’] or )?['`‘]?;['`’]? (?:before|after|at end of)/i},
     {key: 'no_header', re: /No such file or directory|file not found/i},
     {key: 'unterminated_str', re: /missing terminating ["'] character/i},
     {key: 'unterminated_comment', re: /unterminated comment/i},
