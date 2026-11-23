@@ -213,14 +213,30 @@ class jobe {
         string $std = ''
     ): array {
         $params = ['cputime' => $this->cputime] + (self::PARAMETERS[$lang] ?? []);
+        $sourcefilename = self::source_file_name($lang, $code);
         if ($lang === 'c' || $lang === 'cpp') {
+            $extrasources = [];
+            $hasheaders = false;
+            $srcre = $lang === 'c' ? '/^[A-Za-z0-9_]+\.c$/i' : '/^[A-Za-z0-9_]+\.(?:cpp|cc|cxx|c)$/i';
+            $hdrre = '/^[A-Za-z0-9_]+\.(?:h|hpp|hh)$/i';
+            foreach ($files as $f) {
+                $fname = (string) ($f['name'] ?? '');
+                if ($fname === '' || $fname === $sourcefilename) {
+                    continue;
+                }
+                if (preg_match($srcre, $fname)) {
+                    $extrasources[] = $fname;
+                } else if (preg_match($hdrre, $fname)) {
+                    $hasheaders = true;
+                }
+            }
             $norm = compiler::normalize($lang, $compiler, $std);
             if ($norm['compiler'] === 'msvc') {
                 $args = ['-std=' . $norm['std']];
                 if ($lang === 'c') {
                     $args[] = '-D_GNU_SOURCE';
                 }
-                $args = array_merge($args, ['-w', '-I', '.', '-include', 'codelab_msvc.h']);
+                $args = array_merge($args, ['-w', '-I', '.', '-include', 'codelab_msvc.h'], $extrasources);
                 $params['compileargs'] = $args;
                 $files = array_merge(compiler::msvc_headers(), $files);
             } else {
@@ -228,17 +244,21 @@ class jobe {
                 if ($lang === 'c') {
                     $args[] = '-D_GNU_SOURCE';
                 }
+                if ($hasheaders || !empty($extrasources)) {
+                    $args[] = '-I';
+                    $args[] = '.';
+                }
                 $args = array_merge($args, [
                     '-w', '-Dscanf_s=scanf', '-Dfscanf_s=fscanf', '-Dsscanf_s=sscanf',
                     '-Dprintf_s=printf', '-Dfprintf_s=fprintf',
-                ]);
+                ], $extrasources);
                 $params['compileargs'] = $args;
             }
         }
         $spec = [
             'language_id' => self::LANGUAGES[$lang],
             'sourcecode' => $code,
-            'sourcefilename' => self::source_file_name($lang, $code),
+            'sourcefilename' => $sourcefilename,
             'input' => $stdin,
             'parameters' => $params,
         ];

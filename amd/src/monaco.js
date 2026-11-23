@@ -382,7 +382,10 @@ export const createEditor = async(container, options = {}) => {
             editor.pushUndoStop();
             editor.focus();
         },
-        setLanguage: (value) => monaco.editor.setModelLanguage(editor.getModel(), languages[value] || languages[defaultLanguage]),
+        setLanguage: (value) => monaco.editor.setModelLanguage(
+            editor.getModel(),
+            value === 'plaintext' ? 'plaintext' : (languages[value] || languages[defaultLanguage])
+        ),
         setTheme: (value) => {
             const actual = resolveTheme(value);
             win.document.body.className = `theme-${actual}`;

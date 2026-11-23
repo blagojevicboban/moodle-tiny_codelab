@@ -230,6 +230,56 @@ html.tiny_codelab-noscroll body {
     stroke-width: 3px;
 }
 
+/* Multi-file tabs above a Monaco editor (tiny_codelab/filetabs). */
+.tiny_codelab-filetabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .125rem;
+    padding: .25rem .375rem 0;
+    background: #f1f3f5;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.tiny_codelab-filetab {
+    border: 1px solid transparent;
+    border-bottom: 0;
+    border-radius: .25rem .25rem 0 0;
+    background: transparent;
+    color: #495057;
+    font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    font-size: .8125rem;
+    padding: .25rem .625rem;
+    cursor: pointer;
+}
+
+.tiny_codelab-filetab:hover {
+    background: rgba(0, 0, 0, .05);
+}
+
+.tiny_codelab-filetab.active {
+    background: #fff;
+    color: #1d2125;
+    border-color: #dee2e6;
+    font-weight: 600;
+    margin-bottom: -1px;
+    padding-bottom: calc(.25rem + 1px);
+}
+
+.filter_codelab-dark .tiny_codelab-filetabs {
+    background: #252526;
+    border-bottom-color: #3c3c3c;
+}
+
+.filter_codelab-dark .tiny_codelab-filetab {
+    color: #ccc;
+}
+
+.filter_codelab-dark .tiny_codelab-filetab.active {
+    background: #1e1e1e;
+    color: #fff;
+    border-color: #3c3c3c;
+}
+
 /* Compiler error explanations under compiler output (tiny_codelab/compilehint). */
 .tiny_codelab-cmphints-list li + li {
     margin-top: .25rem;
