@@ -186,6 +186,8 @@ class run extends external_api {
             'stderr' => new external_value(PARAM_RAW, 'Standard error'),
             // Only from the CodeLab runner 0.9.0 and later; Jobe gives no time.
             'time' => new external_value(PARAM_FLOAT, 'Seconds the program ran, without the compilation', VALUE_OPTIONAL),
+            // Only from the CodeLab runner 0.13.0 and later; Jobe gives no memory.
+            'memory' => new external_value(PARAM_INT, 'Peak memory used by the program in KB', VALUE_OPTIONAL),
             'files' => new external_multiple_structure(
                 new external_single_structure([
                     'name' => new external_value(PARAM_RAW, 'File name'),

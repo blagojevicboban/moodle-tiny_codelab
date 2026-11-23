@@ -271,6 +271,11 @@ class runner_client extends jobe {
         if ((is_int($time) || is_float($time)) && $time >= 0) {
             $result['time'] = round((float) $time, 3);
         }
+        // Runner 0.13.0 sends peak resident memory in KB when /usr/bin/time is available.
+        $memory = $data['memory'] ?? null;
+        if (is_int($memory) && $memory > 0) {
+            $result['memory'] = $memory;
+        }
         if (is_array($data['files'] ?? null)) {
             $outfiles = [];
             foreach ($data['files'] as $file) {
