@@ -1,65 +1,59 @@
 <div>
   <p><strong>CodeLab: Runnable Program Examples in the VS Code Editor</strong></p>
-  <p><em>Insert program examples in C, C++, Python, Java, C#, JavaScript, Pascal and PHP into any Moodle text, write them in the code editor of VS Code and run them on a Jobe server, on the CodeLab runner or in the browser.</em></p>
+  <p><em>Insert program examples in C, C++, Python, Java, C#, JavaScript, Pascal and PHP into any Moodle text, write them in the code editor of VS Code and run them on Jobe, on the CodeLab runner or in the browser.</em></p>
   <div>
     <a href="https://github.com/blagojevicboban/moodle-tiny_codelab/actions/workflows/ci.yml" target="_blank" rel="noreferrer noopener"><img src="https://github.com/blagojevicboban/moodle-tiny_codelab/actions/workflows/ci.yml/badge.svg" alt="Moodle Plugin CI"></a>
     <a href="https://moodle.org" target="_blank" rel="noreferrer noopener"><img src="https://img.shields.io/badge/Moodle-4.5%20to%205.3-orange.svg" alt="Moodle 4.5 to 5.3"></a>
     <a href="https://github.com/blagojevicboban/moodle-tiny_codelab" target="_blank" rel="noreferrer noopener"><img src="https://img.shields.io/badge/License-GPL%20v3-blue.svg" alt="License GPL v3"></a>
   </div>
 
-  <p><strong>Live demo:</strong> try the CodeLab plugins on <a href="https://codelab.tsp.edu.rs" target="_blank" rel="noreferrer noopener">codelab.tsp.edu.rs</a>. Look around as a guest (Python runs in the browser), or use the demo accounts <strong>teacher</strong> and <strong>student</strong> (password <strong>Demo-2026</strong>) to run every language, the debugger and SQL. Everything is reset every night.</p>
+  <p><strong>Live demo:</strong> try CodeLab on <a href="https://codelab.tsp.edu.rs" target="_blank" rel="noreferrer noopener">codelab.tsp.edu.rs</a> as a guest (Python runs in the browser), or sign in with <strong>teacher</strong> or <strong>student</strong> (password <strong>Demo-2026</strong>) for every language, the debugger and SQL. Reset nightly.</p>
 
   <hr>
   <p><strong>What's New in v1.23.0</strong></p>
   <ul>
-    <li><strong>C and C++ compiler and standard selection:</strong> choose GCC, Clang or MSVC compatibility mode (with Visual Studio headers and safe I/O helpers) and pick a C or C++ language standard per example or as the site default.</li>
-    <li><strong>Safe mode (ASan/UBSan) and heap leak detection:</strong> catches out-of-bounds access, null pointers, integer overflow and unfreed heap blocks in C and C++, highlighting the line in the editor and unfreed blocks in the Memory view in all 15 languages.</li>
-    <li><strong>Instant compiler error explanations:</strong> recognizes 40 common GCC and Clang compiler and linker error messages and shows beginner-friendly explanations with short examples directly under the compiler output in all 15 languages.</li>
-    <li><strong>Multi-file editor tabs and compilation:</strong> companion source, header and data files open as keyboard-accessible tabs above the Monaco editor with syntax highlighting by file extension, and extra C/C++/Java/C# source files compile and link together.</li>
-    <li><strong>Peak memory forwarding:</strong> passes peak memory reported by CodeLab runner 0.13.0+ to test results.</li>
+    <li><strong>C and C++ compiler and standard selection:</strong> choose GCC, Clang or MSVC compatibility mode (Visual Studio headers and safe input/output helpers) and a C or C++ language standard per example or site-wide.</li>
+    <li><strong>Safe mode and heap leak detection:</strong> catches out-of-bounds access, null pointers, integer overflow and unfreed heap blocks in C and C++, highlighting the line in the editor and unfreed blocks in the Memory view in all 15 languages.</li>
+    <li><strong>Compiler error explanations:</strong> explains 40 common GCC and Clang compiler and linker errors in plain language with short examples directly under the compiler output in all 15 languages.</li>
+    <li><strong>Multi-file editor tabs and compilation:</strong> companion source, header and data files open as tabs above the Monaco editor with syntax highlighting by extension, and extra C, C++, Java and C# source files compile together.</li>
+    <li><strong>Peak memory forwarding:</strong> passes peak memory reported by CodeLab runner 0.13.0 or newer to test results.</li>
   </ul>
 
   <hr>
   <p><strong>Core features</strong></p>
   <ul>
-    <li><strong>The code editor of VS Code:</strong> Monaco, with syntax highlighting, line numbers, bracket matching, search and multi-file tabs.</li>
-    <li><strong>Typing help and error explanations:</strong> typing help for every language (Jedi for Python, snippets and library functions for others), plus instant explanations for 40 common GCC/Clang errors and optional AI explanations through Moodle's AI subsystem.</li>
-    <li><strong>Run on Jobe or the CodeLab runner:</strong> choose the server for running and grading, with GCC, Clang or MSVC compatibility mode for C/C++, rate and size limits per user, and a server test page.</li>
-    <li><strong>Interactive runs:</strong> with the CodeLab runner, programs ask for their input while they run, as in a terminal, with optional Safe mode (ASan/UBSan) for C and C++.</li>
-    <li><strong>Python in the browser:</strong> with Pyodide, input asks for the input while the program runs. Step goes line by line with the variables, Stop also ends an endless loop, and turtle graphics draw under the console.</li>
-    <li><strong>Debugger:</strong> breakpoints, Step over and out, call stack and call tree, step back and a timeline, for Python and C/C++.</li>
-    <li><strong>Memory view:</strong> frames and the objects their variables point to, with arrows; C and C++ pointers down a linked list to NULL, plus heap leak warnings when allocated blocks are not freed.</li>
-    <li><strong>Complexity:</strong> a Python example runs for sizes n from 10 to 500, its steps are drawn beside n, n log n and n&sup2;, and the growth is named.</li>
-    <li><strong>Flowchart bridge:</strong> with the Algorithm plugins, Python examples are drawn as flowcharts, and a flowchart opens as a CodeLab example.</li>
-    <li><strong>VS Code themes and phones:</strong> Light, Dark and High Contrast with Auto dark mode; a check button sends input on phones.</li>
-    <li><strong>Simple markup:</strong> an example is a pre element with class names, default input and companion files, which survive Moodle's HTML cleaning.</li>
+    <li><strong>VS Code editor:</strong> Monaco with syntax highlighting, line numbers, bracket matching, search and multi-file tabs.</li>
+    <li><strong>Typing help and error help:</strong> code completion for every language (Jedi for Python), instant explanations for 40 common GCC and Clang errors, and optional AI explanations through Moodle's AI subsystem.</li>
+    <li><strong>Jobe or CodeLab runner:</strong> choose the execution server, with GCC, Clang or MSVC compatibility mode for C/C++, per-user limits and a server test page.</li>
+    <li><strong>Interactive runs and Python in the browser:</strong> live terminal input on the CodeLab runner (with Safe mode for C/C++) or in-browser Python via Pyodide with turtle graphics.</li>
+    <li><strong>Debugger and Memory view:</strong> breakpoints, Step over and out, call stack, call tree, step back timeline, pointer arrows down linked lists to NULL, and heap leak warnings.</li>
+    <li><strong>Complexity and Flowchart bridge:</strong> measure Python step growth against n, n log n and n&sup2;, and exchange Python programs with the Algorithm flowchart plugins.</li>
+    <li><strong>Themes, accessibility and phones:</strong> Light, Dark and High Contrast themes, reduced motion, screen reader announcements and mobile-friendly input.</li>
   </ul>
 
   <hr>
   <p><strong>The CodeLab plugins</strong></p>
   <ul>
-    <li><strong><a href="https://marketplace.moodle.com/plugins/tiny_codelab" target="_blank" rel="noreferrer noopener">CodeLab for TinyMCE</a></strong> (this plugin): inserts examples in the TinyMCE editor. The other two plugins use its editor and runner.</li>
-    <li><strong><a href="https://marketplace.moodle.com/plugins/filter_codelab" target="_blank" rel="noreferrer noopener">CodeLab filter</a></strong>: turns examples into code editors that readers can edit and run.</li>
-    <li><strong><a href="https://marketplace.moodle.com/plugins/qtype_codelab" target="_blank" rel="noreferrer noopener">CodeLab question type</a></strong>: programming questions graded with tests on Jobe or the CodeLab runner.</li>
+    <li><strong><a href="https://marketplace.moodle.com/plugins/tiny_codelab" target="_blank" rel="noreferrer noopener">CodeLab for TinyMCE</a></strong> (this plugin): inserts examples in TinyMCE and provides the shared editor and runner.</li>
+    <li><strong><a href="https://marketplace.moodle.com/plugins/filter_codelab" target="_blank" rel="noreferrer noopener">CodeLab filter</a></strong>: turns examples into interactive code editors.</li>
+    <li><strong><a href="https://marketplace.moodle.com/plugins/qtype_codelab" target="_blank" rel="noreferrer noopener">CodeLab question type</a></strong>: programming questions graded with tests.</li>
   </ul>
 
   <hr>
   <p><strong>Requirements</strong></p>
   <ul>
-    <li><strong>Moodle:</strong> 4.5 LTS to 5.3 (PHP as required by your Moodle version).</li>
-    <li><strong>A server for running programs:</strong> a Jobe server, or the CodeLab runner on your own server (open source, github.com/blagojevicboban/codelab-runner). Python in the browser works without a server.</li>
-    <li><strong>Hosted runner (optional):</strong> a paid plan with a monthly quota of runs, provided by the author, Boban Blagojevi&#263;. Ask for a connection key at boban.blagojevic@tsp.edu.rs. Nothing requires it: Jobe, your own runner and Python in the browser work without it.</li>
-    <li><strong>Python in the browser:</strong> Chrome or Edge 137 or newer. Other browsers run Python on Jobe.</li>
-    <li><strong>CodeLab filter:</strong> install it too and switch the filter <strong>On</strong> in Site administration, Plugins, Filters, Manage filters. Without it readers see the examples as plain code.</li>
+    <li><strong>Moodle:</strong> 4.5 LTS to 5.3.</li>
+    <li><strong>Execution server:</strong> Jobe or the open-source CodeLab runner (github.com/blagojevicboban/codelab-runner). Browser Python needs Chrome or Edge 137+ and works without a server.</li>
+    <li><strong>Hosted runner (optional):</strong> paid monthly quota plan by Boban Blagojevi&#263; (boban.blagojevic@tsp.edu.rs). Not required.</li>
+    <li><strong>CodeLab filter:</strong> install and enable it in Site administration, Plugins, Filters, Manage filters.</li>
   </ul>
 
   <hr>
   <p><strong>Privacy</strong></p>
-  <p>Programs and their input are sent to the server set by the administrator (Jobe or the CodeLab runner, own or hosted) to be compiled and run. Interactive runs, the debugger and SQL always go to the CodeLab runner, with a short-lived signed token that holds only the numeric user id; the runner keeps nothing after the session ends. Nothing is stored in Moodle. When Python runs in the browser, the browser downloads Pyodide from the address in the settings, by default the jsDelivr CDN. It does not send the program or its input there. When the administrator turns on AI explanations, the program and the messages of the console are sent to the AI provider of the site through the AI subsystem of Moodle. The plugin implements the Moodle Privacy API.</p>
+  <p>Programs and input are sent to the configured Jobe or CodeLab runner server to compile and run; interactive sessions use a short-lived signed token with only the numeric user id and keep nothing after exit. Browser Python loads Pyodide from the configured URL without sending code. Optional AI explanations use Moodle's AI subsystem. Implements the Moodle Privacy API.</p>
 
   <hr>
-  <p>Developed by <strong>Boban Blagojevi&#263;</strong>. Languages: English, Serbian (Latin and Cyrillic) and 12 more: de, fr, es, it, pt, pl, hr, bs, sl, mk, sk, cs. It bundles Monaco Editor (MIT).<br>
-    Source, documentation and issue tracker:
-    <a href="https://github.com/blagojevicboban/moodle-tiny_codelab" target="_blank" rel="noreferrer noopener">github.com/blagojevicboban/moodle-tiny_codelab</a><br>
+  <p>Developed by <strong>Boban Blagojevi&#263;</strong>. 15 languages: en, sr_lt, sr_cr, de, fr, es, it, pt, pl, hr, bs, sl, mk, sk, cs. Bundles Monaco Editor (MIT).<br>
+    Source and issues: <a href="https://github.com/blagojevicboban/moodle-tiny_codelab" target="_blank" rel="noreferrer noopener">github.com/blagojevicboban/moodle-tiny_codelab</a><br>
     Licensed under the GNU GPL v3 or later.</p>
 </div>
