@@ -165,6 +165,12 @@ export const languages = {
     kotlin: 'kotlin',
     perl: 'perl',
     octave: 'plaintext',
+    julia: 'julia',
+    scheme: 'scheme',
+    dart: 'dart',
+    scala: 'scala',
+    elixir: 'elixir',
+    swift: 'swift',
     // Runs directly in the browser in a sandboxed preview iframe (no server required).
     html: 'html',
 };

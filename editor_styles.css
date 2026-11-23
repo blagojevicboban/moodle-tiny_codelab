@@ -142,6 +142,36 @@ pre.codelab.codelab-lang-octave::before {
     content: "CodeLab • Octave";
 }
 
+.mce-content-body pre.codelab.codelab-lang-julia::before,
+pre.codelab.codelab-lang-julia::before {
+    content: "CodeLab • Julia";
+}
+
+.mce-content-body pre.codelab.codelab-lang-scheme::before,
+pre.codelab.codelab-lang-scheme::before {
+    content: "CodeLab • Scheme";
+}
+
+.mce-content-body pre.codelab.codelab-lang-dart::before,
+pre.codelab.codelab-lang-dart::before {
+    content: "CodeLab • Dart";
+}
+
+.mce-content-body pre.codelab.codelab-lang-scala::before,
+pre.codelab.codelab-lang-scala::before {
+    content: "CodeLab • Scala";
+}
+
+.mce-content-body pre.codelab.codelab-lang-elixir::before,
+pre.codelab.codelab-lang-elixir::before {
+    content: "CodeLab • Elixir";
+}
+
+.mce-content-body pre.codelab.codelab-lang-swift::before,
+pre.codelab.codelab-lang-swift::before {
+    content: "CodeLab • Swift";
+}
+
 .mce-content-body pre.codelab.codelab-lang-html::before,
 pre.codelab.codelab-lang-html::before {
     content: "CodeLab • HTML / CSS / JS";

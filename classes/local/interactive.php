@@ -27,10 +27,11 @@ namespace tiny_codelab\local;
 class interactive {
     /** Languages the interactive server runs (Python runs in the browser). */
     const LANGUAGES = ['c', 'cpp', 'java', 'csharp', 'mysql', 'typescript', 'bash', 'go', 'rust', 'r',
-        'ruby', 'lua', 'kotlin', 'perl', 'octave'];
+        'ruby', 'lua', 'kotlin', 'perl', 'octave', 'julia', 'scheme', 'dart', 'scala', 'elixir', 'swift'];
 
     /** Languages that run only on the interactive server, not on Jobe. */
-    const ONLY = ['mysql', 'typescript', 'bash', 'go', 'rust', 'r', 'ruby', 'lua', 'kotlin', 'perl', 'octave'];
+    const ONLY = ['mysql', 'typescript', 'bash', 'go', 'rust', 'r', 'ruby', 'lua', 'kotlin', 'perl', 'octave',
+        'julia', 'scheme', 'dart', 'scala', 'elixir', 'swift'];
 
     /** Seconds a token may wait before the browser opens the session. */
     const TOKEN_SECONDS = 60;

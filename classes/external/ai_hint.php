@@ -35,6 +35,8 @@ class ai_hint extends external_api {
         'javascript' => 'JavaScript', 'pascal' => 'Pascal', 'php' => 'PHP', 'mysql' => 'SQL (MySQL / MariaDB)',
         'typescript' => 'TypeScript', 'bash' => 'Bash', 'go' => 'Go', 'rust' => 'Rust', 'r' => 'R',
         'ruby' => 'Ruby', 'lua' => 'Lua', 'kotlin' => 'Kotlin', 'perl' => 'Perl', 'octave' => 'Octave',
+        'julia' => 'Julia', 'scheme' => 'Scheme', 'dart' => 'Dart', 'scala' => 'Scala',
+        'elixir' => 'Elixir', 'swift' => 'Swift',
         'html' => 'HTML / CSS / JS'];
 
     /**

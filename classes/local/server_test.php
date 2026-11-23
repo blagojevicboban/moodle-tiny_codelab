@@ -51,6 +51,12 @@ class server_test {
         'kotlin' => "fun main() { println(readln().toInt() * 2) }\n",
         'perl' => "my \$x = <STDIN>; chomp \$x; print \$x * 2, \"\\n\";\n",
         'octave' => "x = scanf(\"%d\", 1); printf(\"%d\\n\", 2 * x);\n",
+        'julia' => "x = parse(Int, strip(readline()))\nprintln(2 * x)\n",
+        'scheme' => "(display (* 2 (read))) (newline)\n",
+        'dart' => "import 'dart:io';\nvoid main() { print(int.parse(stdin.readLineSync()!.trim()) * 2); }\n",
+        'scala' => "object Main extends App { println(scala.io.StdIn.readInt() * 2) }\n",
+        'elixir' => "IO.gets(\"\") |> String.trim() |> String.to_integer() |> Kernel.*(2) |> IO.puts()\n",
+        'swift' => "if let s = readLine(), let x = Int(s) { print(x * 2) }\n",
     ];
 
     /** Runs sent together in the benchmark. */
