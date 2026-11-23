@@ -10,28 +10,29 @@
   <p><strong>Live demo:</strong> try the CodeLab plugins on <a href="https://codelab.tsp.edu.rs" target="_blank" rel="noreferrer noopener">codelab.tsp.edu.rs</a>. Look around as a guest (Python runs in the browser), or use the demo accounts <strong>teacher</strong> and <strong>student</strong> (password <strong>Demo-2026</strong>) to run every language, the debugger and SQL. Everything is reset every night.</p>
 
   <hr>
-  <p><strong>What's New in v1.22.0</strong></p>
+  <p><strong>What's New in v1.23.0</strong></p>
   <ul>
-    <li><strong>Files of an example:</strong> attach up to 5 input files to a CodeLab block in the dialog; programs read them from the working folder (Python in the browser, CodeLab runner 0.10.0 and Jobe), and files created or changed by the program appear under the console.</li>
-    <li><strong>From 1.21.0, 15 languages and run times:</strong> the interface in 12 more languages (listed below), and grading runs on the CodeLab runner report their duration.</li>
-    <li><strong>From 1.20.0, accessibility:</strong> high contrast, reduced motion and screen readers in every panel.</li>
-    <li><strong>Also since 1.13.3:</strong> AI explanations of errors, stable block ids, templates, turtle graphics for Python, the call tree of recursion, zoom and tooltips.</li>
+    <li><strong>C and C++ compiler and standard selection:</strong> choose GCC, Clang or MSVC compatibility mode (with Visual Studio headers and safe I/O helpers) and pick a C or C++ language standard per example or as the site default.</li>
+    <li><strong>Safe mode (ASan/UBSan) and heap leak detection:</strong> catches out-of-bounds access, null pointers, integer overflow and unfreed heap blocks in C and C++, highlighting the line in the editor and unfreed blocks in the Memory view in all 15 languages.</li>
+    <li><strong>Instant compiler error explanations:</strong> recognizes 40 common GCC and Clang compiler and linker error messages and shows beginner-friendly explanations with short examples directly under the compiler output in all 15 languages.</li>
+    <li><strong>Multi-file editor tabs and compilation:</strong> companion source, header and data files open as keyboard-accessible tabs above the Monaco editor with syntax highlighting by file extension, and extra C/C++/Java/C# source files compile and link together.</li>
+    <li><strong>Peak memory forwarding:</strong> passes peak memory reported by CodeLab runner 0.13.0+ to test results.</li>
   </ul>
 
   <hr>
   <p><strong>Core features</strong></p>
   <ul>
-    <li><strong>The code editor of VS Code:</strong> Monaco, with syntax highlighting, line numbers, bracket matching and search.</li>
-    <li><strong>Typing help for every language:</strong> for Python from Jedi, for the others keywords, snippets, library functions with their parameters, and members of strings, lists and Scanner. Teachers can turn it off for a single example.</li>
-    <li><strong>Run on Jobe or the CodeLab runner:</strong> choose the server for running and grading, with a page that tests the servers. Rate and size limits per user.</li>
-    <li><strong>Interactive runs:</strong> with the CodeLab runner, programs ask for their input while they run, as in a terminal.</li>
+    <li><strong>The code editor of VS Code:</strong> Monaco, with syntax highlighting, line numbers, bracket matching, search and multi-file tabs.</li>
+    <li><strong>Typing help and error explanations:</strong> typing help for every language (Jedi for Python, snippets and library functions for others), plus instant explanations for 40 common GCC/Clang errors and optional AI explanations through Moodle's AI subsystem.</li>
+    <li><strong>Run on Jobe or the CodeLab runner:</strong> choose the server for running and grading, with GCC, Clang or MSVC compatibility mode for C/C++, rate and size limits per user, and a server test page.</li>
+    <li><strong>Interactive runs:</strong> with the CodeLab runner, programs ask for their input while they run, as in a terminal, with optional Safe mode (ASan/UBSan) for C and C++.</li>
     <li><strong>Python in the browser:</strong> with Pyodide, input asks for the input while the program runs. Step goes line by line with the variables, Stop also ends an endless loop, and turtle graphics draw under the console.</li>
     <li><strong>Debugger:</strong> breakpoints, Step over and out, call stack and call tree, step back and a timeline, for Python and C/C++.</li>
-    <li><strong>Memory view:</strong> frames and the objects their variables point to, with arrows; C and C++ pointers too, down a linked list to NULL.</li>
+    <li><strong>Memory view:</strong> frames and the objects their variables point to, with arrows; C and C++ pointers down a linked list to NULL, plus heap leak warnings when allocated blocks are not freed.</li>
     <li><strong>Complexity:</strong> a Python example runs for sizes n from 10 to 500, its steps are drawn beside n, n log n and n&sup2;, and the growth is named.</li>
     <li><strong>Flowchart bridge:</strong> with the Algorithm plugins, Python examples are drawn as flowcharts, and a flowchart opens as a CodeLab example.</li>
     <li><strong>VS Code themes and phones:</strong> Light, Dark and High Contrast with Auto dark mode; a check button sends input on phones.</li>
-    <li><strong>Simple markup:</strong> an example is a pre element with class names and its default input, which survive Moodle's HTML cleaning.</li>
+    <li><strong>Simple markup:</strong> an example is a pre element with class names, default input and companion files, which survive Moodle's HTML cleaning.</li>
   </ul>
 
   <hr>
