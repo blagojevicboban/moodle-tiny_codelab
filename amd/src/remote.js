@@ -402,11 +402,12 @@ export class RemoteSession {
     /**
      * Handle program exit, showing a sanitizer summary when safe mode caught an error.
      *
-     * @param {{status: string}} message
+     * @param {{status: string, leaks?: Array<{addr: string, size: number}>}} message
      * @param {Object<string, string>} s
      */
     finishExit(message, s) {
-        this.end(s[`status_${message.status}`] || s.status_runtime, message.status === 'ok' ? 'ok' : 'error');
+        this.end(s[`status_${message.status}`] || s.status_runtime, message.status === 'ok' ? 'ok' : 'error',
+            Array.isArray(message.leaks) ? message.leaks : []);
         if (message.status !== 'ok' && this.sanitize()) {
             this.showSanitizer(s);
         }
@@ -440,8 +441,9 @@ export class RemoteSession {
      *
      * @param {string} text
      * @param {string} kind ok or error
+     * @param {Array<{addr: string, size: number}>} [leaks] unfreed heap blocks at exit (C/C++ Step)
      */
-    end(text, kind) {
+    end(text, kind, leaks = []) {
         this.debug?.stopAuto();
         this.given = this.typed || '';
         this.editor?.highlightLine(null);
@@ -454,6 +456,6 @@ export class RemoteSession {
         if (this.state !== 'idle') {
             this.setState('idle');
         }
-        this.debug?.finish();
+        this.debug?.finish(leaks);
     }
 }

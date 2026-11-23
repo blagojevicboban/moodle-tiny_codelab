@@ -230,6 +230,11 @@ html.tiny_codelab-noscroll body {
     stroke-width: 3px;
 }
 
+.tiny_codelab-mem-leaked {
+    border-color: #c92a2a;
+    background: #fff5f5;
+}
+
 /* Multi-file tabs above a Monaco editor (tiny_codelab/filetabs). */
 .tiny_codelab-filetabs {
     display: flex;

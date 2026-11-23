@@ -153,6 +153,21 @@ export const parseValue = (text) => {
 };
 
 /**
+ * Summarize unfreed heap blocks reported at the end of a C/C++ Step run.
+ *
+ * @param {Array<{addr: string, size: number}>} leaks
+ * @returns {{count: number, bytes: number, addrs: Set<string>}}
+ */
+export const summarizeLeaks = (leaks) => {
+    const list = Array.isArray(leaks) ? leaks.filter((l) => l && l.addr && l.size > 0) : [];
+    return {
+        count: list.length,
+        bytes: list.reduce((sum, l) => sum + Number(l.size), 0),
+        addrs: new Set(list.map((l) => `@${String(l.addr).toLowerCase()}`)),
+    };
+};
+
+/**
  * The text of a reference in a table or a cell.
  *
  * @param {Object} ref

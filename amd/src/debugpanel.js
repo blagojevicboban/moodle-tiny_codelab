@@ -26,7 +26,7 @@
  */
 import {getStrings} from 'core/str';
 import {component} from './common';
-import {MemoryView, buildView, indexNames} from './memview';
+import {MemoryView, buildView, indexNames, summarizeLeaks} from './memview';
 import {Timeline, outputLength, outputUpTo} from './timeline';
 import {CallTree, drawCallTree} from './calltree';
 
@@ -67,7 +67,8 @@ export const showVariables = (panel, vars, previous, title, empty) => {
 
 const KEYS = ['stepover', 'stepout', 'autostep', 'autostop', 'speed', 'callstack', 'tracetable', 'traceline', 'variables',
     'novariables', 'mainprogram', 'stepback', 'stepforward', 'stepagain', 'timeline', 'timelinepos', 'timelineend',
-    'timelinepast', 'timelinepastended', 'memory', 'memref', 'memmore', 'calltree', 'calltreesummary', 'calltreemore'];
+    'timelinepast', 'timelinepastended', 'memory', 'memref', 'memmore', 'memleak_summary', 'memleak_item',
+    'calltree', 'calltreesummary', 'calltreemore'];
 let strings = null;
 
 /** Most rows the trace table shows. */
@@ -124,6 +125,7 @@ export class DebugPanel {
         this.calls = new CallTree(() => this.actions.source?.() || '');
         this.view = -1;
         this.ended = false;
+        this.leaks = [];
         this.selected = 0;
         this.cut = null;
         this.auto = false;
@@ -142,6 +144,7 @@ export class DebugPanel {
         this.actions.values?.(null);
         this.view = -1;
         this.ended = false;
+        this.leaks = [];
         this.root.replaceChildren();
         this.root.hidden = true;
     }
@@ -192,9 +195,12 @@ export class DebugPanel {
 
     /**
      * The program ended: the record stays, with one more position for the end.
+     *
+     * @param {Array<{addr: string, size: number}>} [leaks] unfreed heap blocks at exit (C/C++ Step)
      */
-    async finish() {
+    async finish(leaks = []) {
         this.stopAuto();
+        this.leaks = Array.isArray(leaks) ? leaks : [];
         if (!this.timeline.length) {
             return;
         }
@@ -418,8 +424,35 @@ export class DebugPanel {
         details.append(summary, body);
         this.memoryView?.dispose();
         this.memoryView = new MemoryView(body, s);
-        if (!this.memoryView.render(view)) {
+        const hasObjects = this.memoryView.render(view);
+        const leakInfo = this.ended ? summarizeLeaks(this.leaks) : {count: 0, bytes: 0, addrs: new Set()};
+        if (!hasObjects && !leakInfo.count) {
             return null;
+        }
+        if (leakInfo.count > 0) {
+            body.querySelectorAll('.tiny_codelab-mem-object[data-id]').forEach((box) => {
+                if (leakInfo.addrs.has((box.dataset.id || '').toLowerCase())) {
+                    box.classList.add('tiny_codelab-mem-leaked');
+                }
+            });
+            const alert = document.createElement('div');
+            alert.className = 'tiny_codelab-mem-leaks alert alert-warning py-1 px-2 mt-2 mb-0 small';
+            const head = document.createElement('div');
+            head.className = 'fw-bold';
+            head.textContent = s.memleak_summary
+                .replace('{$a->count}', String(leakInfo.count))
+                .replace('{$a->bytes}', String(leakInfo.bytes));
+            const list = document.createElement('ul');
+            list.className = 'mb-0 ps-3 font-monospace';
+            for (const leak of this.leaks.slice(0, 10)) {
+                const li = document.createElement('li');
+                li.textContent = s.memleak_item
+                    .replace('{$a->addr}', String(leak.addr))
+                    .replace('{$a->bytes}', String(leak.size));
+                list.append(li);
+            }
+            alert.append(head, list);
+            body.append(alert);
         }
         details.addEventListener('toggle', () => {
             this.memoryOpen = details.open;
