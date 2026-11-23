@@ -36,6 +36,13 @@ final class jobe_test extends \advanced_testcase {
         $this->assertSame('prog.c', jobe::source_file_name('c', 'int main(void) { return 0; }'));
         $this->assertSame('Zbir.java', jobe::source_file_name('java', "import java.util.*;\npublic class Zbir {\n}"));
         $this->assertSame('Main.java', jobe::source_file_name('java', 'class Helper {}'));
+        // Without a public class: the class with main, also after another class.
+        $zadatak = "class Zadatak {\n    public static void main(String[] args) {\n        System.out.println(5);\n    }\n}\n";
+        $this->assertSame('Zadatak.java', jobe::source_file_name('java', $zadatak));
+        $app = "class Tacka { int x; }\nclass App { static public void main(String[] a) {} }\n";
+        $this->assertSame('App.java', jobe::source_file_name('java', $app));
+        $glavna = "class Pomocna { void f() {} }\nfinal class Glavna {\n  public static void main(String... a) {}\n}\n";
+        $this->assertSame('Glavna.java', jobe::source_file_name('java', $glavna));
         $this->assertSame('prog.cs', jobe::source_file_name('csharp', 'class Program {}'));
         $this->assertSame('prog.js', jobe::source_file_name('javascript', 'console.log(1);'));
         $this->assertSame('prog.pas', jobe::source_file_name('pascal', 'begin end.'));

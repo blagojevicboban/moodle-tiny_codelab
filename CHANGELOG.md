@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.23.1 (2026-11-23)
+
+- Java without a public class: the program file is named after the class with `main` (for example `class Zadatak`),
+  so Jobe can run it. Before, the file was `Main.java` and Jobe found no class `Main` to run. CodeLab runner 0.16.1
+  names the file the same way.
+
 ## 1.22.0 (2026-11-23)
 
 - Files of an example: teachers can attach up to 5 input files (64 KB each) to a CodeLab block in the dialog. They are

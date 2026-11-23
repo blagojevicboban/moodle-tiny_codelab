@@ -180,15 +180,32 @@ class jobe {
     }
 
     /**
-     * File name of the program: Java needs the name of its public class.
+     * File name of the program: Java needs the name of its public class. Without a public class, the file is named after
+     * the class with main, since Jobe runs the class of the file's name (class Zadatak { ... main ... } in Main.java
+     * compiles, but there is no class Main to run).
      *
      * @param string $lang
      * @param string $code
      * @return string
      */
     public static function source_file_name(string $lang, string $code): string {
-        if ($lang === 'java' && preg_match('/public\s+(?:final\s+|abstract\s+)*class\s+([A-Za-z_]\w*)/', $code, $m)) {
+        if ($lang !== 'java') {
+            return self::FILES[$lang];
+        }
+        if (preg_match('/public\s+(?:final\s+|abstract\s+)*class\s+([A-Za-z_]\w*)/', $code, $m)) {
             return $m[1] . '.java';
+        }
+        // Each class declaration up to the next one: the first whose part has a main method.
+        $classre = '/\bclass\s+([A-Za-z_]\w*)/';
+        if (preg_match_all($classre, $code, $all, PREG_OFFSET_CAPTURE)) {
+            $count = count($all[0]);
+            for ($i = 0; $i < $count; $i++) {
+                $start = $all[0][$i][1];
+                $end = $i + 1 < $count ? $all[0][$i + 1][1] : strlen($code);
+                if (preg_match('/\bstatic\s+(?:(?:public|final)\s+)*void\s+main\s*\(/', substr($code, $start, $end - $start))) {
+                    return $all[1][$i][0] . '.java';
+                }
+            }
         }
         return self::FILES[$lang];
     }
