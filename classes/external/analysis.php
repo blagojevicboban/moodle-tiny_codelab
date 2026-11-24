@@ -23,7 +23,8 @@ use core_external\external_value;
 use tiny_codelab\local\interactive;
 
 /**
- * A token for a language service of the CodeLab runner, for C# (runner 0.22.0 or newer) or Java (0.23.0 or newer):
+ * A token for a language service of the CodeLab runner, for C# (runner 0.22.0 or newer), Java (0.23.0 or newer), C
+ * and C++ (0.24.0 or newer, clangd):
  * completions, signatures, tooltips and errors while typing. The service only analyzes the program and never runs it,
  * so the token does not count against the rate limit of runs.
  *
@@ -33,7 +34,7 @@ use tiny_codelab\local\interactive;
  */
 class analysis extends external_api {
     /** The languages that have a language service on the runner. */
-    const LANGUAGES = ['csharp', 'java'];
+    const LANGUAGES = ['c', 'cpp', 'csharp', 'java'];
 
     /**
      * Parameters.
@@ -43,7 +44,7 @@ class analysis extends external_api {
     public static function execute_parameters(): external_function_parameters {
         return new external_function_parameters([
             'contextid' => new external_value(PARAM_INT, 'Context of the page with the program'),
-            'lang' => new external_value(PARAM_ALPHA, 'Language: csharp or java'),
+            'lang' => new external_value(PARAM_ALPHA, 'Language: c, cpp, csharp or java'),
         ]);
     }
 

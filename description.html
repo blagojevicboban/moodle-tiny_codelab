@@ -10,18 +10,18 @@
   <p><strong>Live demo:</strong> try CodeLab on <a href="https://codelab.tsp.edu.rs" target="_blank" rel="noreferrer noopener">codelab.tsp.edu.rs</a> as a guest (Python runs in the browser), or sign in with <strong>teacher</strong> or <strong>student</strong> (password <strong>Demo-2026</strong>) for every language, the debugger and SQL. Reset nightly.</p>
 
   <hr>
-  <p><strong>What's New in v1.27.0</strong></p>
+  <p><strong>What's New in v1.28.0</strong></p>
   <ul>
-    <li><strong>Java typing help from the runner:</strong> on CodeLab runner 0.23.0+, real completion of every Java type and of the reader's own classes, overloads and parameters while a call is typed, tooltips with the Javadoc of the JDK, and compiler errors marked while typing.</li>
-    <li><strong>Same as the grader:</strong> the runner checks the code with the compiler of the JDK that runs and grades it, and never runs it for this.</li>
-    <li><strong>Also in 1.26:</strong> the same help for C# from Roslyn, checked as C# 7.3 against the .NET Framework API of Mono.</li>
+    <li><strong>C and C++ typing help from the runner:</strong> on CodeLab runner 0.24.0+, clangd gives real completion of every struct, class and library type such as std::vector and std::string, overloads and parameters while a call is typed, tooltips with the declarations and comments of the C and C++ library, and compiler errors and warnings marked while typing.</li>
+    <li><strong>Same settings as the run:</strong> the code is checked with the language standard and the compiler profile of the example, including the Visual Studio profile, and with the other files of a multi-file example.</li>
+    <li><strong>Also in 1.26 and 1.27:</strong> the same help for C# from Roslyn and for Java from the compiler of the JDK.</li>
   </ul>
 
   <hr>
   <p><strong>Core features</strong></p>
   <ul>
     <li><strong>VS Code editor:</strong> Monaco with syntax highlighting, search, multi-file tabs, zoom, word wrap, full screen, and tooltips with variable values and beginner help.</li>
-    <li><strong>Typing help and error help:</strong> code completion and program templates for every language (Jedi for Python; C# and Java on the runner), instant explanations for 40 common GCC and Clang errors, and optional AI explanations through Moodle's AI subsystem.</li>
+    <li><strong>Typing help and error help:</strong> code completion and program templates for every language (Jedi for Python; C, C++, C# and Java on the runner), instant explanations for 40 common GCC and Clang errors, and optional AI explanations through Moodle's AI subsystem.</li>
     <li><strong>Jobe or CodeLab runner:</strong> choose the execution server, with GCC, Clang or MSVC compatibility mode for C/C++, per-user limits and a server test page.</li>
     <li><strong>Interactive runs and Python in the browser:</strong> live terminal input on the CodeLab runner (with Safe mode for C/C++) or in-browser Python via Pyodide with turtle graphics.</li>
     <li><strong>SQL and files:</strong> MySQL examples with a hidden setup of tables on the CodeLab runner; up to 5 input files per example, and files the program writes appear under the console.</li>

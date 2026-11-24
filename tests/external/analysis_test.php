@@ -99,6 +99,12 @@ final class analysis_test extends \advanced_testcase {
         $payload = json_decode(base64_decode(strtr(explode('.', $java['token'])[0], '-_', '+/')), true);
         $this->assertSame('java', $payload['l']);
         $this->assertSame('analysis', $payload['p']);
+        foreach (['c', 'cpp'] as $lang) {
+            $result = $this->ask($context, $lang);
+            $this->assertSame('ok', $result['status']);
+            $payload = json_decode(base64_decode(strtr(explode('.', $result['token'])[0], '-_', '+/')), true);
+            $this->assertSame($lang, $payload['l']);
+        }
         // C# turned off on the site.
         set_config('languages', 'c,cpp,python', 'tiny_codelab');
         $this->assertSame('nolanguage', $this->ask($context, 'csharp')['status']);

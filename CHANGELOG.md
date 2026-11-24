@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.28.0 (2026-11-25)
+
+- C and C++ typing help from clangd on the CodeLab runner 0.24.0 or newer, like C# and Java: completion of the real
+  members of every struct, class and library type (std::vector, std::string, the reader's own types) and of the names
+  in scope, the overloads and parameters of a call, tooltips with the declaration and the comments of the glibc and
+  libstdc++ headers, and the compiler's errors and warnings while typing (also wrong printf formats). The runner checks
+  the program with the language standard and the compiler profile of the example (the Visual Studio profile knows
+  conio.h and scanf_s), and the other .c, .h and .cpp files of a multi-file example are found by #include. The built-in
+  beginner tooltips (printf formats, keywords) stay next to those of clangd.
+- New option `build` of the Monaco editor: the compiler profile and the standard of a C or C++ example, sent with each
+  request of the language service (filter_codelab 1.19 passes those of the example; without it the runner's defaults,
+  C11 and C++17, are used).
+
 ## 1.27.0 (2026-11-25)
 
 - Java typing help from the CodeLab runner 0.23.0 or newer, like C# in 1.26: completion of the real members of every

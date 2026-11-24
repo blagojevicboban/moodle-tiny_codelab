@@ -42,6 +42,9 @@ Jobe client.
   - syntax errors marked in the editor.
 
   Jedi runs in Pyodide in its own worker and loads when the reader first types. Until then, the help above is used.
+- **C and C++ typing help** on the CodeLab runner 0.24.0 or newer (with clangd): the same four kinds of help as for C#
+  below, checked with the standard (C99 to C23, C++11 to C++23) and the compiler profile of the example; the other
+  files of a multi-file example are found by `#include "..."`. The beginner tooltips of level 1 stay beside them.
 - **Java typing help** on the CodeLab runner 0.23.0 or newer: the same four kinds of help as for C# below, from the
   compiler of the runner's JDK (the one that runs and grades the programs), with the Javadoc of the JDK in the tooltips.
 - **C# typing help from Roslyn** on the CodeLab runner 0.22.0 or newer (with the .NET 8 runtime):

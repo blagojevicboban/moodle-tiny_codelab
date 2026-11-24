@@ -14,10 +14,11 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Typing help for C# and Java from the language services of the CodeLab runner: completion of the real members of
- * every type, signatures of calls, tooltips with the documentation of the library, and the errors of the compiler while
- * typing. C# is checked by Roslyn (runner 0.22.0 or newer) as C# 7.3 against the .NET Framework that Mono runs; Java
- * by the compiler of the runner's JDK (runner 0.23.0 or newer), with the Javadoc of the JDK.
+ * Typing help for C#, Java, C and C++ from the language services of the CodeLab runner: completion of the real members
+ * of every type, signatures of calls, tooltips with the documentation of the library, and the errors of the compiler
+ * while typing. C# is checked by Roslyn (runner 0.22.0 or newer) as C# 7.3 against the .NET Framework that Mono runs;
+ * Java by the compiler of the runner's JDK (runner 0.23.0 or newer), with the Javadoc of the JDK; C and C++ by clangd
+ * (runner 0.24.0 or newer) with the standard and the compiler profile of the example.
  *
  * Moodle gives a token for one connection (tiny_codelab_analysis); a connection per language is opened when a reader
  * first types in such an editor, or points at its code, and is shared by all editors of the page. When the runner has
@@ -34,7 +35,7 @@ import Ajax from 'core/ajax';
 const TIMEOUT = 4000;
 
 /** The languages with a service (Monaco language ids), and the extension of their other files. */
-export const SERVED = {csharp: /\.cs$/i, java: /\.java$/i};
+export const SERVED = {csharp: /\.cs$/i, java: /\.java$/i, c: /\.[ch]$/i, cpp: /\.(?:cpp|cc|cxx|c|h|hpp|hh)$/i};
 
 /** Cultures of the compiler's messages, by the language of Moodle (Roslyn has these; javac fewer, else English). */
 const CULTURES = {
@@ -201,14 +202,32 @@ export const filesOf = (model) => {
 };
 
 /**
+ * The compiler profile and the standard of a C or C++ example (empty: those of the runner).
+ *
+ * @param {Object} model
+ * @returns {{compiler?: string, std?: string}}
+ */
+export const buildOf = (model) => {
+    const build = typeof model.codelab?.build === 'function' ? model.codelab.build() : null;
+    const result = {};
+    if (build?.compiler) {
+        result.compiler = build.compiler;
+    }
+    if (build?.std) {
+        result.std = build.std;
+    }
+    return result;
+};
+
+/**
  * What every request about a position carries.
  *
  * @param {Object} model
  * @param {Object} position
  * @returns {Object}
  */
-const at = (model, position) => ({code: model.getValue(), files: filesOf(model), line: position.lineNumber,
-    column: position.column});
+const at = (model, position) => Object.assign({code: model.getValue(), files: filesOf(model), line: position.lineNumber,
+    column: position.column}, buildOf(model));
 
 /**
  * Completions at a position.
@@ -256,11 +275,12 @@ export const hover = (model, position) => ask(model, Object.assign({op: 'hover'}
  *     column: number, endLine: number, endColumn: number}>>}
  */
 export const diagnostics = async(model) => {
-    const answer = await ask(model, {op: 'diagnostics', code: model.getValue(), files: filesOf(model)});
+    const answer = await ask(model, Object.assign({op: 'diagnostics', code: model.getValue(), files: filesOf(model)},
+        buildOf(model)));
     if (!answer) {
         return null;
     }
-    // Roslyn names the shown file Program.cs; the Java service after its public class.
+    // Roslyn names the shown file Program.cs; the Java service after its public class; clangd prog.c or prog.cpp.
     const main = answer.main || 'Program.cs';
     return answer.items.filter((d) => d.file === main);
 };

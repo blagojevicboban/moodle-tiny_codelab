@@ -262,6 +262,7 @@ export const openDialog = async(editor) => {
         pyodide,
         // Breakpoints where Step exists: Python in the browser, C and C++ on the interactive server.
         breakpoints: pyodide !== '' || interactive.some((lang) => lang === 'c' || lang === 'cpp'),
+        build: () => ({compiler: cc.compiler(), std: cc.std()}),
     });
     code.focus();
 

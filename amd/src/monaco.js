@@ -422,6 +422,8 @@ const attachBreakpoints = (editor, monaco, win, enabled) => {
  * @param {function(): void} [options.onRun] called on Ctrl+Enter
  * @param {string} [options.pyodide] address of Pyodide: Python typing help from Jedi (level 2); '' for level 1
  * @param {boolean} [options.breakpoints] a click left of the line numbers sets or removes a breakpoint (Step)
+ * @param {function(): {compiler: string, std: string}} [options.build] C and C++: the compiler profile and the standard
+ *     of the example, for the language service of the runner (default: those of the runner)
  * @returns {Promise<CodeEditor>}
  */
 export const createEditor = async(container, options = {}) => {
@@ -476,7 +478,7 @@ export const createEditor = async(container, options = {}) => {
     }, options.noassist ? NO_ASSIST : {}));
 
     // What the tooltips show (tiny_codelab/hover): help and numbers with typing help, values while stepping.
-    editor.getModel().codelab = {help: !options.noassist, values: null};
+    editor.getModel().codelab = {help: !options.noassist, values: null, build: options.build || null};
     editor.onDidChangeModelContent(() => {
         editor.getModel().codelab.values = null;
     });
@@ -562,7 +564,7 @@ export const createEditor = async(container, options = {}) => {
             editor.getModel().codelab.values = values || null;
         },
         setValue: (value) => editor.setValue(value),
-        // The other files of the example, for the C# language service (tiny_codelab/roslyn): a function that gives
+        // The other files of the example, for the language services (tiny_codelab/langservice): a function that gives
         // [{name, code}] of the tabs not shown.
         setCompanions: (companions) => {
             editor.getModel().codelab.companions = companions;
