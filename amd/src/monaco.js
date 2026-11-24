@@ -220,10 +220,10 @@ const attachBreakpoints = (editor, monaco, win, enabled) => {
     const listeners = [];
     const conditions = new Map();
     let labels = {
-        bpcondition: 'Condition',
-        bpcondition_active: 'Condition: {$a}',
-        bpcondition_hint: 'Breakpoint',
-        bpcondition_placeholder: 'i == 5',
+        condition: 'Condition',
+        active: 'Condition: {$a}',
+        hint: 'Breakpoint',
+        placeholder: 'i == 5',
         ok: 'OK',
         cancel: 'Cancel',
     };
@@ -261,7 +261,7 @@ const attachBreakpoints = (editor, monaco, win, enabled) => {
                 isWholeLine: false,
                 glyphMarginClassName: cond ? 'codelab-breakpoint-cond' : 'codelab-breakpoint',
                 glyphMarginHoverMessage: {
-                    value: cond ? labels.bpcondition_active.replace('{$a}', cond) : labels.bpcondition_hint,
+                    value: cond ? labels.active.replace('{$a}', cond) : labels.hint,
                 },
                 stickiness: 1,
             },
@@ -296,8 +296,8 @@ const attachBreakpoints = (editor, monaco, win, enabled) => {
         const input = doc.createElement('input');
         input.type = 'text';
         input.value = existing;
-        input.placeholder = labels.bpcondition_placeholder;
-        input.setAttribute('aria-label', labels.bpcondition);
+        input.placeholder = labels.placeholder;
+        input.setAttribute('aria-label', labels.condition);
         const okBtn = doc.createElement('button');
         okBtn.type = 'button';
         okBtn.setAttribute('data-ok', '');
@@ -342,15 +342,15 @@ const attachBreakpoints = (editor, monaco, win, enabled) => {
             {key: 'cancel', component: 'core'},
         ]).then((vals) => {
             labels = {
-                bpcondition: vals[0],
-                bpcondition_active: vals[1],
-                bpcondition_hint: vals[2],
-                bpcondition_placeholder: vals[3],
+                condition: vals[0],
+                active: vals[1],
+                hint: vals[2],
+                placeholder: vals[3],
                 ok: vals[4],
                 cancel: vals[5],
             };
             return labels;
-        }).catch(() => {});
+        }).catch(() => null);
 
         editor.onMouseDown((e) => {
             if (e.target.type !== monaco.editor.MouseTargetType.GUTTER_GLYPH_MARGIN || !e.target.position) {

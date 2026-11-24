@@ -350,6 +350,45 @@ export class DebugPanel {
         const live = !this.ended && !this.inPast();
         this.showView();
         this.root.replaceChildren();
+        this.root.append(this.renderControls(s, stack, live), this.slider(s));
+
+        const frames = this.view === this.timeline.length ? [] : stack;
+        if (frames.length > 1) {
+            this.renderCallStack(s, frames);
+        }
+
+        const frame = stack[this.selected] || {func: '', vars: {}};
+        this.actions.values?.(frame.vars);
+        const previous = this.selected === 0 && this.view < this.timeline.length ? this.timeline.varsAt(index - 1) : frame.vars;
+        const vars = document.createElement('div');
+        showVariables(vars, frame.vars, previous,
+            frame.func && frame.func !== '<module>' ? `${s.variables}: ${frame.func}()` : s.variables, s.novariables);
+        this.root.append(vars);
+        if (this.actions.onWatches) {
+            this.root.append(this.watchSection(s, index));
+        }
+        const memory = this.memorySection(s, index);
+        if (memory) {
+            this.root.append(memory);
+        }
+        if (this.calls.hasCalls) {
+            this.root.append(this.callTreeSection(s, index));
+        }
+        if (this.timeline.length > 1) {
+            this.root.append(this.traceTable(s, index));
+        }
+        this.root.hidden = false;
+    }
+
+    /**
+     * Render the step controls row.
+     *
+     * @param {Object<string, string>} s strings
+     * @param {Array} stack call stack frames
+     * @param {boolean} live whether at the latest paused step
+     * @returns {HTMLDivElement}
+     */
+    renderControls(s, stack, live) {
         const controls = document.createElement('div');
         controls.className = 'tiny_codelab-debug-controls d-flex flex-wrap align-items-center gap-2 mb-2';
         const back = button(`◀ ${s.stepback}`, 'back');
@@ -384,53 +423,36 @@ export class DebugPanel {
             again.addEventListener('click', () => this.actions.again());
             controls.append(again);
         }
-        this.root.append(controls, this.slider(s));
+        return controls;
+    }
 
-        const frames = this.view === this.timeline.length ? [] : stack;
-        if (frames.length > 1) {
-            const title = document.createElement('div');
-            title.className = 'tiny_codelab-vars-title';
-            title.textContent = s.callstack;
-            const list = document.createElement('ol');
-            list.className = 'tiny_codelab-callstack list-unstyled mb-2';
-            frames.forEach((frame, i) => {
-                const item = document.createElement('li');
-                const link = document.createElement('button');
-                link.type = 'button';
-                link.className = 'btn btn-link btn-sm p-0' + (i === this.selected ? ' fw-bold' : '');
-                link.textContent = (frame.func ? `${frame.func}()` : s.mainprogram) + (frame.line > 0 ? ` : ${frame.line}` : '');
-                link.setAttribute('aria-current', i === this.selected ? 'true' : 'false');
-                link.addEventListener('click', () => {
-                    this.selected = i;
-                    this.render(s);
-                });
-                item.append(link);
-                list.append(item);
+    /**
+     * Render the call stack list.
+     *
+     * @param {Object<string, string>} s strings
+     * @param {Array<{func: string, line: number}>} frames
+     */
+    renderCallStack(s, frames) {
+        const title = document.createElement('div');
+        title.className = 'tiny_codelab-vars-title';
+        title.textContent = s.callstack;
+        const list = document.createElement('ol');
+        list.className = 'tiny_codelab-callstack list-unstyled mb-2';
+        frames.forEach((frame, i) => {
+            const item = document.createElement('li');
+            const link = document.createElement('button');
+            link.type = 'button';
+            link.className = 'btn btn-link btn-sm p-0' + (i === this.selected ? ' fw-bold' : '');
+            link.textContent = (frame.func ? `${frame.func}()` : s.mainprogram) + (frame.line > 0 ? ` : ${frame.line}` : '');
+            link.setAttribute('aria-current', i === this.selected ? 'true' : 'false');
+            link.addEventListener('click', () => {
+                this.selected = i;
+                this.render(s);
             });
-            this.root.append(title, list);
-        }
-
-        const frame = stack[this.selected] || {func: '', vars: {}};
-        this.actions.values?.(frame.vars);
-        const previous = this.selected === 0 && this.view < this.timeline.length ? this.timeline.varsAt(index - 1) : frame.vars;
-        const vars = document.createElement('div');
-        showVariables(vars, frame.vars, previous,
-            frame.func && frame.func !== '<module>' ? `${s.variables}: ${frame.func}()` : s.variables, s.novariables);
-        this.root.append(vars);
-        if (this.actions.onWatches) {
-            this.root.append(this.watchSection(s, index));
-        }
-        const memory = this.memorySection(s, index);
-        if (memory) {
-            this.root.append(memory);
-        }
-        if (this.calls.hasCalls) {
-            this.root.append(this.callTreeSection(s, index));
-        }
-        if (this.timeline.length > 1) {
-            this.root.append(this.traceTable(s, index));
-        }
-        this.root.hidden = false;
+            item.append(link);
+            list.append(item);
+        });
+        this.root.append(title, list);
     }
 
     /**
