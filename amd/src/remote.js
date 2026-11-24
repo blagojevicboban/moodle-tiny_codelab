@@ -113,7 +113,7 @@ export class RemoteSession {
             mark: (line, file) => this.editor?.highlightLine(line, file), terminal: () => this.terminal,
             values: (vars) => this.editor?.setValues?.(vars),
             onWatches: (expressions) => this.send({type: 'watches', expressions}),
-            again: () => this.start(true, this.given), source: () => this.editor?.getValue() ?? ''}) : null;
+            again: () => this.start(true, this.given), source: () => this.mainSource()}) : null;
         // Breakpoints set or removed while the program runs.
         const shiftBp = (bp) => {
             if (typeof bp === 'number') {
@@ -276,6 +276,15 @@ export class RemoteSession {
     }
 
     /**
+     * Text of the main program, also while a companion file tab is shown.
+     *
+     * @returns {string}
+     */
+    mainSource() {
+        return this.editor?.getMainValue?.() ?? this.editor?.getValue() ?? '';
+    }
+
+    /**
      * The program stopped before a line (Step): mark it and show the variables; lines of the hidden code are passed.
      *
      * @param {Object} message of the server
@@ -290,9 +299,10 @@ export class RemoteSession {
     paused({line, file = null, func, vars, stack, targets, watches}) {
         const s = this.strings;
         const shown = file ? line : line - this.offset;
-        const lines = this.editor ? this.editor.getValue().split('\n').length : 0;
-        if (!this.editor || (!file && (shown < 1 || shown > lines))) {
-            // A line of the hidden code: go on as asked.
+        const lines = this.editor ? this.mainSource().split('\n').length : 0;
+        const known = file ? this.editor?.hasFile?.(file) === true : (shown >= 1 && shown <= lines);
+        if (!this.editor || !known) {
+            // A line of the hidden code or of a file without a tab: go on as asked.
             this.send({type: this.mode === 'continue' ? 'continue' : 'step'});
             return;
         }

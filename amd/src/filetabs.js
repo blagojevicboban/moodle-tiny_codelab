@@ -255,6 +255,10 @@ export const createFileTabs = ({
         bpListeners.forEach((fn) => fn(all));
     });
 
+    // The main program and the file names, for a debugger that pauses while another tab is shown.
+    editor.getMainValue = () => (active === 0 ? editor.getValue() : contents[0]);
+    editor.hasFile = (name) => names.indexOf(name) > 0;
+
     if (rawGetBp) {
         editor.getBreakpoints = combinedBps;
         editor.onBreakpointsChange = (fn) => bpListeners.push(fn);

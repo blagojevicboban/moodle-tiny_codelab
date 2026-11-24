@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.25.1 (2026-11-24)
+
+- Breakpoints and stack frames in companion C/C++ files (CodeLab runner 0.21.0+): Step switches to the tab of the file
+  that runs next, breakpoints are kept per tab and the stack shows `file:line` for frames in companion files.
+- Fixed: a pause in the main program was skipped when a companion file tab with fewer lines was shown; a pause in a
+  file that has no tab now goes on instead of marking a line in the wrong tab.
+
 ## 1.25.0 (2026-11-24)
 
 - Conditional breakpoints in the debugger (Python in the browser and C/C++ on CodeLab runner 0.20.0+): right-click or
