@@ -51,7 +51,7 @@ $functions = [
     ],
     'tiny_codelab_analysis' => [
         'classname' => 'tiny_codelab\external\analysis',
-        'description' => 'A token for the C# language service of the CodeLab runner (typing help and errors while typing).',
+        'description' => 'A token for the C# or Java language service of the CodeLab runner (typing help and errors while typing).',
         'type' => 'read',
         'ajax' => true,
         'loginrequired' => true,

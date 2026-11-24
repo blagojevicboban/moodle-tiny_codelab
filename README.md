@@ -42,6 +42,8 @@ Jobe client.
   - syntax errors marked in the editor.
 
   Jedi runs in Pyodide in its own worker and loads when the reader first types. Until then, the help above is used.
+- **Java typing help** on the CodeLab runner 0.23.0 or newer: the same four kinds of help as for C# below, from the
+  compiler of the runner's JDK (the one that runs and grades the programs), with the Javadoc of the JDK in the tooltips.
 - **C# typing help from Roslyn** on the CodeLab runner 0.22.0 or newer (with the .NET 8 runtime):
   - completion of the real members of every .NET type and of the reader's own classes and variables;
   - the overloads and the parameters of a call while it is typed;

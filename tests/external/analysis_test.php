@@ -93,7 +93,12 @@ final class analysis_test extends \advanced_testcase {
         set_config('runnerurl', 'wss://runner.example.org/', 'tiny_codelab');
         set_config('runnersecret', self::SECRET, 'tiny_codelab');
         $context = $this->student_context();
-        $this->assertSame('nolanguage', $this->ask($context, 'java')['status']);
+        $this->assertSame('nolanguage', $this->ask($context, 'python')['status']);
+        $java = $this->ask($context, 'java');
+        $this->assertSame('ok', $java['status']);
+        $payload = json_decode(base64_decode(strtr(explode('.', $java['token'])[0], '-_', '+/')), true);
+        $this->assertSame('java', $payload['l']);
+        $this->assertSame('analysis', $payload['p']);
         // C# turned off on the site.
         set_config('languages', 'c,cpp,python', 'tiny_codelab');
         $this->assertSame('nolanguage', $this->ask($context, 'csharp')['status']);

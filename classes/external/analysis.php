@@ -23,14 +23,18 @@ use core_external\external_value;
 use tiny_codelab\local\interactive;
 
 /**
- * A token for the C# language service of the CodeLab runner (completions, signatures, tooltips and errors while typing).
- * The service only analyzes the program and never runs it, so the token does not count against the rate limit of runs.
+ * A token for a language service of the CodeLab runner, for C# (runner 0.22.0 or newer) or Java (0.23.0 or newer):
+ * completions, signatures, tooltips and errors while typing. The service only analyzes the program and never runs it,
+ * so the token does not count against the rate limit of runs.
  *
  * @package    tiny_codelab
  * @copyright  2026 Boban Blagojević
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class analysis extends external_api {
+    /** The languages that have a language service on the runner. */
+    const LANGUAGES = ['csharp', 'java'];
+
     /**
      * Parameters.
      *
@@ -39,7 +43,7 @@ class analysis extends external_api {
     public static function execute_parameters(): external_function_parameters {
         return new external_function_parameters([
             'contextid' => new external_value(PARAM_INT, 'Context of the page with the program'),
-            'lang' => new external_value(PARAM_ALPHA, 'Language: csharp'),
+            'lang' => new external_value(PARAM_ALPHA, 'Language: csharp or java'),
         ]);
     }
 
@@ -60,11 +64,11 @@ class analysis extends external_api {
         $result = ['status' => 'ok', 'url' => '', 'token' => ''];
         if (interactive::url() === '') {
             $result['status'] = 'notconfigured';
-        } else if ($params['lang'] !== 'csharp' || !in_array('csharp', interactive::languages(), true)) {
+        } else if (!in_array($params['lang'], array_intersect(self::LANGUAGES, interactive::languages()), true)) {
             $result['status'] = 'nolanguage';
         } else {
             $result['url'] = interactive::url() . '/analysis';
-            $result['token'] = interactive::token((int) $USER->id, 'csharp', null, 'analysis');
+            $result['token'] = interactive::token((int) $USER->id, $params['lang'], null, 'analysis');
         }
         return $result;
     }

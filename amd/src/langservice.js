@@ -14,15 +14,17 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Typing help for C# from Roslyn on the CodeLab runner (runner 0.22.0 or newer): completion of the real members of
- * every type, signatures of calls, tooltips with the documentation of .NET and errors of the compiler while typing. The
- * program is checked as C# 7.3 against the .NET Framework that Mono runs, as the runner and Jobe compile it.
+ * Typing help for C# and Java from the language services of the CodeLab runner: completion of the real members of
+ * every type, signatures of calls, tooltips with the documentation of the library, and the errors of the compiler while
+ * typing. C# is checked by Roslyn (runner 0.22.0 or newer) as C# 7.3 against the .NET Framework that Mono runs; Java
+ * by the compiler of the runner's JDK (runner 0.23.0 or newer), with the Javadoc of the JDK.
  *
- * Moodle gives a token for one connection (tiny_codelab_analysis); the connection is opened when a reader first types
- * in a C# editor and is shared by all editors of the page. When the runner has no language service, or does not answer
- * in time, the editor keeps the typing help of level 1 (tiny_codelab/intellisense).
+ * Moodle gives a token for one connection (tiny_codelab_analysis); a connection per language is opened when a reader
+ * first types in such an editor, or points at its code, and is shared by all editors of the page. When the runner has
+ * no service for the language, or does not answer in time, the editor keeps the typing help of level 1
+ * (tiny_codelab/intellisense).
  *
- * @module     tiny_codelab/roslyn
+ * @module     tiny_codelab/langservice
  * @copyright  2026 Boban Blagojević
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -31,21 +33,41 @@ import Ajax from 'core/ajax';
 /** Longest wait for an answer, in milliseconds (errors take longer: the whole program is compiled). */
 const TIMEOUT = 4000;
 
-/** Cultures of the compiler's messages that Roslyn has, by the language of Moodle. */
+/** The languages with a service (Monaco language ids), and the extension of their other files. */
+export const SERVED = {csharp: /\.cs$/i, java: /\.java$/i};
+
+/** Cultures of the compiler's messages, by the language of Moodle (Roslyn has these; javac fewer, else English). */
 const CULTURES = {
     cs: 'cs', de: 'de', es: 'es', fr: 'fr', it: 'it', ja: 'ja', ko: 'ko', pl: 'pl', ru: 'ru', tr: 'tr',
     'pt-br': 'pt-BR', 'zh-cn': 'zh-Hans', 'zh-tw': 'zh-Hant',
 };
 
-/** @type {?WebSocket} */
-let socket = null;
-/** @type {?Promise<?WebSocket>} */
-let opening = null;
-let disabled = false;
-let failures = 0;
+/**
+ * The state of the connection of one language.
+ *
+ * @typedef {Object} Connection
+ * @property {?WebSocket} socket
+ * @property {?Promise<?WebSocket>} opening
+ * @property {boolean} disabled
+ * @property {number} failures
+ */
+
+/** @type {Object<string, Connection>} */
+const connections = {};
 let next = 0;
 /** @type {Map<number, function(?Object): void>} */
 const pending = new Map();
+
+/**
+ * The connection state of a language.
+ *
+ * @param {string} lang
+ * @returns {Connection}
+ */
+const state = (lang) => {
+    connections[lang] = connections[lang] || {socket: null, opening: null, disabled: false, failures: 0};
+    return connections[lang];
+};
 
 /**
  * The culture of the compiler's messages for the language of the page ('' for English).
@@ -58,35 +80,38 @@ export const culture = () => {
 };
 
 /**
- * Whether the language service may still be asked on this page.
+ * Whether the service of a language may still be asked on this page.
  *
+ * @param {string} lang Monaco language id
  * @returns {boolean}
  */
-export const enabled = () => !disabled && typeof WebSocket === 'function';
+export const enabled = (lang) => Object.prototype.hasOwnProperty.call(SERVED, lang) && !state(lang).disabled
+    && typeof WebSocket === 'function';
 
 /**
- * Open the connection, or give the open one.
+ * Open the connection of a language, or give the open one.
  *
+ * @param {string} lang
  * @returns {Promise<?WebSocket>}
  */
-const connect = () => {
-    if (socket && socket.readyState === WebSocket.OPEN) {
-        return Promise.resolve(socket);
+const connect = (lang) => {
+    const c = state(lang);
+    if (c.socket && c.socket.readyState === WebSocket.OPEN) {
+        return Promise.resolve(c.socket);
     }
-    if (opening) {
-        return opening;
+    if (c.opening) {
+        return c.opening;
     }
-    opening = (async() => {
+    c.opening = (async() => {
         let grant;
         try {
-            grant = await Ajax.call([{methodname: 'tiny_codelab_analysis',
-                args: {contextid: M.cfg.contextid, lang: 'csharp'}}])[0];
+            grant = await Ajax.call([{methodname: 'tiny_codelab_analysis', args: {contextid: M.cfg.contextid, lang}}])[0];
         } catch (e) {
-            disabled = true;
+            c.disabled = true;
             return null;
         }
         if (grant.status !== 'ok') {
-            disabled = true;
+            c.disabled = true;
             return null;
         }
         return new Promise((resolve) => {
@@ -94,8 +119,8 @@ const connect = () => {
             let open = false;
             ws.onopen = () => {
                 open = true;
-                failures = 0;
-                socket = ws;
+                c.failures = 0;
+                c.socket = ws;
                 resolve(ws);
             };
             ws.onmessage = (event) => {
@@ -112,62 +137,67 @@ const connect = () => {
                 }
             };
             ws.onclose = () => {
-                if (!open && ++failures >= 3) {
-                    // The runner has no language service (an older runner answers 404): level 1 stays.
-                    disabled = true;
+                if (!open && ++c.failures >= 3) {
+                    // The runner has no service for this language (an older runner): level 1 stays.
+                    c.disabled = true;
                 }
-                if (socket === ws) {
-                    socket = null;
+                if (c.socket === ws) {
+                    c.socket = null;
                 }
-                pending.forEach((done) => done(null));
-                pending.clear();
                 resolve(null);
             };
         });
     })().finally(() => {
-        opening = null;
+        c.opening = null;
     });
-    return opening;
+    return c.opening;
 };
 
 /**
- * Ask the language service.
+ * Ask the service of the model's language.
  *
+ * @param {Object} model
  * @param {Object} request op, code, files, line, column, item
  * @returns {Promise<?Object>} null when there is no answer in time
  */
-const ask = async(request) => {
-    if (!enabled()) {
+const ask = async(model, request) => {
+    const lang = model.getLanguageId();
+    if (!enabled(lang)) {
         return null;
     }
-    const ws = await connect();
+    const ws = await connect(lang);
     if (!ws || ws.readyState !== WebSocket.OPEN) {
         return null;
     }
     const id = ++next;
     return new Promise((resolve) => {
-        const timer = setTimeout(() => {
-            pending.delete(id);
-            resolve(null);
-        }, request.op === 'diagnostics' ? TIMEOUT * 2 : TIMEOUT);
-        pending.set(id, (answer) => {
+        const finish = (answer) => {
             clearTimeout(timer);
+            ws.removeEventListener('close', closed);
             resolve(answer);
-        });
+        };
+        const closed = () => {
+            pending.delete(id);
+            finish(null);
+        };
+        const timer = setTimeout(closed, request.op === 'diagnostics' ? TIMEOUT * 2 : TIMEOUT);
+        ws.addEventListener('close', closed);
+        pending.set(id, finish);
         ws.send(JSON.stringify(Object.assign({id, culture: culture()}, request)));
     });
 };
 
 /**
- * The C# files of the example that are not shown (tabs of tiny_codelab/filetabs).
+ * The files of the example in the model's language that are not shown (tabs of tiny_codelab/filetabs).
  *
  * @param {Object} model
  * @returns {Array<{name: string, code: string}>}
  */
 export const filesOf = (model) => {
     const companions = model.codelab?.companions;
-    return typeof companions === 'function'
-        ? companions().filter((f) => /\.cs$/i.test(f.name) && typeof f.code === 'string') : [];
+    const extension = SERVED[model.getLanguageId()];
+    return typeof companions === 'function' && extension
+        ? companions().filter((f) => extension.test(f.name) && typeof f.code === 'string') : [];
 };
 
 /**
@@ -187,8 +217,8 @@ const at = (model, position) => ({code: model.getValue(), files: filesOf(model),
  * @param {Object} position
  * @returns {Promise<?Array<{label: string, insert: string, kind: string, filter: string, sort: string, detail: string}>>}
  */
-export const complete = async(model, position) => (await ask(Object.assign({op: 'complete'}, at(model, position))))?.items
-    ?? null;
+export const complete = async(model, position) =>
+    (await ask(model, Object.assign({op: 'complete'}, at(model, position))))?.items ?? null;
 
 /**
  * The description of one completion (its declaration and documentation).
@@ -196,9 +226,9 @@ export const complete = async(model, position) => (await ask(Object.assign({op: 
  * @param {Object} model
  * @param {Object} position where the completions were asked
  * @param {string} item label of the completion
- * @returns {Promise<?{text: string, doc: string}>} the declaration and its documentation
+ * @returns {Promise<?{text: string, doc: string}>}
  */
-export const describe = (model, position, item) => ask(Object.assign({op: 'describe', item}, at(model, position)));
+export const describe = (model, position, item) => ask(model, Object.assign({op: 'describe', item}, at(model, position)));
 
 /**
  * The signatures of the call at a position.
@@ -207,7 +237,7 @@ export const describe = (model, position, item) => ask(Object.assign({op: 'descr
  * @param {Object} position
  * @returns {Promise<?{signatures: Array, active: number, parameter: number}>}
  */
-export const signatures = (model, position) => ask(Object.assign({op: 'signatures'}, at(model, position)));
+export const signatures = (model, position) => ask(model, Object.assign({op: 'signatures'}, at(model, position)));
 
 /**
  * The tooltip at a position.
@@ -216,7 +246,7 @@ export const signatures = (model, position) => ask(Object.assign({op: 'signature
  * @param {Object} position
  * @returns {Promise<?{markdown: string[], line: number, column: number, endLine: number, endColumn: number}>}
  */
-export const hover = (model, position) => ask(Object.assign({op: 'hover'}, at(model, position)));
+export const hover = (model, position) => ask(model, Object.assign({op: 'hover'}, at(model, position)));
 
 /**
  * The errors and warnings of the compiler in the shown file.
@@ -226,6 +256,11 @@ export const hover = (model, position) => ask(Object.assign({op: 'hover'}, at(mo
  *     column: number, endLine: number, endColumn: number}>>}
  */
 export const diagnostics = async(model) => {
-    const answer = await ask({op: 'diagnostics', code: model.getValue(), files: filesOf(model)});
-    return answer ? answer.items.filter((d) => d.file === 'Program.cs') : null;
+    const answer = await ask(model, {op: 'diagnostics', code: model.getValue(), files: filesOf(model)});
+    if (!answer) {
+        return null;
+    }
+    // Roslyn names the shown file Program.cs; the Java service after its public class.
+    const main = answer.main || 'Program.cs';
+    return answer.items.filter((d) => d.file === main);
 };

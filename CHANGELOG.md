@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.27.0 (2026-11-25)
+
+- Java typing help from the CodeLab runner 0.23.0 or newer, like C# in 1.26: completion of the real members of every
+  type (instance members after a value, static ones after a class, the names in scope), the overloads and parameters
+  of a call, tooltips with the declaration and the Javadoc of the JDK, and the compiler's errors and warnings while
+  typing. The runner checks the program with the compiler of its JDK, the one that runs and grades it; the file is
+  named after its public class, and the other Java files of a multi-file example are included.
+- The client of the language services is now `tiny_codelab/langservice` (was `roslyn`), one connection per language.
+
 ## 1.26.0 (2026-11-24)
 
 - C# typing help from Roslyn on the CodeLab runner 0.22.0 or newer: completion of the real members of every .NET type

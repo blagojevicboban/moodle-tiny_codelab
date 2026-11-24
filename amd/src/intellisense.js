@@ -24,7 +24,7 @@
 import libraries from './libraries';
 import {languages} from './common';
 import * as Jedi from './jedi';
-import * as Roslyn from './roslyn';
+import * as LangService from './langservice';
 
 /**
  * Parse 'name(a, b)' or 'NAME' into a name and its parameters (null for a property).
@@ -322,7 +322,7 @@ const jediSignatureHelp = async(model, position) => {
 };
 
 /**
- * C# completions from Roslyn on the runner, with the snippets of level 1; null when Roslyn has no answer.
+ * C# or Java completions from the language service of the runner, with the snippets of level 1; null without an answer.
  *
  * @param {Object} monaco
  * @param {Object} library
@@ -330,8 +330,8 @@ const jediSignatureHelp = async(model, position) => {
  * @param {Object} position
  * @returns {Promise<?Object[]>}
  */
-const roslynCompletions = async(monaco, library, model, position) => {
-    const found = await Roslyn.complete(model, position);
+const serviceCompletions = async(monaco, library, model, position) => {
+    const found = await LangService.complete(model, position);
     if (!found) {
         return null;
     }
@@ -354,14 +354,14 @@ const roslynCompletions = async(monaco, library, model, position) => {
 };
 
 /**
- * C# signature help from Roslyn; null when Roslyn has no answer.
+ * C# or Java signature help from the language service of the runner; null without an answer.
  *
  * @param {Object} model
  * @param {Object} position
  * @returns {Promise<?Object>}
  */
-const roslynSignatureHelp = async(model, position) => {
-    const found = await Roslyn.signatures(model, position);
+const serviceSignatureHelp = async(model, position) => {
+    const found = await LangService.signatures(model, position);
     if (!found || !found.signatures.length) {
         return null;
     }
@@ -380,11 +380,12 @@ const roslynSignatureHelp = async(model, position) => {
 };
 
 /**
- * Mark the errors and warnings of the C# compiler (Roslyn on the runner), a moment after the reader stops typing.
+ * Mark the errors and warnings of the C# or Java compiler (language service of the runner), a moment after the reader
+ * stops typing.
  *
  * @param {Object} monaco
  */
-const markCsharpErrors = (monaco) => {
+const markServiceErrors = (monaco) => {
     const owner = 'codelab-roslyn';
     monaco.editor.onDidCreateModel((model) => {
         let timer = null;
@@ -392,16 +393,16 @@ const markCsharpErrors = (monaco) => {
             if (model.isDisposed()) {
                 return;
             }
-            if (model.getLanguageId() !== 'csharp' || !Roslyn.enabled()) {
+            if (!LangService.enabled(model.getLanguageId())) {
                 monaco.editor.setModelMarkers(model, owner, []);
                 return;
             }
             const version = model.getVersionId();
-            const found = await Roslyn.diagnostics(model);
+            const found = await LangService.diagnostics(model);
             if (found && !model.isDisposed() && model.getVersionId() === version) {
                 monaco.editor.setModelMarkers(model, owner, found.map((d) => ({
                     severity: d.severity === 'error' ? monaco.MarkerSeverity.Error : monaco.MarkerSeverity.Warning,
-                    message: d.message, code: d.code,
+                    message: d.message, code: d.code.replace(/^compiler\.(err|warn)\./, ''),
                     startLineNumber: d.line, startColumn: d.column,
                     endLineNumber: d.endLine, endColumn: Math.max(d.endColumn, d.line === d.endLine ? d.column + 1 : 1),
                 })));
@@ -417,17 +418,17 @@ const markCsharpErrors = (monaco) => {
 };
 
 /**
- * Tooltips of C# from Roslyn: the declaration and the documentation of what is under the mouse.
+ * Tooltips of C# and Java from the language service: the declaration and the documentation of what is under the mouse.
  *
  * @param {Object} monaco
  */
-const registerCsharpHover = (monaco) => {
-    monaco.languages.registerHoverProvider('csharp', {
+const registerServiceHover = (monaco) => {
+    Object.keys(LangService.SERVED).forEach((id) => monaco.languages.registerHoverProvider(id, {
         provideHover: async(model, position) => {
-            if (!Roslyn.enabled() || model.codelab?.help === false) {
+            if (!LangService.enabled(model.getLanguageId()) || model.codelab?.help === false) {
                 return null;
             }
-            const found = await Roslyn.hover(model, position).catch(() => null);
+            const found = await LangService.hover(model, position).catch(() => null);
             if (!found || !found.markdown.length) {
                 return null;
             }
@@ -436,7 +437,7 @@ const registerCsharpHover = (monaco) => {
                 contents: found.markdown.map((value) => ({value})),
             };
         },
-    });
+    }));
 };
 
 /**
@@ -495,13 +496,13 @@ export const registerAssist = (monaco, pyodide = '') => {
 
     Object.entries(ids).forEach(([id, library]) => {
         const python = id === 'python';
-        const csharp = id === 'csharp';
+        const served = Object.prototype.hasOwnProperty.call(LangService.SERVED, id);
         monaco.languages.registerCompletionItemProvider(id, {
             triggerCharacters: ['.', '<'],
             provideCompletionItems: async(model, position) => {
                 let items = python && Jedi.enabled() ? await jediCompletions(monaco, library, model, position) : null;
-                if (!items && csharp && Roslyn.enabled()) {
-                    items = await roslynCompletions(monaco, library, model, position);
+                if (!items && served && LangService.enabled(id)) {
+                    items = await serviceCompletions(monaco, library, model, position);
                 }
                 if (items) {
                     return {suggestions: items};
@@ -511,7 +512,7 @@ export const registerAssist = (monaco, pyodide = '') => {
             },
             resolveCompletionItem: async(item) => {
                 if (item.codelab && !item.documentation) {
-                    const found = await Roslyn.describe(item.codelab.model, item.codelab.position, item.label);
+                    const found = await LangService.describe(item.codelab.model, item.codelab.position, item.label);
                     if (found?.text) {
                         item.detail = found.text;
                         item.documentation = found.doc || undefined;
@@ -526,14 +527,14 @@ export const registerAssist = (monaco, pyodide = '') => {
             signatureHelpRetriggerCharacters: [','],
             provideSignatureHelp: async(model, position) => {
                 let help = python && Jedi.enabled() ? await jediSignatureHelp(model, position) : null;
-                if (!help && csharp && Roslyn.enabled()) {
-                    help = await roslynSignatureHelp(model, position);
+                if (!help && served && LangService.enabled(id)) {
+                    help = await serviceSignatureHelp(model, position);
                 }
                 return help || librarySignatureHelp(library, model, position);
             },
         });
     });
     markPythonErrors(monaco);
-    markCsharpErrors(monaco);
-    registerCsharpHover(monaco);
+    markServiceErrors(monaco);
+    registerServiceHover(monaco);
 };
