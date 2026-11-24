@@ -112,9 +112,13 @@ export class RemoteSession {
         this.debug = vars ? new DebugPanel(vars, {step: () => this.step(), next: () => this.next(), out: () => this.out(),
             mark: (line) => this.editor?.highlightLine(line), terminal: () => this.terminal,
             values: (vars) => this.editor?.setValues?.(vars),
+            onWatches: (expressions) => this.send({type: 'watches', expressions}),
             again: () => this.start(true, this.given), source: () => this.editor?.getValue() ?? ''}) : null;
         // Breakpoints set or removed while the program runs.
-        editor?.onBreakpointsChange?.((lines) => this.send({type: 'breakpoints', lines: lines.map((l) => l + this.offset)}));
+        editor?.onBreakpointsChange?.((lines) => this.send({
+            type: 'breakpoints',
+            lines: lines.map((bp) => (typeof bp === 'number' ? bp + this.offset : {...bp, line: bp.line + this.offset})),
+        }));
         this.lang = typeof lang === 'function' ? lang : () => lang;
         this.program = program;
         this.panel = panel;
@@ -150,7 +154,8 @@ export class RemoteSession {
         // The input of this run, for Step again with the same input.
         this.typed = stdin;
         this.mode = step ? 'step' : 'continue';
-        const breakpoints = (this.editor?.getBreakpoints?.() || []).map((l) => l + this.offset);
+        const breakpoints = (this.editor?.getBreakpoints?.() || [])
+            .map((bp) => (typeof bp === 'number' ? bp + this.offset : {...bp, line: bp.line + this.offset}));
         // Under gdb when stepping, or when Run has breakpoints to stop at.
         const debug = STEP_LANGUAGES.includes(this.lang()) && (step || breakpoints.length > 0);
         this.setState('running');
@@ -177,8 +182,10 @@ export class RemoteSession {
             const cc = this.compiler();
             const std = this.std();
             const san = this.sanitize();
+            const watches = this.debug?.getWatches?.() || [];
             ws.send(JSON.stringify({type: 'start', lang: this.lang(), code: this.program(), stdin,
                 debug, step, breakpoints, setup: this.setup(),
+                ...(watches.length ? {watches} : {}),
                 ...(inputFiles.length ? {files: inputFiles} : {}),
                 ...(cc ? {compiler: cc} : {}),
                 ...(std ? {std} : {}),
@@ -208,6 +215,9 @@ export class RemoteSession {
                     break;
                 case 'paused':
                     this.paused(message);
+                    break;
+                case 'watches':
+                    this.debug?.updateWatches(message.values);
                     break;
                 case 'files':
                     if (Array.isArray(message.files) && message.files.length) {
@@ -268,8 +278,9 @@ export class RemoteSession {
      * @param {Array<{name: string, value: string}>} message.vars variables of the function
      * @param {Array<{func: string, line: number, vars: Array}>} [message.stack] the program's frames, innermost first
      * @param {Object<string, string>} [message.targets] what the pointers point to, by address (memory view)
+     * @param {Array<{expr: string, value: ?string}>} [message.watches] watched expressions evaluated at this stop
      */
-    paused({line, func, vars, stack, targets}) {
+    paused({line, func, vars, stack, targets, watches}) {
         const s = this.strings;
         const shown = line - this.offset;
         const lines = this.editor ? this.editor.getValue().split('\n').length : 0;
@@ -281,7 +292,7 @@ export class RemoteSession {
         this.terminal.setStatus(s.paused.replace('{$a}', shown), 'running');
         this.editor.highlightLine(shown);
         this.debug?.show({line: shown, stack: editorStack(stack || [{func, line, vars}], this.offset, lines),
-            targets: targets || null});
+            targets: targets || null, watches: watches || null});
         this.setState('paused');
     }
 

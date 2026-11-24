@@ -38,6 +38,24 @@ body.theme-hc-black .codelab-current-line { background: #264f78; }
 .codelab-current-mark { background: #f0ad00; width: 4px !important; margin-left: 3px; }
 .codelab-breakpoint { background: #d9534f; border-radius: 50%; width: 10px !important; height: 10px !important;
     margin: 5px 0 0 6px; }
+.codelab-breakpoint-cond { background: #e67e22; border-radius: 50%; width: 10px !important; height: 10px !important;
+    margin: 5px 0 0 6px; box-shadow: inset 0 0 0 2.5px #fff; }
+.codelab-bp-pop { position: fixed; z-index: 9999; display: flex; align-items: center; gap: 4px; padding: 4px 6px;
+    background: #fff; color: #1d2125; border: 1px solid #ced4da; border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, .18); font: 12px/1.3 system-ui, -apple-system, sans-serif; }
+.codelab-bp-pop input { width: 160px; padding: 2px 6px; border: 1px solid #adb5bd; border-radius: 3px;
+    font: 12px/1.3 SFMono-Regular, Menlo, Monaco, Consolas, monospace; background: #fff; color: #1d2125; }
+.codelab-bp-pop button { padding: 2px 7px; border: 1px solid #ced4da; border-radius: 3px; background: #f8f9fa;
+    color: #1d2125; cursor: pointer; font: inherit; }
+.codelab-bp-pop button[data-ok] { background: #0f6cbf; border-color: #0f6cbf; color: #fff; }
+body.theme-vs-dark .codelab-bp-pop, body.theme-hc-black .codelab-bp-pop { background: #252526; color: #eee;
+    border-color: #454545; }
+body.theme-vs-dark .codelab-bp-pop input, body.theme-hc-black .codelab-bp-pop input { background: #1e1e1e; color: #eee;
+    border-color: #555; }
+body.theme-vs-dark .codelab-bp-pop button, body.theme-hc-black .codelab-bp-pop button { background: #333; color: #eee;
+    border-color: #555; }
+body.theme-vs-dark .codelab-bp-pop button[data-ok], body.theme-hc-black .codelab-bp-pop button[data-ok] {
+    background: #0e639c; border-color: #0e639c; color: #fff; }
 .monaco-editor .margin-view-overlays .cgmr { cursor: pointer; }
 </style>
 </head>

@@ -141,13 +141,35 @@ const HARNESS = [
     '        out["ret"] = ret',
     '    return json.dumps(out)',
     '',
+    'def __codelab_watches(frame):',
+    '    exprs = list(js.codelab.getWatches())',
+    '    if not exprs:',
+    '        return None',
+    '    out = []',
+    '    for expr in exprs:',
+    '        try:',
+    '            val = __codelab_short(eval(expr, frame.f_globals, frame.f_locals))',
+    '        except Exception:',
+    '            val = None',
+    '        out.append({"expr": expr, "value": val})',
+    '    return json.dumps(out)',
+    '',
     'def __codelab_trace(frame, event, arg):',
     '    if frame.f_code.co_filename != "<program>":',
     '        return None',
     '    if event == "line":',
     '        c = js.codelab',
     '        mode = c.mode',
-    '        stop = c.isBreakpoint(frame.f_lineno)',
+    '        cond = c.breakpointCondition(frame.f_lineno)',
+    '        stop = False',
+    '        if cond is not None:',
+    '            if cond == "":',
+    '                stop = True',
+    '            else:',
+    '                try:',
+    '                    stop = bool(eval(cond, frame.f_globals, frame.f_locals))',
+    '                except Exception:',
+    '                    stop = False',
     '        depth = 0',
     '        if not stop and mode != "continue":',
     '            depth = __codelab_depth(frame)',
@@ -155,7 +177,10 @@ const HARNESS = [
     '        if stop:',
     '            depth = depth or __codelab_depth(frame)',
     '            __codelab_tflush()',
-    '            run_sync(c.step(frame.f_lineno, frame.f_code.co_name, __codelab_vars(frame), __codelab_stack(frame), depth))',
+    '            act = run_sync(c.step(frame.f_lineno, frame.f_code.co_name, __codelab_vars(frame),',
+    '                                  __codelab_stack(frame), depth, __codelab_watches(frame)))',
+    '            while act == "watches":',
+    '                act = run_sync(c.updateWatches(__codelab_watches(frame)))',
     '    elif event == "return":',
     '        # The caller goes on in the middle of its line, without a line event: stop there when the function that',
     '        # returns is the one of the last stop (Step, Step over or Step out).',
@@ -165,8 +190,10 @@ const HARNESS = [
     '            depth = __codelab_depth(frame)',
     '            if depth == c.refDepth or (c.mode != "out" and depth < c.refDepth):',
     '                __codelab_tflush()',
-    '                run_sync(c.step(caller.f_lineno, caller.f_code.co_name, __codelab_vars(caller),',
-    '                                __codelab_stack(caller, __codelab_short(arg)), depth - 1))',
+    '                act = run_sync(c.step(caller.f_lineno, caller.f_code.co_name, __codelab_vars(caller),',
+    '                                      __codelab_stack(caller, __codelab_short(arg)), depth - 1, __codelab_watches(caller)))',
+    '                while act == "watches":',
+    '                    act = run_sync(c.updateWatches(__codelab_watches(caller)))',
     '    return __codelab_trace',
     '',
     'def __codelab_run(code, trace):',
@@ -277,20 +304,44 @@ const postFiles = () => {
 };
 // Step by step: mode step (every line), next (not deeper than refDepth), out (above refDepth), continue (only at
 // breakpoints).
-let breakpoints = new Set();
+let breakpoints = new Map();
+let watches = [];
+const setBreakpointMap = (list) => {
+    breakpoints = new Map();
+    for (const item of (list || [])) {
+        if (typeof item === 'number' && Number.isInteger(item) && item > 0) {
+            breakpoints.set(item, '');
+        } else if (item && typeof item === 'object' && Number.isInteger(item.line) && item.line > 0) {
+            breakpoints.set(item.line, typeof item.condition === 'string' ? item.condition.trim() : '');
+        }
+    }
+};
+const setWatchList = (list) => {
+    watches = (Array.isArray(list) ? list : [])
+        .filter((e) => typeof e === 'string')
+        .map((e) => e.trim().slice(0, 200))
+        .filter((e) => e.length > 0)
+        .slice(0, 20);
+};
 self.codelab = {
     turtle: (events) => postMessage({type: 'turtle', events}),
     mode: 'continue',
     refDepth: 0,
     isBreakpoint: (line) => breakpoints.has(line),
+    breakpointCondition: (line) => (breakpoints.has(line) ? breakpoints.get(line) : null),
+    getWatches: () => watches,
     readLine: () => new Promise((resolve) => {
         pendingLine = resolve;
         postMessage({type: 'input'});
     }),
-    step: (line, scope, vars, stack, depth) => new Promise((resolve) => {
+    step: (line, scope, vars, stack, depth, watchValues) => new Promise((resolve) => {
         self.codelab.refDepth = depth;
         pendingStep = resolve;
-        postMessage({type: 'line', line, scope, vars, stack});
+        postMessage({type: 'line', line, scope, vars, stack, watches: watchValues || null});
+    }),
+    updateWatches: (watchValues) => new Promise((resolve) => {
+        pendingStep = resolve;
+        postMessage({type: 'watches', watches: watchValues || '[]'});
     }),
 };
 const writer = (stream) => ({
@@ -345,12 +396,19 @@ onmessage = async(e) => {
         pendingLine = null;
         resolve(m.text);
     } else if (m.type === 'breakpoints') {
-        breakpoints = new Set(m.lines);
+        setBreakpointMap(m.lines);
+    } else if (m.type === 'watches') {
+        setWatchList(m.expressions);
+        if (pendingStep) {
+            const resolve = pendingStep;
+            pendingStep = null;
+            resolve('watches');
+        }
     } else if (m.type === 'resume' && pendingStep) {
         self.codelab.mode = m.mode;
         const resolve = pendingStep;
         pendingStep = null;
-        resolve();
+        resolve('resume');
     } else if (m.type === 'count') {
         try {
             if (!pyodide) {
@@ -378,7 +436,8 @@ onmessage = async(e) => {
                 pyodide.setStderr(writer('err'));
             }
             written = 0;
-            breakpoints = new Set(m.breakpoints || []);
+            setBreakpointMap(m.breakpoints);
+            setWatchList(m.watches);
             self.codelab.mode = m.step ? 'step' : 'continue';
             pyodide.globals.set('__codelab_code', m.code);
             pyodide.globals.set('__codelab_turtle_src', TURTLE);
@@ -449,10 +508,11 @@ const stopWorker = () => {
  * @param {boolean} step stop before the first line
  * @param {number[]} [breakpoints] lines to stop at
  * @param {Array<{name: string, text: string}>} [files] files put in the working folder before the run
+ * @param {string[]} [watches] expressions evaluated at every stop
  * @returns {{sendInput: function(string): void, resume: function(string): void, setBreakpoints: function(number[]): void,
- *     stop: function(): void}} resume with step, next, out or continue
+ *     setWatches: function(string[]): void, stop: function(): void}} resume with step, next, out or continue
  */
-export const runPython = (base, code, handlers, step = false, breakpoints = [], files = []) => {
+export const runPython = (base, code, handlers, step = false, breakpoints = [], files = [], watches = []) => {
     // A program still running is stopped; an idle worker keeps Pyodide loaded for the next run.
     if (current) {
         stopWorker();
@@ -486,7 +546,10 @@ export const runPython = (base, code, handlers, step = false, breakpoints = [], 
             handlers.onInput();
         } else if (m.type === 'line' && handlers.onLine) {
             const memory = JSON.parse(m.stack);
-            handlers.onLine(m.line, m.scope, JSON.parse(m.vars), memory.frames, memory.heap, memory.ret);
+            const watchVals = m.watches ? JSON.parse(m.watches) : null;
+            handlers.onLine(m.line, m.scope, JSON.parse(m.vars), memory.frames, memory.heap, memory.ret, watchVals);
+        } else if (m.type === 'watches') {
+            handlers.onWatches?.(JSON.parse(m.watches || '[]'));
         } else if (m.type === 'turtle') {
             handlers.onTurtle?.(JSON.parse(m.events));
         } else if (m.type === 'files') {
@@ -498,11 +561,12 @@ export const runPython = (base, code, handlers, step = false, breakpoints = [], 
             handlers.onDone(toolong ? {status: 'toolong'} : {status: m.status, message: m.message});
         }
     };
-    own.postMessage({type: 'run', code, step, breakpoints, files});
+    own.postMessage({type: 'run', code, step, breakpoints, files, watches});
     return {
         sendInput: (text) => own.postMessage({type: 'line', text}),
         resume: (mode) => own.postMessage({type: 'resume', mode}),
         setBreakpoints: (lines) => own.postMessage({type: 'breakpoints', lines}),
+        setWatches: (expressions) => own.postMessage({type: 'watches', expressions}),
         stop: () => {
             if (current === handlers) {
                 stopWorker();

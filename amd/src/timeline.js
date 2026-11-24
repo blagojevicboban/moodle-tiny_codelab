@@ -71,7 +71,7 @@ export class Timeline {
      * @param {{line: number, stack: Array, out: number, heap?: Object}} stop
      * @returns {number} index of the new snapshot
      */
-    record({line, stack, out, heap = null, targets = null}) {
+    record({line, stack, out, heap = null, targets = null, watches = null}) {
         this.count++;
         this.items.push({
             line,
@@ -83,6 +83,8 @@ export class Timeline {
             heap,
             // C and C++: what the pointers point to (runner 0.6.0).
             targets,
+            // Watch expressions evaluated at this stop.
+            watches: Array.isArray(watches) ? watches.map((w) => ({expr: w.expr, value: w.value})) : null,
         });
         if (this.items.length > this.max) {
             const half = Math.floor(this.items.length / 2);

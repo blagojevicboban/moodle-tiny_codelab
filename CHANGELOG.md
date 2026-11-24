@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.25.0 (2026-11-24)
+
+- Conditional breakpoints in the debugger (Python in the browser and C/C++ on CodeLab runner 0.20.0+): right-click or
+  Shift+click the gutter next to a line number to enter a condition such as `i == 7`; conditional breakpoints show an
+  amber ring with a hover tooltip and move with their line when code is edited.
+- Watch expressions in the debugger panel (Python in the browser and C/C++ on CodeLab runner 0.20.0+): add custom
+  expressions such as `a[i]` or `total + i` to track their values across steps, with live evaluation while paused,
+  change highlighting and timeline history.
+- Updated all 29 interface languages with strings for conditional breakpoints and watch expressions.
+- Compiler error hints now also match GCC's `expected ',' or ';'` semicolon diagnostic.
+
 ## 1.24.0 (2026-11-23)
 
 - Interface translated into 14 more languages (29 total): added Portuguese (Brazil), Turkish, Dutch, Russian, Ukrainian,

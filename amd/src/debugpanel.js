@@ -68,7 +68,7 @@ export const showVariables = (panel, vars, previous, title, empty) => {
 const KEYS = ['stepover', 'stepout', 'autostep', 'autostop', 'speed', 'callstack', 'tracetable', 'traceline', 'variables',
     'novariables', 'mainprogram', 'stepback', 'stepforward', 'stepagain', 'timeline', 'timelinepos', 'timelineend',
     'timelinepast', 'timelinepastended', 'memory', 'memref', 'memmore', 'memleak_summary', 'memleak_item',
-    'calltree', 'calltreesummary', 'calltreemore'];
+    'calltree', 'calltreesummary', 'calltreemore', 'watch', 'watch_add', 'watch_placeholder', 'watch_remove'];
 let strings = null;
 
 /** Most rows the trace table shows. */
@@ -131,6 +131,32 @@ export class DebugPanel {
         this.auto = false;
         this.timer = null;
         this.delay = 600;
+        this.watches = [];
+        this.watchOpen = false;
+    }
+
+    /**
+     * Active watch expressions (kept across runs until removed).
+     *
+     * @returns {string[]}
+     */
+    getWatches() {
+        return [...this.watches];
+    }
+
+    /**
+     * Live watch values received while paused: update the latest snapshot and refresh.
+     *
+     * @param {Array<{expr: string, value: ?string}>} values
+     */
+    async updateWatches(values) {
+        const snap = this.timeline.get(this.timeline.length - 1);
+        if (!snap) {
+            return;
+        }
+        snap.watches = Array.isArray(values) ? values.map((w) => ({expr: w.expr, value: w.value})) : [];
+        const s = await loadPanelStrings();
+        this.render(s);
     }
 
     /**
@@ -177,13 +203,14 @@ export class DebugPanel {
      * @param {?Object} [pause.heap] objects of the memory view (Python)
      * @param {?Object<string, string>} [pause.targets] what the pointers point to (C and C++)
      * @param {?string} [pause.ret] the value returned by the call that just ended (Python), for the call tree
+     * @param {?Array<{expr: string, value: ?string}>} [pause.watches] watched expressions evaluated at this stop
      */
-    async show({line, stack, heap = null, targets = null, ret = null}) {
+    async show({line, stack, heap = null, targets = null, ret = null, watches = null}) {
         const s = await loadPanelStrings();
         const terminal = this.actions.terminal?.();
         const out = terminal ? outputLength(terminal.output) : 0;
         this.view = this.timeline.record({line, stack: stack.length ? stack : [{func: '', line, vars: {}}], out, heap,
-            targets});
+            targets, watches});
         const snap = this.timeline.get(this.view);
         this.calls.add({stack: snap.stack, step: snap.step, ret});
         this.selected = 0;
@@ -390,6 +417,9 @@ export class DebugPanel {
         showVariables(vars, frame.vars, previous,
             frame.func && frame.func !== '<module>' ? `${s.variables}: ${frame.func}()` : s.variables, s.novariables);
         this.root.append(vars);
+        if (this.actions.onWatches) {
+            this.root.append(this.watchSection(s, index));
+        }
         const memory = this.memorySection(s, index);
         if (memory) {
             this.root.append(memory);
@@ -401,6 +431,84 @@ export class DebugPanel {
             this.root.append(this.traceTable(s, index));
         }
         this.root.hidden = false;
+    }
+
+    /**
+     * Watch expressions section: add/remove expressions and show their values at the shown stop.
+     *
+     * @param {Object<string, string>} s strings
+     * @param {number} index the stop
+     * @returns {HTMLDetailsElement}
+     */
+    watchSection(s, index) {
+        const snap = this.timeline.get(index);
+        const prevSnap = index > 0 ? this.timeline.get(index - 1) : null;
+        const prevMap = new Map((prevSnap?.watches || []).map((w) => [w.expr, w.value]));
+        const curList = snap?.watches || [];
+        const curMap = new Map(curList.map((w) => [w.expr, w.value]));
+        const details = document.createElement('details');
+        details.className = 'tiny_codelab-watch mt-2';
+        details.open = this.watchOpen || this.watches.length > 0;
+        const summary = document.createElement('summary');
+        summary.textContent = this.watches.length ? `${s.watch} (${this.watches.length})` : s.watch;
+        details.append(summary);
+
+        const form = document.createElement('form');
+        form.className = 'd-flex align-items-center gap-1 mt-1 mb-1';
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.className = 'form-control form-control-sm font-monospace';
+        input.style.maxWidth = '16rem';
+        input.placeholder = s.watch_placeholder;
+        input.setAttribute('aria-label', s.watch_placeholder);
+        const addBtn = document.createElement('button');
+        addBtn.type = 'submit';
+        addBtn.className = 'btn btn-outline-secondary btn-sm';
+        addBtn.textContent = s.watch_add;
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const expr = input.value.trim().slice(0, 200);
+            if (!expr || this.watches.includes(expr) || this.watches.length >= 20) {
+                return;
+            }
+            this.watches.push(expr);
+            this.watchOpen = true;
+            this.actions.onWatches([...this.watches]);
+            this.render(s);
+        });
+        form.append(input, addBtn);
+        details.append(form);
+
+        if (this.watches.length) {
+            const table = document.createElement('table');
+            table.className = 'tiny_codelab-vars-table tiny_codelab-watch-table';
+            for (const expr of this.watches) {
+                const row = table.insertRow();
+                const val = curMap.has(expr) ? curMap.get(expr) : null;
+                if (prevMap.has(expr) && prevMap.get(expr) !== val) {
+                    row.className = 'tiny_codelab-vars-changed';
+                }
+                row.insertCell().textContent = expr;
+                row.insertCell().textContent = val === null || val === undefined ? '—' : val;
+                const rmCell = row.insertCell();
+                const rm = document.createElement('button');
+                rm.type = 'button';
+                rm.className = 'btn btn-link btn-sm p-0 text-danger';
+                rm.textContent = '×';
+                rm.setAttribute('aria-label', s.watch_remove.replace('{$a}', expr));
+                rm.addEventListener('click', () => {
+                    this.watches = this.watches.filter((x) => x !== expr);
+                    this.actions.onWatches([...this.watches]);
+                    this.render(s);
+                });
+                rmCell.append(rm);
+            }
+            details.append(table);
+        }
+        details.addEventListener('toggle', () => {
+            this.watchOpen = details.open;
+        });
+        return details;
     }
 
     /**

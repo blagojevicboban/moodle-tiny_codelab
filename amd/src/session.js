@@ -135,9 +135,12 @@ export class PythonSession {
         this.debug = new DebugPanel(vars, {step: () => this.step(), next: () => this.next(), out: () => this.out(),
             mark: (line) => this.editor.highlightLine(line), terminal: () => this.terminal,
             values: (vars) => this.editor.setValues?.(vars),
+            onWatches: (exprs) => this.run?.setWatches(exprs),
             again: () => this.start(true, this.given), source: () => this.editor.getValue()});
         // Breakpoints set or removed while the program runs.
-        this.editor.onBreakpointsChange?.((lines) => this.run?.setBreakpoints(lines.map((l) => l + this.offset)));
+        this.editor.onBreakpointsChange?.((lines) => this.run?.setBreakpoints(
+            lines.map((bp) => (typeof bp === 'number' ? bp + this.offset : {...bp, line: bp.line + this.offset}))
+        ));
     }
 
     /**
@@ -170,7 +173,8 @@ export class PythonSession {
         this.mode = step ? 'step' : 'continue';
         this.setState('running');
         const terminal = this.terminal;
-        const breakpoints = (this.editor.getBreakpoints?.() || []).map((l) => l + this.offset);
+        const breakpoints = (this.editor.getBreakpoints?.() || [])
+            .map((bp) => (typeof bp === 'number' ? bp + this.offset : {...bp, line: bp.line + this.offset}));
         this.run = runPython(this.base, this.program(), {
             onLoading: () => terminal.setStatus(s.loadingpython, 'running'),
             onStarted: () => terminal.setStatus(s.running_browser, 'running'),
@@ -200,7 +204,7 @@ export class PythonSession {
                     this.run.sendInput(line);
                 }
             },
-            onLine: (programLine, scope, vars, stack, heap, ret) => {
+            onLine: (programLine, scope, vars, stack, heap, ret, watches) => {
                 const lines = this.editor.getValue().split('\n').length;
                 const line = programLine - this.offset;
                 if (line < 1 || line > lines) {
@@ -210,9 +214,10 @@ export class PythonSession {
                 }
                 terminal.setStatus(s.paused.replace('{$a}', line), 'running');
                 this.editor.highlightLine(line);
-                this.debug.show({line, stack: editorStack(stack, this.offset, lines), heap, ret});
+                this.debug.show({line, stack: editorStack(stack, this.offset, lines), heap, ret, watches});
                 this.setState('paused');
             },
+            onWatches: (values) => this.debug.updateWatches(values),
             onDone: ({status, message}) => {
                 terminal.cancelAsk();
                 if (message && status === 'error') {
@@ -226,7 +231,7 @@ export class PythonSession {
                 this.setState('idle');
                 this.debug.finish();
             },
-        }, step, breakpoints, this.files());
+        }, step, breakpoints, this.files(), this.debug.getWatches());
     }
 
     /**

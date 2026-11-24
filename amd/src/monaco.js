@@ -23,7 +23,8 @@
  * @copyright  2026 Boban Blagojević
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-import {languages, defaultLanguage} from './common';
+import {getStrings} from 'core/str';
+import {component, languages, defaultLanguage} from './common';
 import {registerAssist} from './intellisense';
 import {registerHover} from './hover';
 
@@ -203,6 +204,194 @@ const NO_ASSIST = {
  */
 
 /**
+ * Attach click, Shift+click and right-click breakpoint handling (including conditional breakpoints) to a Monaco editor.
+ *
+ * @param {Object} editor Monaco editor instance
+ * @param {Object} monaco Monaco API
+ * @param {Window} win iframe window
+ * @param {boolean} enabled whether interactive breakpoints are enabled
+ * @returns {{get: function(): Array<number|{line: number, condition: string}>,
+ *            onChange: function(function(Array<number|{line: number, condition: string}>): void): void,
+ *            setCondition: function(number, string): void,
+ *            close: function(): void}}
+ */
+const attachBreakpoints = (editor, monaco, win, enabled) => {
+    const collection = editor.createDecorationsCollection();
+    const listeners = [];
+    const conditions = new Map();
+    let labels = {
+        bpcondition: 'Condition',
+        bpcondition_active: 'Condition: {$a}',
+        bpcondition_hint: 'Breakpoint',
+        bpcondition_placeholder: 'i == 5',
+        ok: 'OK',
+        cancel: 'Cancel',
+    };
+    let popover = null;
+
+    const closePopover = () => {
+        if (popover) {
+            popover.remove();
+            popover = null;
+        }
+    };
+
+    const currentEntries = () => {
+        const model = editor.getModel();
+        if (!model) {
+            return [];
+        }
+        const byLine = new Map();
+        for (const id of (collection._decorationIds || [])) {
+            const range = model.getDecorationRange(id);
+            if (range) {
+                byLine.set(range.startLineNumber, conditions.get(id) || '');
+            }
+        }
+        return [...byLine.entries()].sort((a, b) => a[0] - b[0]);
+    };
+
+    const exportList = () => currentEntries().map(([line, cond]) => (cond ? {line, condition: cond} : line));
+
+    const applyEntries = (entries) => {
+        conditions.clear();
+        const specs = entries.map(([line, cond]) => ({
+            range: new monaco.Range(line, 1, line, 1),
+            options: {
+                isWholeLine: false,
+                glyphMarginClassName: cond ? 'codelab-breakpoint-cond' : 'codelab-breakpoint',
+                glyphMarginHoverMessage: {
+                    value: cond ? labels.bpcondition_active.replace('{$a}', cond) : labels.bpcondition_hint,
+                },
+                stickiness: 1,
+            },
+        }));
+        const ids = collection.set(specs);
+        if (Array.isArray(ids)) {
+            ids.forEach((id, i) => {
+                if (entries[i][1]) {
+                    conditions.set(id, entries[i][1]);
+                }
+            });
+        }
+        const list = exportList();
+        listeners.forEach((fn) => fn(list));
+    };
+
+    const setCondition = (line, raw) => {
+        const cond = (raw || '').trim().slice(0, 200);
+        const map = new Map(currentEntries());
+        map.set(line, cond);
+        applyEntries([...map.entries()].sort((a, b) => a[0] - b[0]));
+    };
+
+    const openPopover = (line, clientY) => {
+        closePopover();
+        const existing = new Map(currentEntries()).get(line) || '';
+        const doc = win.document;
+        const pop = doc.createElement('div');
+        pop.className = 'codelab-bp-pop';
+        pop.style.left = '28px';
+        pop.style.top = `${Math.max(4, Math.min(clientY - 12, win.innerHeight - 36))}px`;
+        const input = doc.createElement('input');
+        input.type = 'text';
+        input.value = existing;
+        input.placeholder = labels.bpcondition_placeholder;
+        input.setAttribute('aria-label', labels.bpcondition);
+        const okBtn = doc.createElement('button');
+        okBtn.type = 'button';
+        okBtn.setAttribute('data-ok', '');
+        okBtn.textContent = labels.ok;
+        const cancelBtn = doc.createElement('button');
+        cancelBtn.type = 'button';
+        cancelBtn.textContent = labels.cancel;
+        const commit = () => {
+            setCondition(line, input.value);
+            closePopover();
+            editor.focus();
+        };
+        okBtn.addEventListener('click', commit);
+        cancelBtn.addEventListener('click', () => {
+            closePopover();
+            editor.focus();
+        });
+        input.addEventListener('keydown', (ev) => {
+            if (ev.key === 'Enter') {
+                ev.preventDefault();
+                commit();
+            } else if (ev.key === 'Escape') {
+                ev.preventDefault();
+                closePopover();
+                editor.focus();
+            }
+        });
+        pop.append(input, okBtn, cancelBtn);
+        doc.body.append(pop);
+        popover = pop;
+        input.focus();
+        input.select();
+    };
+
+    if (enabled) {
+        getStrings([
+            {key: 'bpcondition', component},
+            {key: 'bpcondition_active', component},
+            {key: 'bpcondition_hint', component},
+            {key: 'bpcondition_placeholder', component},
+            {key: 'ok', component: 'core'},
+            {key: 'cancel', component: 'core'},
+        ]).then((vals) => {
+            labels = {
+                bpcondition: vals[0],
+                bpcondition_active: vals[1],
+                bpcondition_hint: vals[2],
+                bpcondition_placeholder: vals[3],
+                ok: vals[4],
+                cancel: vals[5],
+            };
+            return labels;
+        }).catch(() => {});
+
+        editor.onMouseDown((e) => {
+            if (e.target.type !== monaco.editor.MouseTargetType.GUTTER_GLYPH_MARGIN || !e.target.position) {
+                closePopover();
+                return;
+            }
+            const line = e.target.position.lineNumber;
+            if (e.event.rightButton || e.event.shiftKey) {
+                e.event.preventDefault();
+                e.event.stopPropagation();
+                openPopover(line, e.event.posy);
+                return;
+            }
+            closePopover();
+            const map = new Map(currentEntries());
+            if (map.has(line)) {
+                map.delete(line);
+            } else {
+                map.set(line, '');
+            }
+            applyEntries([...map.entries()].sort((a, b) => a[0] - b[0]));
+        });
+
+        editor.onContextMenu((e) => {
+            if (e.target.type === monaco.editor.MouseTargetType.GUTTER_GLYPH_MARGIN && e.target.position) {
+                e.event.preventDefault();
+                e.event.stopPropagation();
+                openPopover(e.target.position.lineNumber, e.event.posy);
+            }
+        });
+    }
+
+    return {
+        get: exportList,
+        onChange: (listener) => listeners.push(listener),
+        setCondition,
+        close: closePopover,
+    };
+};
+
+/**
  * Create a code editor inside a container.
  *
  * @param {HTMLElement} container element the frame is added to
@@ -341,25 +530,7 @@ export const createEditor = async(container, options = {}) => {
     const current = editor.createDecorationsCollection();
 
     // Breakpoints: decorations, so that they move with their lines when the code changes.
-    const breakpoints = editor.createDecorationsCollection();
-    const breakpointListeners = [];
-    const breakpointLines = () => [...new Set(breakpoints.getRanges().map((r) => r.startLineNumber))].sort((a, b) => a - b);
-    if (options.breakpoints) {
-        editor.onMouseDown((e) => {
-            const type = e.target.type;
-            if (type !== monaco.editor.MouseTargetType.GUTTER_GLYPH_MARGIN || !e.target.position) {
-                return;
-            }
-            const line = e.target.position.lineNumber;
-            const lines = breakpointLines();
-            const next = lines.includes(line) ? lines.filter((l) => l !== line) : [...lines, line];
-            breakpoints.set(next.map((l) => ({
-                range: new monaco.Range(l, 1, l, 1),
-                options: {isWholeLine: false, glyphMarginClassName: 'codelab-breakpoint', stickiness: 1},
-            })));
-            breakpointListeners.forEach((listener) => listener(breakpointLines()));
-        });
-    }
+    const bp = attachBreakpoints(editor, monaco, win, !!options.breakpoints);
 
     return {
         getValue: () => editor.getValue(),
@@ -394,8 +565,9 @@ export const createEditor = async(container, options = {}) => {
         setReadOnly: (value) => editor.updateOptions({readOnly: !!value}),
         onChange: (callback) => editor.onDidChangeModelContent(() => callback(editor.getValue())),
         focus: () => editor.focus(),
-        getBreakpoints: breakpointLines,
-        onBreakpointsChange: (listener) => breakpointListeners.push(listener),
+        getBreakpoints: bp.get,
+        onBreakpointsChange: bp.onChange,
+        setBreakpointCondition: bp.setCondition,
         setFixedHeight: (height) => {
             if (fixedHeight === null) {
                 normalHeight = frame.style.height;
@@ -404,6 +576,7 @@ export const createEditor = async(container, options = {}) => {
             resize();
         },
         dispose: () => {
+            bp.close();
             shared.editors.delete(applyShared);
             win.removeEventListener('wheel', onWheel, {capture: true});
             editor.dispose();
