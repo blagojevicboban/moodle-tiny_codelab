@@ -24,6 +24,7 @@
 import libraries from './libraries';
 import {languages} from './common';
 import * as Jedi from './jedi';
+import * as Roslyn from './roslyn';
 
 /**
  * Parse 'name(a, b)' or 'NAME' into a name and its parameters (null for a property).
@@ -321,6 +322,124 @@ const jediSignatureHelp = async(model, position) => {
 };
 
 /**
+ * C# completions from Roslyn on the runner, with the snippets of level 1; null when Roslyn has no answer.
+ *
+ * @param {Object} monaco
+ * @param {Object} library
+ * @param {Object} model
+ * @param {Object} position
+ * @returns {Promise<?Object[]>}
+ */
+const roslynCompletions = async(monaco, library, model, position) => {
+    const found = await Roslyn.complete(model, position);
+    if (!found) {
+        return null;
+    }
+    const kinds = monaco.languages.CompletionItemKind;
+    const range = wordRange(model, position);
+    const items = found.map((c) => ({
+        label: c.label, kind: kinds[c.kind] ?? kinds.Text, detail: c.detail || undefined, insertText: c.insert,
+        filterText: c.filter, sortText: c.sort, range,
+        // For the description asked when the item is chosen (resolveCompletionItem).
+        codelab: {model, position: {lineNumber: position.lineNumber, column: position.column}},
+    }));
+    const member = /\.\w*$/.test(model.getLineContent(position.lineNumber).slice(0, position.column - 1));
+    if (!member) {
+        library.snippets.forEach(([label, body]) => items.push({
+            label, kind: kinds.Snippet, insertText: body,
+            insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet, detail: body.split('\n')[0], range,
+        }));
+    }
+    return items;
+};
+
+/**
+ * C# signature help from Roslyn; null when Roslyn has no answer.
+ *
+ * @param {Object} model
+ * @param {Object} position
+ * @returns {Promise<?Object>}
+ */
+const roslynSignatureHelp = async(model, position) => {
+    const found = await Roslyn.signatures(model, position);
+    if (!found || !found.signatures.length) {
+        return null;
+    }
+    return {
+        value: {
+            signatures: found.signatures.map((s) => ({
+                label: s.label,
+                documentation: s.doc,
+                parameters: s.parameters.map((p) => ({label: p.label, documentation: p.doc})),
+            })),
+            activeSignature: found.active,
+            activeParameter: found.parameter,
+        },
+        dispose: () => null,
+    };
+};
+
+/**
+ * Mark the errors and warnings of the C# compiler (Roslyn on the runner), a moment after the reader stops typing.
+ *
+ * @param {Object} monaco
+ */
+const markCsharpErrors = (monaco) => {
+    const owner = 'codelab-roslyn';
+    monaco.editor.onDidCreateModel((model) => {
+        let timer = null;
+        const check = async() => {
+            if (model.isDisposed()) {
+                return;
+            }
+            if (model.getLanguageId() !== 'csharp' || !Roslyn.enabled()) {
+                monaco.editor.setModelMarkers(model, owner, []);
+                return;
+            }
+            const version = model.getVersionId();
+            const found = await Roslyn.diagnostics(model);
+            if (found && !model.isDisposed() && model.getVersionId() === version) {
+                monaco.editor.setModelMarkers(model, owner, found.map((d) => ({
+                    severity: d.severity === 'error' ? monaco.MarkerSeverity.Error : monaco.MarkerSeverity.Warning,
+                    message: d.message, code: d.code,
+                    startLineNumber: d.line, startColumn: d.column,
+                    endLineNumber: d.endLine, endColumn: Math.max(d.endColumn, d.line === d.endLine ? d.column + 1 : 1),
+                })));
+            }
+        };
+        model.onDidChangeContent(() => {
+            clearTimeout(timer);
+            timer = setTimeout(check, 800);
+        });
+        // Only after the reader types: a page with many C# examples opens no connection by itself.
+        model.onDidChangeLanguage(() => monaco.editor.setModelMarkers(model, owner, []));
+    });
+};
+
+/**
+ * Tooltips of C# from Roslyn: the declaration and the documentation of what is under the mouse.
+ *
+ * @param {Object} monaco
+ */
+const registerCsharpHover = (monaco) => {
+    monaco.languages.registerHoverProvider('csharp', {
+        provideHover: async(model, position) => {
+            if (!Roslyn.enabled() || model.codelab?.help === false) {
+                return null;
+            }
+            const found = await Roslyn.hover(model, position).catch(() => null);
+            if (!found || !found.markdown.length) {
+                return null;
+            }
+            return {
+                range: new monaco.Range(found.line, found.column, found.endLine, found.endColumn),
+                contents: found.markdown.map((value) => ({value})),
+            };
+        },
+    });
+};
+
+/**
  * Mark the syntax errors Jedi finds in Python code, a moment after the reader stops typing.
  *
  * @param {Object} monaco
@@ -376,15 +495,29 @@ export const registerAssist = (monaco, pyodide = '') => {
 
     Object.entries(ids).forEach(([id, library]) => {
         const python = id === 'python';
+        const csharp = id === 'csharp';
         monaco.languages.registerCompletionItemProvider(id, {
             triggerCharacters: ['.', '<'],
             provideCompletionItems: async(model, position) => {
-                const items = python && Jedi.enabled() ? await jediCompletions(monaco, library, model, position) : null;
+                let items = python && Jedi.enabled() ? await jediCompletions(monaco, library, model, position) : null;
+                if (!items && csharp && Roslyn.enabled()) {
+                    items = await roslynCompletions(monaco, library, model, position);
+                }
                 if (items) {
                     return {suggestions: items};
                 }
                 const line = model.getLineContent(position.lineNumber).slice(0, position.column - 1);
                 return {suggestions: completionItems(monaco, library, line, model.getValue(), wordRange(model, position))};
+            },
+            resolveCompletionItem: async(item) => {
+                if (item.codelab && !item.documentation) {
+                    const found = await Roslyn.describe(item.codelab.model, item.codelab.position, item.label);
+                    if (found?.text) {
+                        item.detail = found.text;
+                        item.documentation = found.doc || undefined;
+                    }
+                }
+                return item;
             },
         });
 
@@ -392,10 +525,15 @@ export const registerAssist = (monaco, pyodide = '') => {
             signatureHelpTriggerCharacters: ['(', ','],
             signatureHelpRetriggerCharacters: [','],
             provideSignatureHelp: async(model, position) => {
-                const help = python && Jedi.enabled() ? await jediSignatureHelp(model, position) : null;
+                let help = python && Jedi.enabled() ? await jediSignatureHelp(model, position) : null;
+                if (!help && csharp && Roslyn.enabled()) {
+                    help = await roslynSignatureHelp(model, position);
+                }
                 return help || librarySignatureHelp(library, model, position);
             },
         });
     });
     markPythonErrors(monaco);
+    markCsharpErrors(monaco);
+    registerCsharpHover(monaco);
 };

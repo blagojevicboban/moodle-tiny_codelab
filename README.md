@@ -42,6 +42,15 @@ Jobe client.
   - syntax errors marked in the editor.
 
   Jedi runs in Pyodide in its own worker and loads when the reader first types. Until then, the help above is used.
+- **C# typing help from Roslyn** on the CodeLab runner 0.22.0 or newer (with the .NET 8 runtime):
+  - completion of the real members of every .NET type and of the reader's own classes and variables;
+  - the overloads and the parameters of a call while it is typed;
+  - tooltips with the declaration and the documentation of .NET classes and methods;
+  - errors and warnings of the compiler marked while typing, in the language of the page where Roslyn has it.
+
+  The program is checked as C# 7.3 against .NET Framework 4.7.2, the API of Mono that runs and grades it, and is never
+  run for this. One process on the runner serves all readers; the connection opens when a reader first types or points
+  at the code. Without it, or with typing help off, the help above is used.
 - **Run** from the dialog with an input field. Programs are compiled and run on a
   [Jobe](https://github.com/trampgeek/jobe) server.
 - **Python in the browser** ([Pyodide](https://pyodide.org)):

@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.26.0 (2026-11-24)
+
+- C# typing help from Roslyn on the CodeLab runner 0.22.0 or newer: completion of the real members of every .NET type
+  and of the reader's own classes, the overloads and parameters of a call, tooltips with the declaration and the
+  documentation of .NET, and the errors and warnings of the compiler marked while typing (in the language of the page
+  where Roslyn has it). The program is checked as C# 7.3 against .NET Framework 4.7.2, the API of Mono that runs and
+  grades it, and the other C# files of a multi-file example are included. Web service `tiny_codelab_analysis` gives a
+  token for one connection; it is not a run and does not count against the rate limit. Without the service, or with
+  typing help off, the built-in help stays.
+
 ## 1.25.1 (2026-11-24)
 
 - Breakpoints and stack frames in companion C/C++ files (CodeLab runner 0.21.0+): Step switches to the tab of the file

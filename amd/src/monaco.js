@@ -562,6 +562,11 @@ export const createEditor = async(container, options = {}) => {
             editor.getModel().codelab.values = values || null;
         },
         setValue: (value) => editor.setValue(value),
+        // The other files of the example, for the C# language service (tiny_codelab/roslyn): a function that gives
+        // [{name, code}] of the tabs not shown.
+        setCompanions: (companions) => {
+            editor.getModel().codelab.companions = companions;
+        },
         insertText: (text) => {
             editor.pushUndoStop();
             editor.executeEdits('tiny_codelab', [{range: editor.getSelection(), text, forceMoveMarkers: true}]);

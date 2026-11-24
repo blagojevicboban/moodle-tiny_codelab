@@ -123,9 +123,10 @@ class interactive {
      * @param int $userid
      * @param string $lang the language the session may run ('' for any)
      * @param int|null $now
+     * @param string $purpose '' for a session that runs a program, 'analysis' for the C# language service
      * @return string
      */
-    public static function token(int $userid, string $lang = '', ?int $now = null): string {
+    public static function token(int $userid, string $lang = '', ?int $now = null, string $purpose = ''): string {
         $payload = [
             'u' => $userid,
             's' => self::site(),
@@ -134,6 +135,9 @@ class interactive {
         ];
         if ($lang !== '') {
             $payload['l'] = $lang;
+        }
+        if ($purpose !== '') {
+            $payload['p'] = $purpose;
         }
         $body = self::base64url(json_encode($payload));
         return $body . '.' . self::base64url(hash_hmac('sha256', $body, self::secret(), true));

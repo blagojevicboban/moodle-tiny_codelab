@@ -258,6 +258,8 @@ export const createFileTabs = ({
     // The main program and the file names, for a debugger that pauses while another tab is shown.
     editor.getMainValue = () => (active === 0 ? editor.getValue() : contents[0]);
     editor.hasFile = (name) => names.indexOf(name) > 0;
+    // The tabs not shown, so that the C# language service knows the classes of the other files.
+    editor.setCompanions?.(() => names.map((name, i) => ({name, code: contents[i]})).filter((f, i) => i !== active));
 
     if (rawGetBp) {
         editor.getBreakpoints = combinedBps;
