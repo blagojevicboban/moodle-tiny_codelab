@@ -110,14 +110,21 @@ export class RemoteSession {
         this.mode = 'step';
         this.given = '';
         this.debug = vars ? new DebugPanel(vars, {step: () => this.step(), next: () => this.next(), out: () => this.out(),
-            mark: (line) => this.editor?.highlightLine(line), terminal: () => this.terminal,
+            mark: (line, file) => this.editor?.highlightLine(line, file), terminal: () => this.terminal,
             values: (vars) => this.editor?.setValues?.(vars),
             onWatches: (expressions) => this.send({type: 'watches', expressions}),
             again: () => this.start(true, this.given), source: () => this.editor?.getValue() ?? ''}) : null;
         // Breakpoints set or removed while the program runs.
+        const shiftBp = (bp) => {
+            if (typeof bp === 'number') {
+                return bp + this.offset;
+            }
+            return bp.file ? bp : {...bp, line: bp.line + this.offset};
+        };
+        this.shiftBp = shiftBp;
         editor?.onBreakpointsChange?.((lines) => this.send({
             type: 'breakpoints',
-            lines: lines.map((bp) => (typeof bp === 'number' ? bp + this.offset : {...bp, line: bp.line + this.offset})),
+            lines: lines.map(shiftBp),
         }));
         this.lang = typeof lang === 'function' ? lang : () => lang;
         this.program = program;
@@ -154,8 +161,7 @@ export class RemoteSession {
         // The input of this run, for Step again with the same input.
         this.typed = stdin;
         this.mode = step ? 'step' : 'continue';
-        const breakpoints = (this.editor?.getBreakpoints?.() || [])
-            .map((bp) => (typeof bp === 'number' ? bp + this.offset : {...bp, line: bp.line + this.offset}));
+        const breakpoints = (this.editor?.getBreakpoints?.() || []).map(this.shiftBp);
         // Under gdb when stepping, or when Run has breakpoints to stop at.
         const debug = STEP_LANGUAGES.includes(this.lang()) && (step || breakpoints.length > 0);
         this.setState('running');
@@ -274,24 +280,25 @@ export class RemoteSession {
      *
      * @param {Object} message of the server
      * @param {number} message.line line of the whole program that runs next
+     * @param {?string} [message.file] companion file name (null/undefined for main program)
      * @param {string} message.func function of that line
      * @param {Array<{name: string, value: string}>} message.vars variables of the function
      * @param {Array<{func: string, line: number, vars: Array}>} [message.stack] the program's frames, innermost first
      * @param {Object<string, string>} [message.targets] what the pointers point to, by address (memory view)
      * @param {Array<{expr: string, value: ?string}>} [message.watches] watched expressions evaluated at this stop
      */
-    paused({line, func, vars, stack, targets, watches}) {
+    paused({line, file = null, func, vars, stack, targets, watches}) {
         const s = this.strings;
-        const shown = line - this.offset;
+        const shown = file ? line : line - this.offset;
         const lines = this.editor ? this.editor.getValue().split('\n').length : 0;
-        if (!this.editor || shown < 1 || shown > lines) {
+        if (!this.editor || (!file && (shown < 1 || shown > lines))) {
             // A line of the hidden code: go on as asked.
             this.send({type: this.mode === 'continue' ? 'continue' : 'step'});
             return;
         }
-        this.terminal.setStatus(s.paused.replace('{$a}', shown), 'running');
-        this.editor.highlightLine(shown);
-        this.debug?.show({line: shown, stack: editorStack(stack || [{func, line, vars}], this.offset, lines),
+        this.terminal.setStatus(s.paused.replace('{$a}', file ? `${file}:${shown}` : shown), 'running');
+        this.editor.highlightLine(shown, file);
+        this.debug?.show({line: shown, file, stack: editorStack(stack || [{func, line, file, vars}], this.offset, lines),
             targets: targets || null, watches: watches || null});
         this.setState('paused');
     }

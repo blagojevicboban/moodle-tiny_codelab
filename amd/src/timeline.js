@@ -71,11 +71,13 @@ export class Timeline {
      * @param {{line: number, stack: Array, out: number, heap?: Object}} stop
      * @returns {number} index of the new snapshot
      */
-    record({line, stack, out, heap = null, targets = null, watches = null}) {
+    record({line, file = null, stack, out, heap = null, targets = null, watches = null}) {
         this.count++;
         this.items.push({
             line,
+            file: file || null,
             stack: (stack || []).map((f) => ({func: f.func, line: f.line, vars: {...(f.vars || {})},
+                ...(f.file ? {file: f.file} : {}),
                 ...(f.refs ? {refs: f.refs} : {}), ...(f.addrs ? {addrs: f.addrs} : {})})),
             out: out || 0,
             step: this.count,

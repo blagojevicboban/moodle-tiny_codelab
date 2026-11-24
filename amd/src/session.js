@@ -96,9 +96,11 @@ export const filesAfterRun = (s, files) => {
  * @returns {Array<{func: string, line: number, vars: Object<string, string>}>}
  */
 export const editorStack = (stack, offset, lines) => stack.map((frame) => {
-    const line = frame.line - offset;
+    const line = frame.file ? frame.line : frame.line - offset;
+    const valid = frame.file ? line >= 1 : (line >= 1 && line <= lines);
     const vars = Array.isArray(frame.vars) ? Object.fromEntries(frame.vars.map((v) => [v.name, v.value])) : frame.vars;
-    return {func: frame.func === '<module>' ? '' : frame.func, line: line >= 1 && line <= lines ? line : 0, vars,
+    return {func: frame.func === '<module>' ? '' : frame.func, line: valid ? line : 0, vars,
+        ...(frame.file ? {file: frame.file} : {}),
         ...(frame.refs ? {refs: frame.refs} : {}), ...(frame.addrs ? {addrs: frame.addrs} : {})};
 });
 

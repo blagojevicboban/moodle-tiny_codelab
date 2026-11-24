@@ -151,9 +151,34 @@ export const createFileTabs = ({
     const names = [mainFileName(lang), ...files.map((f) => f.name)];
     const originals = [initialMain, ...files.map((f) => f.text)];
     const contents = [...originals];
+    const tabBps = names.map(() => []);
+    const bpListeners = [];
     const mainListeners = [];
+    const rawGetBp = editor.getBreakpoints;
+    const rawSetBp = editor.setBreakpoints;
+    const rawOnBpChange = editor.onBreakpointsChange;
+    const rawHighlight = editor.highlightLine;
     let active = 0;
     let switching = false;
+
+    const combinedBps = () => {
+        if (rawGetBp) {
+            tabBps[active] = rawGetBp();
+        }
+        const all = [];
+        tabBps.forEach((list, i) => {
+            for (const bp of list) {
+                if (i === 0) {
+                    all.push(bp);
+                } else if (typeof bp === 'number') {
+                    all.push({line: bp, file: names[i]});
+                } else {
+                    all.push({...bp, file: names[i]});
+                }
+            }
+        });
+        return all;
+    };
 
     const bar = document.createElement('div');
     bar.className = 'tiny_codelab-filetabs';
@@ -178,6 +203,9 @@ export const createFileTabs = ({
         if (index < 0 || index >= names.length || index === active) {
             return;
         }
+        if (rawGetBp) {
+            tabBps[active] = rawGetBp();
+        }
         active = index;
         buttons.forEach((btn, i) => {
             const on = i === active;
@@ -190,6 +218,7 @@ export const createFileTabs = ({
             editor.setValue(contents[active]);
             editor.setLanguage(active === 0 ? lang : languageForFile(names[active], lang));
             editor.setReadOnly(active === 0 ? readOnlyMain : readOnlyFiles);
+            rawSetBp?.(tabBps[active], false);
         } finally {
             switching = false;
         }
@@ -216,6 +245,31 @@ export const createFileTabs = ({
             mainListeners.forEach((fn) => fn(value));
         }
     });
+
+    rawOnBpChange?.((list) => {
+        if (switching) {
+            return;
+        }
+        tabBps[active] = list;
+        const all = combinedBps();
+        bpListeners.forEach((fn) => fn(all));
+    });
+
+    if (rawGetBp) {
+        editor.getBreakpoints = combinedBps;
+        editor.onBreakpointsChange = (fn) => bpListeners.push(fn);
+    }
+    if (rawHighlight) {
+        editor.highlightLine = (line, file = null) => {
+            if (line) {
+                const idx = file ? names.indexOf(file) : 0;
+                if (idx >= 0) {
+                    select(idx);
+                }
+            }
+            rawHighlight(line);
+        };
+    }
 
     host.before(bar);
 

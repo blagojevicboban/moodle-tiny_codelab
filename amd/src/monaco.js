@@ -253,7 +253,7 @@ const attachBreakpoints = (editor, monaco, win, enabled) => {
 
     const exportList = () => currentEntries().map(([line, cond]) => (cond ? {line, condition: cond} : line));
 
-    const applyEntries = (entries) => {
+    const applyEntries = (entries, notify = true) => {
         conditions.clear();
         const specs = entries.map(([line, cond]) => ({
             range: new monaco.Range(line, 1, line, 1),
@@ -274,8 +274,22 @@ const attachBreakpoints = (editor, monaco, win, enabled) => {
                 }
             });
         }
-        const list = exportList();
-        listeners.forEach((fn) => fn(list));
+        if (notify) {
+            const list = exportList();
+            listeners.forEach((fn) => fn(list));
+        }
+    };
+
+    const setAll = (list, notify = false) => {
+        const map = new Map();
+        for (const item of (list || [])) {
+            if (typeof item === 'number' && Number.isInteger(item) && item > 0) {
+                map.set(item, '');
+            } else if (item && typeof item === 'object' && Number.isInteger(item.line) && item.line > 0) {
+                map.set(item.line, typeof item.condition === 'string' ? item.condition.trim().slice(0, 200) : '');
+            }
+        }
+        applyEntries([...map.entries()].sort((a, b) => a[0] - b[0]), notify);
     };
 
     const setCondition = (line, raw) => {
@@ -385,6 +399,7 @@ const attachBreakpoints = (editor, monaco, win, enabled) => {
 
     return {
         get: exportList,
+        set: setAll,
         onChange: (listener) => listeners.push(listener),
         setCondition,
         close: closePopover,
@@ -566,6 +581,7 @@ export const createEditor = async(container, options = {}) => {
         onChange: (callback) => editor.onDidChangeModelContent(() => callback(editor.getValue())),
         focus: () => editor.focus(),
         getBreakpoints: bp.get,
+        setBreakpoints: bp.set,
         onBreakpointsChange: bp.onChange,
         setBreakpointCondition: bp.setCondition,
         setFixedHeight: (height) => {

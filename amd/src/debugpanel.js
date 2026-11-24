@@ -198,6 +198,7 @@ export class DebugPanel {
      *
      * @param {Object} pause
      * @param {number} pause.line line in the editor
+     * @param {?string} [pause.file] companion file name (null for the main program)
      * @param {Array<{func: string, line: number, vars: Object<string, string>}>} pause.stack frames, innermost first,
      *     lines in the editor (0 for a line of the hidden code)
      * @param {?Object} [pause.heap] objects of the memory view (Python)
@@ -205,11 +206,11 @@ export class DebugPanel {
      * @param {?string} [pause.ret] the value returned by the call that just ended (Python), for the call tree
      * @param {?Array<{expr: string, value: ?string}>} [pause.watches] watched expressions evaluated at this stop
      */
-    async show({line, stack, heap = null, targets = null, ret = null, watches = null}) {
+    async show({line, file = null, stack, heap = null, targets = null, ret = null, watches = null}) {
         const s = await loadPanelStrings();
         const terminal = this.actions.terminal?.();
         const out = terminal ? outputLength(terminal.output) : 0;
-        this.view = this.timeline.record({line, stack: stack.length ? stack : [{func: '', line, vars: {}}], out, heap,
+        this.view = this.timeline.record({line, file, stack: stack.length ? stack : [{func: '', line, vars: {}}], out, heap,
             targets, watches});
         const snap = this.timeline.get(this.view);
         this.calls.add({stack: snap.stack, step: snap.step, ret});
@@ -296,7 +297,7 @@ export class DebugPanel {
     showView() {
         const atEnd = this.ended && this.view === this.timeline.length;
         const snap = this.timeline.get(Math.min(this.view, this.timeline.length - 1));
-        this.actions.mark?.(atEnd || !snap ? null : snap.line);
+        this.actions.mark?.(atEnd || !snap ? null : snap.line, atEnd || !snap ? null : snap.file);
         this.showConsole(this.inPast() ? snap?.out : true);
     }
 
@@ -443,7 +444,8 @@ export class DebugPanel {
             const link = document.createElement('button');
             link.type = 'button';
             link.className = 'btn btn-link btn-sm p-0' + (i === this.selected ? ' fw-bold' : '');
-            link.textContent = (frame.func ? `${frame.func}()` : s.mainprogram) + (frame.line > 0 ? ` : ${frame.line}` : '');
+            const loc = frame.file ? `${frame.file}:${frame.line}` : String(frame.line);
+            link.textContent = (frame.func ? `${frame.func}()` : s.mainprogram) + (frame.line > 0 ? ` : ${loc}` : '');
             link.setAttribute('aria-current', i === this.selected ? 'true' : 'false');
             link.addEventListener('click', () => {
                 this.selected = i;
