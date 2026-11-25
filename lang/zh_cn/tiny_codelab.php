@@ -397,6 +397,7 @@ $string['servertest_answers'] = '服务器响应正常（{$a} ms）。';
 $string['servertest_backend'] = '运行与评分服务器：{$a}。';
 $string['servertest_benchmark'] = '基准测试：';
 $string['servertest_benchmark_result'] = '同时发送 {$a->runs} 个不同的 {$a->language} 程序：{$a->right} 个正确，用时 {$a->seconds} 秒；中位数 {$a->median} ms，最慢 {$a->slowest} ms。约每分钟 {$a->perminute} 次运行。';
+$string['servertest_cloud'] = 'CodeLab Cloud（托管运行器）：{$a->server} 上的站点 {$a->site}';
 $string['servertest_desc'] = '检查 Jobe 服务器和 CodeLab 运行器是否响应，为每种可用语言运行一个小程序，并同时发送 {$a} 个程序以测试全班同时提交检查时的服务器速度。';
 $string['servertest_jobe'] = 'Jobe 服务器';
 $string['servertest_language'] = '语言';

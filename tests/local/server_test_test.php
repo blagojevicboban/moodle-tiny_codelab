@@ -39,6 +39,18 @@ final class server_test_test extends \advanced_testcase {
         $this->assertStringContainsString(get_string('servertest_notset', 'tiny_codelab'), $html);
     }
 
+    public function test_hosted_runner_is_named_with_its_site_and_server(): void {
+        $this->resetAfterTest();
+        set_config('jobeserver', '', 'tiny_codelab');
+        $this->assertSame(get_string('servertest_runner', 'tiny_codelab'), server_test::run(0)['servers'][1]['name']);
+        set_config('cloudkey', base64_encode(json_encode(['url' => 'wss://trial.example.org', 'site' => 'school-1',
+            'secret' => 'hosted-secret-123456'])), 'tiny_codelab');
+        \curl::mock_response(json_encode(['ok' => true, 'languages' => [], 'version' => '0.21.0']));
+        $name = server_test::run(0)['servers'][1]['name'];
+        $this->assertSame(get_string('servertest_cloud', 'tiny_codelab', (object) ['site' => 'school-1',
+            'server' => 'trial.example.org']), $name);
+    }
+
     public function test_server_that_does_not_answer(): void {
         $this->resetAfterTest();
         set_config('jobeserver', 'http://127.0.0.1:9', 'tiny_codelab');

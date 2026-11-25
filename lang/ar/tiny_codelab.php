@@ -397,6 +397,7 @@ $string['servertest_answers'] = 'الخادم يستجيب ({$a} مللي ثان
 $string['servertest_backend'] = 'خادم التشغيل والتقييم: {$a}.';
 $string['servertest_benchmark'] = 'اختبار الأداء:';
 $string['servertest_benchmark_result'] = 'تم إرسال {$a->runs} برامج مختلفة بلغة {$a->language} معاً: {$a->right} صحيحة في {$a->seconds} ث؛ الوسيط {$a->median} مللي ثانية، والأبطأ {$a->slowest} مللي ثانية. نحو {$a->perminute} عملية تشغيل في الدقيقة.';
+$string['servertest_cloud'] = 'CodeLab Cloud (مشغّل مستضاف): الموقع {$a->site} على {$a->server}';
 $string['servertest_desc'] = 'يتحقّق من استجابة خادم Jobe ومشغّل CodeLab، ويشغّل برنامجاً صغيراً في كل لغة من لغاتهما، ويرسل {$a} برامج معاً لقياس سرعة الخادم عندما يتحقّق صف كامل من إجاباته في الوقت نفسه.';
 $string['servertest_jobe'] = 'خادم Jobe';
 $string['servertest_language'] = 'اللغة';

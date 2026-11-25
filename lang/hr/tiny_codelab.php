@@ -397,6 +397,7 @@ $string['servertest_answers'] = 'Poslužitelj odgovara ({$a} ms).';
 $string['servertest_backend'] = 'Poslužitelj za izvršavanje i ocjenjivanje: {$a}.';
 $string['servertest_benchmark'] = 'Test brzine:';
 $string['servertest_benchmark_result'] = '{$a->runs} različitih {$a->language} programa poslano zajedno: {$a->right} točnih za {$a->seconds} s; medijan {$a->median} ms, najsporiji {$a->slowest} ms. Oko {$a->perminute} izvršavanja u minuti.';
+$string['servertest_cloud'] = 'CodeLab Cloud (hostirani runner): sjedište {$a->site} na {$a->server}';
 $string['servertest_desc'] = 'Provjerava odgovaraju li Jobe poslužitelj i CodeLab runner, izvršava mali program na svakom njihovom jeziku i šalje {$a} programa zajedno kako bi izmjerio brzinu poslužitelja kad razred istodobno provjerava odgovore.';
 $string['servertest_jobe'] = 'Jobe poslužitelj';
 $string['servertest_language'] = 'Jezik';

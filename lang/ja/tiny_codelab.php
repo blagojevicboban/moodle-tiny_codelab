@@ -397,6 +397,7 @@ $string['servertest_answers'] = 'サーバーが応答しました（{$a} ms）�
 $string['servertest_backend'] = '実行・採点用サーバー: {$a}。';
 $string['servertest_benchmark'] = 'ベンチマーク:';
 $string['servertest_benchmark_result'] = '異なる {$a->language} プログラム {$a->runs} 件を同時送信: {$a->seconds} 秒で {$a->right} 件正解。中央値 {$a->median} ms、最遅 {$a->slowest} ms。1分あたり約 {$a->perminute} 回実行可能。';
+$string['servertest_cloud'] = 'CodeLab Cloud（ホステッドランナー）: {$a->server} 上のサイト {$a->site}';
 $string['servertest_desc'] = 'JobeサーバーとCodeLab runnerの応答を確認し、対応する各言語で小さなプログラムを実行したあと、クラス全体が同時に確認する状況を想定して {$a} 件のプログラムを同時に送信し速度を計測します。';
 $string['servertest_jobe'] = 'Jobeサーバー';
 $string['servertest_language'] = '言語';

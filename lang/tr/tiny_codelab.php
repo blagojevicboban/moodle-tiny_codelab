@@ -397,6 +397,7 @@ $string['servertest_answers'] = 'Sunucu yanıt veriyor ({$a} ms).';
 $string['servertest_backend'] = 'Çalıştırma ve değerlendirme sunucusu: {$a}.';
 $string['servertest_benchmark'] = 'Kıyaslama testi:';
 $string['servertest_benchmark_result'] = 'Birlikte gönderilen {$a->runs} farklı {$a->language} programı: {$a->seconds} sn içinde {$a->right} doğru; ortanca {$a->median} ms, en yavaş {$a->slowest} ms. Dakikada yaklaşık {$a->perminute} çalıştırma.';
+$string['servertest_cloud'] = 'CodeLab Cloud (barındırılan runner): {$a->server} üzerinde site {$a->site}';
 $string['servertest_desc'] = 'Jobe sunucusu ile CodeLab çalıştırıcısının yanıt verdiğini kontrol eder, her dilinde küçük bir program çalıştırır ve bir sınıf yanıtlarını aynı anda kontrol ettiğinde sunucunun hızını ölçmek için {$a} programı birlikte gönderir.';
 $string['servertest_jobe'] = 'Jobe sunucusu';
 $string['servertest_language'] = 'Dil';

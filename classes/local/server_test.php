@@ -73,7 +73,14 @@ class server_test {
         $servers = [];
         $jobe = new jobe();
         $servers[] = self::server(get_string('servertest_jobe', 'tiny_codelab'), $jobe, $burst);
-        $servers[] = self::server(get_string('servertest_runner', 'tiny_codelab'), new runner_client(), $burst);
+        // With a connection key the runner is the hosted one: say which site and server, so it is clearly tested.
+        $cloud = interactive::cloud_config();
+        $runnername = $cloud === null ? get_string('servertest_runner', 'tiny_codelab')
+            : get_string('servertest_cloud', 'tiny_codelab', (object) [
+                'site' => $cloud['site'],
+                'server' => (string) parse_url(preg_replace('~^ws~', 'http', $cloud['url']), PHP_URL_HOST),
+            ]);
+        $servers[] = self::server($runnername, new runner_client(), $burst);
         $mode = backend::mode();
         return [
             'servers' => $servers,

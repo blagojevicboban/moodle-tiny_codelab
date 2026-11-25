@@ -397,6 +397,7 @@ $string['servertest_answers'] = 'The server answers ({$a} ms).';
 $string['servertest_backend'] = 'Server for running and grading: {$a}.';
 $string['servertest_benchmark'] = 'Benchmark:';
 $string['servertest_benchmark_result'] = '{$a->runs} different {$a->language} programs sent together: {$a->right} right in {$a->seconds} s; median {$a->median} ms, slowest {$a->slowest} ms. About {$a->perminute} runs per minute.';
+$string['servertest_cloud'] = 'CodeLab Cloud (hosted runner): site {$a->site} on {$a->server}';
 $string['servertest_desc'] = 'Checks that the Jobe server and the CodeLab runner answer, runs a small program in each of their languages, and sends {$a} programs together to measure the speed of the server when a class checks its answers at once.';
 $string['servertest_jobe'] = 'Jobe server';
 $string['servertest_language'] = 'Language';

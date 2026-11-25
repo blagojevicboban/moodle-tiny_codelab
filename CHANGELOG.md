@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.31.1 (2026-11-25)
+
+- Test the servers: with a connection key, the hosted runner is named CodeLab Cloud with the site id and the server of
+  the key, instead of CodeLab runner, so it is clear that the hosted runner is the one tested.
+
 ## 1.31.0 (2026-11-25)
 
 - Free 30-day trial of the hosted runner with one click: while no connection key is set, the Hosted runner section

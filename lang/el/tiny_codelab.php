@@ -397,6 +397,7 @@ $string['servertest_answers'] = 'Ο διακομιστής απαντά ({$a} ms
 $string['servertest_backend'] = 'Διακομιστής εκτέλεσης και βαθμολόγησης: {$a}.';
 $string['servertest_benchmark'] = 'Δοκιμή απόδοσης:';
 $string['servertest_benchmark_result'] = '{$a->runs} διαφορετικά προγράμματα {$a->language} στάλθηκαν ταυτόχρονα: {$a->right} σωστά σε {$a->seconds} s· διάμεσος {$a->median} ms, πιο αργό {$a->slowest} ms. Περίπου {$a->perminute} εκτελέσεις ανά λεπτό.';
+$string['servertest_cloud'] = 'CodeLab Cloud (φιλοξενούμενος runner): ιστότοπος {$a->site} στο {$a->server}';
 $string['servertest_desc'] = 'Ελέγχει ότι ο διακομιστής Jobe και ο CodeLab runner απαντούν, εκτελεί ένα μικρό πρόγραμμα σε καθεμία από τις γλώσσες τους και στέλνει {$a} προγράμματα ταυτόχρονα για να μετρήσει την ταχύτητα του διακομιστή όταν μια τάξη ελέγχει τις απαντήσεις της μαζί.';
 $string['servertest_jobe'] = 'Διακομιστής Jobe';
 $string['servertest_language'] = 'Γλώσσα';

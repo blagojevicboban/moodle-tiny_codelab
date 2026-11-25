@@ -397,6 +397,7 @@ $string['servertest_answers'] = 'Server odpovedá ({$a} ms).';
 $string['servertest_backend'] = 'Server na spúšťanie a hodnotenie: {$a}.';
 $string['servertest_benchmark'] = 'Test výkonu:';
 $string['servertest_benchmark_result'] = '{$a->runs} rôznych programov {$a->language} odoslaných naraz: {$a->right} správne za {$a->seconds} s; medián {$a->median} ms, najpomalší {$a->slowest} ms. Približne {$a->perminute} spustení za minútu.';
+$string['servertest_cloud'] = 'CodeLab Cloud (hostovaný runner): stránka {$a->site} na {$a->server}';
 $string['servertest_desc'] = 'Skontroluje, či server Jobe a CodeLab runner odpovedajú, spustí malý program v každom z ich jazykov a pošle naraz {$a} programov, aby zmeral rýchlosť servera, keď trieda kontroluje odpovede súčasne.';
 $string['servertest_jobe'] = 'Server Jobe';
 $string['servertest_language'] = 'Jazyk';

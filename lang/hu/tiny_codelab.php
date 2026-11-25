@@ -397,6 +397,7 @@ $string['servertest_answers'] = 'A szerver válaszol ({$a} ms).';
 $string['servertest_backend'] = 'Futtató és értékelő szerver: {$a}.';
 $string['servertest_benchmark'] = 'Teljesítményteszt:';
 $string['servertest_benchmark_result'] = '{$a->runs} különböző {$a->language} program egyszerre elküldve: {$a->right} helyes {$a->seconds} s alatt; medián {$a->median} ms, leglassabb {$a->slowest} ms. Körülbelül {$a->perminute} futtatás percenként.';
+$string['servertest_cloud'] = 'CodeLab Cloud (hosztolt runner): {$a->site} webhely itt: {$a->server}';
 $string['servertest_desc'] = 'Ellenőrzi, hogy a Jobe szerver és a CodeLab futtató válaszol-e, minden támogatott nyelvükön futtat egy kis programot, majd egyszerre elküld {$a} programot a szerver sebességének méréséhez, mintha egy osztály egyszerre ellenőrizné a válaszait.';
 $string['servertest_jobe'] = 'Jobe szerver';
 $string['servertest_language'] = 'Nyelv';
