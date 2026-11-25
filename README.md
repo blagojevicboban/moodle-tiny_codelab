@@ -19,7 +19,7 @@ Jobe client.
 
 > Status: **stable**.
 
-> **Live demo:** [codelab.tsp.edu.rs](https://codelab.tsp.edu.rs) (look around as a guest, or use `teacher` / `student` with password `Demo-2026`; reset every night)
+> **Live demo:** [demo.codelabedu.com](https://demo.codelabedu.com) (look around as a guest, or use `teacher` / `student` with password `Demo-2026`; reset every night)
 
 > **Video:** [CodeLab for Moodle in 2 minutes](https://youtu.be/BUF-3pVR1Rk) (live coding, the visual debugger, safe mode and auto-grading)
 
