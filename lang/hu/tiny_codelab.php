@@ -331,6 +331,7 @@ $string['memleak_summary'] = 'Memóriaszivárgás: {$a->count} heap-blokk ({$a->
 $string['memmore'] = 'még {$a}';
 $string['memory'] = 'Memória';
 $string['memref'] = 'ide mutat: {$a}';
+$string['memshared'] = 'A(z) {$a} sorok ugyanaz a lista: ha az egyik változik, mind változik.';
 $string['menuitem'] = 'CodeLab program';
 $string['noassist'] = 'Gépelési segítség nélkül (dolgozatokhoz)';
 $string['nooutput'] = '(a program nem írt ki semmit)';

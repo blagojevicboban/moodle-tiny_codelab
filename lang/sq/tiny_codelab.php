@@ -331,6 +331,7 @@ $string['memleak_summary'] = 'Rrjedhje memorieje: {$a->count} bllok(e) në heap 
 $string['memmore'] = '{$a} të tjera';
 $string['memory'] = 'Memoria';
 $string['memref'] = 'tregon te {$a}';
+$string['memshared'] = 'Rreshtat {$a} janë e njëjta listë: një ndryshim në njërin i ndryshon të gjithë.';
 $string['menuitem'] = 'Program CodeLab';
 $string['noassist'] = 'Pa ndihmë gjatë shkrimit (për teste)';
 $string['nooutput'] = '(programi nuk shfaqi asgjë)';

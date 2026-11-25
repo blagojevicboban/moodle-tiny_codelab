@@ -150,7 +150,10 @@ next is marked in the editor, and the debugger panel below the console shows:
   the same input** starts a new Step run with the input of the last one;
 - **Memory**: the frames and the objects their variables point to, with arrows (Python in the browser: lists, dicts,
   sets, objects of classes, two names of one object; C and C++: arrays, matrices, structs, std::vector). Lists and
-  arrays are cells (numbers also as bars), changed cells are green, index variables (a[i]) stand under their cell;
+  arrays are cells (numbers also as bars), changed cells are green, index variables (a[i]) stand under their cell.
+  A matrix (a list of lists, a 2D array) is one table shaded from the smallest to the largest number, with the row
+  and column index variables (t[i][j]) beside and under it and their cell outlined; rows that are one and the same
+  Python list ([[0] * 3] * 3) get a warning;
 - **Call tree** (when the program calls a function): every call drawn under the call that made it, with its arguments
   and, in Python, the value it returned. The running call is blue, the calls waiting for it light blue, and calls made
   again with the same arguments are amber (the repeated work of a recursive Fibonacci). The tree follows Step back and

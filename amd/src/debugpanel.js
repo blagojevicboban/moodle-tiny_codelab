@@ -26,7 +26,7 @@
  */
 import {getStrings} from 'core/str';
 import {component} from './common';
-import {MemoryView, buildView, indexNames, summarizeLeaks} from './memview';
+import {MemoryView, buildView, indexNames, matrixIndexNames, summarizeLeaks} from './memview';
 import {Timeline, outputLength, outputUpTo} from './timeline';
 import {CallTree, drawCallTree} from './calltree';
 
@@ -67,7 +67,7 @@ export const showVariables = (panel, vars, previous, title, empty) => {
 
 const KEYS = ['stepover', 'stepout', 'autostep', 'autostop', 'speed', 'callstack', 'tracetable', 'traceline', 'variables',
     'novariables', 'mainprogram', 'stepback', 'stepforward', 'stepagain', 'timeline', 'timelinepos', 'timelineend',
-    'timelinepast', 'timelinepastended', 'memory', 'memref', 'memmore', 'memleak_summary', 'memleak_item',
+    'timelinepast', 'timelinepastended', 'memory', 'memref', 'memmore', 'memshared', 'memleak_summary', 'memleak_item',
     'calltree', 'calltreesummary', 'calltreemore', 'watch', 'watch_add', 'watch_placeholder', 'watch_remove'];
 let strings = null;
 
@@ -546,7 +546,7 @@ export class DebugPanel {
         const snap = this.timeline.get(index);
         const code = this.actions.source?.();
         const view = buildView(snap.stack, snap.heap, index > 0 ? this.timeline.get(index - 1) : null,
-            code === undefined ? null : indexNames(code), snap.targets);
+            code === undefined ? null : indexNames(code), snap.targets, code === undefined ? null : matrixIndexNames(code));
         const details = document.createElement('details');
         details.className = 'tiny_codelab-memory mt-2';
         details.open = this.memoryOpen ?? true;

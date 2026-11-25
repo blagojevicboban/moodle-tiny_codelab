@@ -331,6 +331,7 @@ $string['memleak_summary'] = 'Puščanje pomnilnika: {$a->count} blok(ov) na kop
 $string['memmore'] = 'še {$a}';
 $string['memory'] = 'Pomnilnik';
 $string['memref'] = 'kaže na {$a}';
+$string['memshared'] = 'Vrstice {$a} so en in isti seznam: sprememba v eni spremeni vse.';
 $string['menuitem'] = 'Program CodeLab';
 $string['noassist'] = 'Brez pomoči pri pisanju (za preverjanja)';
 $string['nooutput'] = '(program ni izpisal ničesar)';

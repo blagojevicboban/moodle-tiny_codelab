@@ -331,6 +331,7 @@ $string['memleak_summary'] = '内存泄漏：有 {$a->count} 个堆内存块（{
 $string['memmore'] = '还有 {$a} 项';
 $string['memory'] = '内存';
 $string['memref'] = '指向 {$a}';
+$string['memshared'] = '第 {$a} 行是同一个列表：修改其中一行会改变所有这些行。';
 $string['menuitem'] = 'CodeLab 程序';
 $string['noassist'] = '关闭输入辅助（适用于测验）';
 $string['nooutput'] = '（程序无输出）';

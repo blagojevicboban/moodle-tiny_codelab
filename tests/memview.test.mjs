@@ -21,7 +21,7 @@
  */
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {parseValue, buildView, refText, indexNames} from '../amd/src/memview.js';
+import {parseValue, buildView, refText, indexNames, matrixIndexNames, heat, sharedRows} from '../amd/src/memview.js';
 
 test('gdb values: arrays, repeats, structs, vectors, strings and plain values', () => {
     assert.equal(parseValue('5'), null);
@@ -106,4 +106,53 @@ test('C pointers of the runner: into an array, to a variable, a linked list on t
     assert.deepEqual(view.order, [a, '@0x9000', '@0x9020']);
     // Without the data of the runner (older runner) a pointer stays its value.
     assert.equal(buildView([{func: 'main', line: 1, vars: {p: '0x1008'}}], null).frames[0].rows[0].ref.v, '0x1008');
+});
+
+test('matrix: C table with heat map, row and column index variables, changed cells', () => {
+    const names = matrixIndexNames('for (i = 1; i < 4; i++) for (j = 1; j < 4; j++) t[i][j] = t[i - 1][j] + t[i][j - 1];');
+    assert.deepEqual([...names.rows], ['i']);
+    assert.deepEqual([...names.cols], ['j']);
+    const before = {stack: [{func: 'main', line: 5, vars: {t: '{{1, 2}, {3, 0}}', i: '1', j: '1'}}], heap: null};
+    const stack = [{func: 'main', line: 6, vars: {t: '{{1, 2}, {3, 5}}', i: '1', j: '0', n: '7'}}];
+    const view = buildView(stack, null, before, indexNames('t[i][j]'), null, names);
+    const id = view.order[0];
+    const m = view.matrices[id];
+    assert.deepEqual(m.cells, [['1', '2'], ['3', '5']]);
+    assert.equal(m.cols, 2);
+    assert.deepEqual(m.shades, [[0, 1], [2, 4]]);
+    assert.deepEqual(m.rowMarkers, {1: ['i']});
+    assert.deepEqual(m.colMarkers, {0: ['j']});
+    assert.deepEqual([...m.changed], ['1,1']);
+    // Texts (a grid of characters) are a matrix without shades.
+    const grid = buildView([{func: 'main', line: 1, vars: {g: "{{35 '#', 46 '.'}, {46 '.', 35 '#'}}"}}], null);
+    assert.equal(Object.values(grid.matrices)[0].shades, null);
+    // A plain array and an array of structs are no matrix.
+    const plain = buildView([{func: 'main', line: 1, vars: {a: '{1, 2}', p: '{{x = 1}, {x = 2}}'}}], null);
+    assert.deepEqual(plain.matrices, {});
+});
+
+test('matrix: Python rows keep their ids, a row of one list repeated is not a matrix', () => {
+    const heap = {
+        1: {t: 'list', k: 'list', n: 2, items: [{r: '2'}, {r: '3'}]},
+        2: {t: 'list', k: 'list', n: 3, items: [{v: '0'}, {v: '1'}, {v: '2'}]},
+        3: {t: 'list', k: 'list', n: 2, items: [{v: '3'}, {v: '4'}]},
+        4: {t: 'list', k: 'list', n: 3, items: [{r: '5'}, {r: '5'}, {r: '5'}]},
+        5: {t: 'list', k: 'list', n: 2, items: [{v: '0'}, {v: '0'}]},
+    };
+    const stack = [{func: '', line: 3, vars: {}, refs: {dp: {r: '1'}, row: {r: '3'}, bad: {r: '4'}, i: {v: '1'}}}];
+    const view = buildView(stack, heap, null, null, null, null);
+    const m = view.matrices['1'];
+    assert.deepEqual(m.rowIds, ['2', '3']);
+    assert.equal(m.cols, 3, 'a short row leaves empty cells');
+    assert.deepEqual(m.rowMarkers, {1: ['i']});
+    assert.equal(view.matrices['4'], undefined);
+    assert.deepEqual(view.shared['4'], [[0, 1, 2]]);
+    assert.deepEqual(sharedRows([{id: '2'}, {id: '3'}]), []);
+});
+
+test('heat: five shades between the smallest and the largest number', () => {
+    assert.equal(heat(5, 5, 5), 0);
+    assert.equal(heat(0, 0, 10), 0);
+    assert.equal(heat(10, 0, 10), 4);
+    assert.equal(heat(5, 0, 10), 2);
 });

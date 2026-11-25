@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.29.0 (2026-11-25)
+
+- Matrices in the memory view: a list of lists of values (Python) or an array of arrays (C, C++, std::vector of
+  vectors) is drawn as one table instead of one box per row. The numbers are shaded from the smallest to the largest
+  (a heat map, as in the Algorithm plugins), the index variables of its rows stand beside them and those of its
+  columns under them (only names used as t[i][j] in the program), and the cell t[i][j] is outlined. The cells written
+  by the last step are marked, and a variable that points to one row (row = t[1]) gets an arrow to that row.
+- A Python list whose rows are one and the same list ([[0] * 3] * 3) stays drawn with arrows and gets a warning:
+  changing one row changes them all.
+
 ## 1.28.0 (2026-11-25)
 
 - C and C++ typing help from clangd on the CodeLab runner 0.24.0 or newer, like C# and Java: completion of the real

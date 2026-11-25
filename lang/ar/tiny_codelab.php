@@ -331,6 +331,7 @@ $string['memleak_summary'] = 'تسريب في الذاكرة: {$a->count} كتل
 $string['memmore'] = '{$a} أخرى';
 $string['memory'] = 'الذاكرة';
 $string['memref'] = 'يشير إلى {$a}';
+$string['memshared'] = 'الصفوف {$a} هي القائمة نفسها: تغيير أحدها يغيرها كلها.';
 $string['menuitem'] = 'برنامج CodeLab';
 $string['noassist'] = 'من دون مساعدة الكتابة (للاختبارات)';
 $string['nooutput'] = '(لم يطبع البرنامج شيئاً)';

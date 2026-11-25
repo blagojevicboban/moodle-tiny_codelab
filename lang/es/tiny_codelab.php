@@ -331,6 +331,7 @@ $string['memleak_summary'] = 'Fuga de memoria: {$a->count} bloque(s) en el mont�
 $string['memmore'] = '{$a} más';
 $string['memory'] = 'Memoria';
 $string['memref'] = 'apunta a {$a}';
+$string['memshared'] = 'Las filas {$a} son una misma lista: un cambio en una las cambia todas.';
 $string['menuitem'] = 'Programa CodeLab';
 $string['noassist'] = 'Sin ayuda de escritura (para exámenes)';
 $string['nooutput'] = '(el programa no imprimió nada)';

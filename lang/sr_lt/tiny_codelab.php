@@ -331,6 +331,7 @@ $string['memleak_summary'] = 'Curenje memorije: {$a->count} blok(ova) na hipu ({
 $string['memmore'] = 'još {$a}';
 $string['memory'] = 'Memorija';
 $string['memref'] = 'pokazuje na {$a}';
+$string['memshared'] = 'Redovi {$a} su jedna ista lista: promena u jednom menja sve njih.';
 $string['menuitem'] = 'CodeLab program';
 $string['noassist'] = 'Bez pomoći pri kucanju (za kontrolne)';
 $string['nooutput'] = '(program nije ništa ispisao)';

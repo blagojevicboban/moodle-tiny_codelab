@@ -331,6 +331,7 @@ $string['memleak_summary'] = '메모리 누수: {$a->count}개의 힙 블록({$a
 $string['memmore'] = '{$a}개 더';
 $string['memory'] = '메모리';
 $string['memref'] = '{$a}을(를) 가리킴';
+$string['memshared'] = '행 {$a}은(는) 같은 하나의 리스트입니다. 한 행을 바꾸면 모두 바뀝니다.';
 $string['menuitem'] = 'CodeLab 프로그램';
 $string['noassist'] = '입력 보조 끄기 (시험용)';
 $string['nooutput'] = '(프로그램이 아무것도 출력하지 않았습니다)';

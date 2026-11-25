@@ -331,6 +331,7 @@ $string['memleak_summary'] = 'Bellek sızıntısı: {$a->count} yığın bloğu 
 $string['memmore'] = '{$a} daha';
 $string['memory'] = 'Bellek';
 $string['memref'] = '{$a} adresini gösterir';
+$string['memshared'] = '{$a} satırları aynı listedir: birindeki değişiklik hepsini değiştirir.';
 $string['menuitem'] = 'CodeLab programı';
 $string['noassist'] = 'Yazma yardımı yok (sınavlar için)';
 $string['nooutput'] = '(program hiçbir şey yazdırmadı)';

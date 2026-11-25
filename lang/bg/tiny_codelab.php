@@ -331,6 +331,7 @@ $string['memleak_summary'] = 'Изтичане на памет: {$a->count} бл
 $string['memmore'] = 'още {$a}';
 $string['memory'] = 'Памет';
 $string['memref'] = 'сочи към {$a}';
+$string['memshared'] = 'Редовете {$a} са един и същи списък: промяна в един променя всички.';
 $string['menuitem'] = 'Програма в CodeLab';
 $string['noassist'] = 'Без помощ при писане (за тестове)';
 $string['nooutput'] = '(програмата не отпечата нищо)';

@@ -331,6 +331,7 @@ $string['memleak_summary'] = 'Wyciek pamięci: {$a->count} blok(ów) na stercie 
 $string['memmore'] = 'jeszcze {$a}';
 $string['memory'] = 'Pamięć';
 $string['memref'] = 'wskazuje na {$a}';
+$string['memshared'] = 'Wiersze {$a} to jedna i ta sama lista: zmiana w jednym zmienia wszystkie.';
 $string['menuitem'] = 'Program CodeLab';
 $string['noassist'] = 'Bez pomocy przy pisaniu (na sprawdziany)';
 $string['nooutput'] = '(program nic nie wypisał)';

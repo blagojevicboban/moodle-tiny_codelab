@@ -331,6 +331,7 @@ $string['memleak_summary'] = 'Утечка памяти: {$a->count} блок(о
 $string['memmore'] = 'ещё {$a}';
 $string['memory'] = 'Память';
 $string['memref'] = 'указывает на {$a}';
+$string['memshared'] = 'Строки {$a} — это один и тот же список: изменение одной меняет все.';
 $string['menuitem'] = 'Программа CodeLab';
 $string['noassist'] = 'Без подсказок при наборе (для контрольных)';
 $string['nooutput'] = '(программа ничего не вывела)';

@@ -331,6 +331,7 @@ $string['memleak_summary'] = 'Únik pamäte: {$a->count} blok(ov) na halde ({$a-
 $string['memmore'] = 'ďalších {$a}';
 $string['memory'] = 'Pamäť';
 $string['memref'] = 'ukazuje na {$a}';
+$string['memshared'] = 'Riadky {$a} sú jeden a ten istý zoznam: zmena v jednom zmení všetky.';
 $string['menuitem'] = 'Program CodeLab';
 $string['noassist'] = 'Bez pomoci pri písaní (na testy)';
 $string['nooutput'] = '(program nič nevypísal)';

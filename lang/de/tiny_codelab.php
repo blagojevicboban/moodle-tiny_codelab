@@ -331,6 +331,7 @@ $string['memleak_summary'] = 'Speicherleck: {$a->count} Heap-Block/Blöcke ({$a-
 $string['memmore'] = '{$a} weitere';
 $string['memory'] = 'Speicher';
 $string['memref'] = 'zeigt auf {$a}';
+$string['memshared'] = 'Die Zeilen {$a} sind ein und dieselbe Liste: Eine Änderung in einer ändert alle.';
 $string['menuitem'] = 'CodeLab-Programm';
 $string['noassist'] = 'Ohne Eingabehilfe (für Prüfungen)';
 $string['nooutput'] = '(das Programm hat nichts ausgegeben)';

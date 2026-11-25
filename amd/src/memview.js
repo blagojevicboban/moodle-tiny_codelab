@@ -18,7 +18,9 @@
  * with arrows. Lists and arrays are rows of cells (numbers also as bars), the cells changed since the step before are
  * marked, and integer variables that are a valid index are shown under their cell (i, j, lo, hi). Python in the
  * browser sends the objects with their identity (two names of one list point to the same box); for C and C++ the
- * values of gdb ({1, 2, 3}, {x = 1, y = 2}, std::vector ... = {...}) are read here, arrays of arrays as a grid.
+ * values of gdb ({1, 2, 3}, {x = 1, y = 2}, std::vector ... = {...}) are read here. A list of lists of values (a
+ * matrix, a DP table) is one table with a heat map and the index variables of its rows and columns (t[i][j]); rows
+ * that are one and the same list (Python [[0] * 3] * 3) stay arrows, with a warning.
  *
  * Model: a reference is {v: text} (a plain value), {r: id} (an object of the heap) or {node} (an object drawn in its
  * place, C only); a heap object is {t: type, k: list|tuple|set|dict|object|other, n: length, items}, where items of a
@@ -269,6 +271,89 @@ const linkPointers = (stack, frames, all, targets) => {
 };
 
 /**
+ * The rows of a matrix: a list or tuple whose items are all lists or tuples of plain values (numbers, texts), each
+ * row a heap object (Python) or drawn in place (C, C++). Null for anything else.
+ *
+ * @param {?Object} node
+ * @param {Object<string, Object>} all heap objects by id
+ * @returns {?Array<{id: ?string, node: Object}>}
+ */
+export const matrixRows = (node, all) => {
+    if (!node || !['list', 'tuple'].includes(node.k) || !node.items.length) {
+        return null;
+    }
+    const rows = node.items.map((item) => {
+        if (item && 'node' in item) {
+            return {id: null, node: item.node};
+        }
+        return item && 'r' in item && all[item.r] ? {id: item.r, node: all[item.r]} : null;
+    });
+    const plain = (row) => row && ['list', 'tuple'].includes(row.node.k) && row.node.items.length > 0
+        && row.node.items.every((cell) => 'v' in cell);
+    return rows.every(plain) ? rows : null;
+};
+
+/**
+ * The rows of a list that point to one and the same list (Python [[0] * 3] * 3): groups of their indexes.
+ *
+ * @param {Array<{id: ?string}>} rows
+ * @returns {number[][]} groups of two or more rows, empty when every row is its own list
+ */
+export const sharedRows = (rows) => {
+    const groups = new Map();
+    rows.forEach((row, i) => {
+        if (row.id !== null) {
+            groups.set(row.id, [...(groups.get(row.id) || []), i]);
+        }
+    });
+    return [...groups.values()].filter((group) => group.length > 1);
+};
+
+/**
+ * The shade of a number of a matrix between the smallest and the largest (0 to 4), for the heat map.
+ *
+ * @param {number} x
+ * @param {number} lo
+ * @param {number} hi
+ * @returns {number}
+ */
+export const heat = (x, lo, hi) => (hi > lo ? Math.min(4, Math.floor(((x - lo) / (hi - lo)) * 5)) : 0);
+
+/**
+ * A matrix as a grid of texts with what the view draws: its shades, the index variables of its rows and columns.
+ *
+ * @param {Array<{id: ?string, node: Object}>} rows
+ * @param {Array<{name: string, ref: Object}>} ints the integer variables of the frame
+ * @param {?{rows: Set<string>, cols: Set<string>}} names names used as t[row][col] in the program; null: every integer
+ * @returns {{rowIds: Array<?string>, cells: string[][], cols: number, shades: ?number[][],
+ *     rowMarkers: Object<number, string[]>, colMarkers: Object<number, string[]>}}
+ */
+export const matrixView = (rows, ints, names) => {
+    const cells = rows.map((row) => row.node.items.map(refText));
+    const cols = Math.max(...cells.map((row) => row.length));
+    const flat = cells.flat();
+    let shades = null;
+    if (flat.every(isNumber)) {
+        const nums = flat.map(Number);
+        const lo = Math.min(...nums);
+        const hi = Math.max(...nums);
+        shades = cells.map((row) => row.map((text) => heat(Number(text), lo, hi)));
+    }
+    const markers = (allowed, size) => {
+        const found = {};
+        ints.filter((int) => !names || allowed.has(int.name)).forEach((int) => {
+            const index = Number(refText(int.ref));
+            if (index >= 0 && index < size) {
+                (found[index] ||= []).push(int.name);
+            }
+        });
+        return found;
+    };
+    return {rowIds: rows.map((row) => row.id), cells, cols, shades,
+        rowMarkers: markers(names?.rows, cells.length), colMarkers: markers(names?.cols, cols)};
+};
+
+/**
  * The view of one stop: the frames with their references, the heap objects in the order they are first reached,
  * the index variables of each list and the cells changed since the stop before.
  *
@@ -278,10 +363,12 @@ const linkPointers = (stack, frames, all, targets) => {
  * @param {?{stack: Array, heap: ?Object}} [before] the stop before, for the changed cells
  * @param {?Set<string>} [indexNames] names used as an index in the program (in [...]); null: every integer
  * @param {?Object<string, string>} [targets] C and C++: values of the objects pointers point to, by address (runner)
+ * @param {?{rows: Set<string>, cols: Set<string>}} [matrixNames] names used as t[row][col] (matrixIndexNames)
  * @returns {{frames: Array<{func: string, rows: Array<{name: string, ref: Object}>}>, heap: Object<string, Object>,
- *     order: string[], markers: Object<string, Object<number, string[]>>, changed: Object<string, Set<number>>}}
+ *     order: string[], markers: Object<string, Object<number, string[]>>, changed: Object<string, Set<number>>,
+ *     matrices: Object<string, Object>, shared: Object<string, number[][]>}}
  */
-export const buildView = (stack, heap, before = null, indexNames = null, targets = null) => {
+export const buildView = (stack, heap, before = null, indexNames = null, targets = null, matrixNames = null) => {
     const all = {...(heap || {})};
     const frames = (stack || []).map((frame, f) => {
         const rows = [];
@@ -316,11 +403,23 @@ export const buildView = (stack, heap, before = null, indexNames = null, targets
 
     // Index variables: integers of a frame that are a valid index of a list the same frame points to.
     const markers = {};
+    // Matrices (lists of lists of values) are drawn as one table; rows that are one list stay arrows, with a warning.
+    const matrices = {};
+    const shared = {};
     frames.forEach((frame) => {
-        const ints = frame.rows.filter((row) => /^-?\d+$/.test(refText(row.ref).trim())
-            && (!indexNames || indexNames.has(row.name)));
+        const integers = frame.rows.filter((row) => /^-?\d+$/.test(refText(row.ref).trim()));
+        const ints = integers.filter((row) => !indexNames || indexNames.has(row.name));
         frame.rows.forEach((row) => {
             const node = 'r' in row.ref ? all[row.ref.r] : null;
+            const rows = node ? matrixRows(node, all) : null;
+            if (rows && !matrices[row.ref.r] && !shared[row.ref.r]) {
+                const same = sharedRows(rows);
+                if (same.length) {
+                    shared[row.ref.r] = same;
+                } else {
+                    matrices[row.ref.r] = matrixView(rows, integers, matrixNames);
+                }
+            }
             // A matrix (a list of lists only) gets no markers on its rows.
             if (!node || !['list', 'tuple'].includes(node.k) || node.items.every((item) => !('v' in item))) {
                 return;
@@ -369,8 +468,23 @@ export const buildView = (stack, heap, before = null, indexNames = null, targets
                 changed[id] = set;
             }
         });
+        // The cells of a matrix changed since the stop before ("row,column"), new rows and columns included.
+        Object.entries(matrices).forEach(([id, matrix]) => {
+            const was = old[id] ? matrixRows(old[id], old) : null;
+            if (!was) {
+                return;
+            }
+            const cells = new Set();
+            matrix.cells.forEach((row, r) => row.forEach((text, c) => {
+                const item = was[r]?.node.items[c];
+                if (!item || refText(item) !== text) {
+                    cells.add(`${r},${c}`);
+                }
+            }));
+            matrix.changed = cells;
+        });
     }
-    return {frames, heap: all, order, markers, changed};
+    return {frames, heap: all, order, markers, changed, matrices, shared};
 };
 
 /**
@@ -387,6 +501,23 @@ export const indexNames = (code) => {
         }
     }
     return names;
+};
+
+/**
+ * The names a program uses as the row and the column of a matrix: t[i][j] and t[i + 1][j - 1] give rows i, columns j.
+ *
+ * @param {string} code
+ * @returns {{rows: Set<string>, cols: Set<string>}}
+ */
+export const matrixIndexNames = (code) => {
+    const rows = new Set();
+    const cols = new Set();
+    const names = (text, set) => [...text.matchAll(/[A-Za-z_]\w*/g)].forEach(([name]) => set.add(name));
+    for (const [, row, col] of String(code || '').matchAll(/\w\s*\[([^[\]]*)\]\s*\[([^[\]]*)\]/g)) {
+        names(row, rows);
+        names(col, cols);
+    }
+    return {rows, cols};
 };
 
 /**
@@ -424,7 +555,7 @@ export class MemoryView {
      * The view in an element.
      *
      * @param {HTMLElement} root
-     * @param {Object<string, string>} strings memory, memframe, mainprogram, memref, memmore
+     * @param {Object<string, string>} strings memory, memframe, mainprogram, memref, memmore, memshared
      */
     constructor(root, strings) {
         this.root = root;
@@ -467,7 +598,10 @@ export class MemoryView {
             left.append(f);
         });
         const right = el('div', 'tiny_codelab-mem-objects');
-        view.order.forEach((id) => right.append(this.object(id, view.heap[id])));
+        // Rows of a matrix are drawn in its table.
+        const inMatrix = new Set(Object.values(view.matrices || {}).flatMap((m) => m.rowIds.filter((id) => id !== null)));
+        view.order.filter((id) => !inMatrix.has(id) || view.matrices?.[id])
+            .forEach((id) => right.append(this.object(id, view.heap[id])));
         const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
         svg.setAttribute('class', 'tiny_codelab-mem-arrows');
         svg.setAttribute('aria-hidden', 'true');
@@ -532,13 +666,84 @@ export class MemoryView {
             wrap.append(table);
         } else if (node.k === 'other') {
             wrap.append(this.value(node.items[0]));
+        } else if (id !== null && this.view.matrices?.[id]) {
+            wrap.append(this.matrix(this.view.matrices[id]));
         } else {
             wrap.append(this.cells(id, node, changed));
         }
         if (more > 0) {
             wrap.append(el('div', 'tiny_codelab-mem-more', this.s.memmore.replace('{$a}', String(more))));
         }
+        // Above the cells: the arrows of the rows leave them downwards.
+        ((id !== null && this.view.shared?.[id]) || []).forEach((group) => wrap.firstChild.after(el('div',
+            'tiny_codelab-mem-shared', this.s.memshared.replace('{$a}', group.join(', ')))));
         return wrap;
+    }
+
+    /**
+     * A matrix as one table: column indexes above, row indexes on the left, the numbers shaded from the smallest to
+     * the largest, the index variables of the rows on the right and of the columns below, their cell outlined.
+     *
+     * @param {Object} m a matrix of buildView
+     * @returns {HTMLTableElement}
+     */
+    matrix(m) {
+        // The class table-reboot: without the borders Moodle gives every table in the content.
+        const table = el('table', 'tiny_codelab-mem-matrix table-reboot');
+        const head = table.createTHead().insertRow();
+        head.append(el('th', 'tiny_codelab-mem-index'));
+        for (let c = 0; c < m.cols; c++) {
+            const th = el('th', 'tiny_codelab-mem-index', String(c));
+            th.scope = 'col';
+            head.append(th);
+        }
+        const body = table.createTBody();
+        m.cells.forEach((row, r) => body.append(this.matrixRow(m, row, r)));
+        if (Object.keys(m.colMarkers).length) {
+            const foot = table.createTFoot().insertRow();
+            foot.insertCell();
+            for (let c = 0; c < m.cols; c++) {
+                foot.append(el('td', 'tiny_codelab-mem-marker', m.colMarkers[c] ? `\u25B2 ${m.colMarkers[c].join(', ')}` : ''));
+            }
+        }
+        return table;
+    }
+
+    /**
+     * One row of a matrix.
+     *
+     * @param {Object} m a matrix of buildView
+     * @param {string[]} row the texts of the row
+     * @param {number} r its index
+     * @returns {HTMLTableRowElement}
+     */
+    matrixRow(m, row, r) {
+        const tr = document.createElement('tr');
+        if (m.rowIds[r] !== null) {
+            // The target of the arrows of variables that point to this row (row = t[1]).
+            tr.dataset.id = m.rowIds[r];
+        }
+        const th = el('th', 'tiny_codelab-mem-index', String(r));
+        th.scope = 'row';
+        tr.append(th);
+        for (let c = 0; c < m.cols; c++) {
+            if (c >= row.length) {
+                tr.append(el('td', 'tiny_codelab-mem-empty'));
+                continue;
+            }
+            const classes = ['tiny_codelab-mem-heat-' + (m.shades ? m.shades[r][c] : 0)];
+            if (m.changed?.has(`${r},${c}`)) {
+                classes.push('tiny_codelab-mem-changed');
+            }
+            if (m.rowMarkers[r] && m.colMarkers[c]) {
+                classes.push('tiny_codelab-mem-current');
+            }
+            tr.append(el('td', classes.join(' '), row[c]));
+        }
+        if (Object.keys(m.rowMarkers).length) {
+            tr.append(el('td', 'tiny_codelab-mem-marker', m.rowMarkers[r] ? `\u25C0 ${m.rowMarkers[r].join(', ')}` : ''));
+        }
+        return tr;
     }
 
     /**
@@ -591,7 +796,7 @@ export class MemoryView {
         defs.append(head);
         const lines = [defs];
         this.box.querySelectorAll('.tiny_codelab-mem-ptr').forEach((dot) => {
-            const target = this.box.querySelector(`.tiny_codelab-mem-object[data-id="${CSS.escape(dot.dataset.target)}"]`);
+            const target = this.box.querySelector(`[data-id="${CSS.escape(dot.dataset.target)}"]`);
             if (!target || !dot.offsetParent) {
                 return;
             }

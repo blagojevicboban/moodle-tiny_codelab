@@ -331,6 +331,7 @@ $string['memleak_summary'] = 'Pierdere de memorie: {$a->count} bloc(uri) pe heap
 $string['memmore'] = 'încă {$a}';
 $string['memory'] = 'Memorie';
 $string['memref'] = 'indică spre {$a}';
+$string['memshared'] = 'Rândurile {$a} sunt una și aceeași listă: o modificare într-unul le schimbă pe toate.';
 $string['menuitem'] = 'Program CodeLab';
 $string['noassist'] = 'Fără asistență la tastare (pentru teste)';
 $string['nooutput'] = '(programul nu a afișat nimic)';

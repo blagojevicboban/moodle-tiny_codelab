@@ -331,6 +331,7 @@ $string['memleak_summary'] = 'Διαρροή μνήμης: {$a->count} μπλο�
 $string['memmore'] = '{$a} ακόμη';
 $string['memory'] = 'Μνήμη';
 $string['memref'] = 'δείχνει στο {$a}';
+$string['memshared'] = 'Οι γραμμές {$a} είναι μία και η ίδια λίστα: μια αλλαγή σε μία τις αλλάζει όλες.';
 $string['menuitem'] = 'Πρόγραμμα CodeLab';
 $string['noassist'] = 'Χωρίς βοήθεια πληκτρολόγησης (για εξετάσεις)';
 $string['nooutput'] = '(το πρόγραμμα δεν εκτύπωσε τίποτα)';

@@ -331,6 +331,7 @@ $string['memleak_summary'] = 'メモリリーク: {$a->count} 個のヒープブ
 $string['memmore'] = 'ほか {$a} 件';
 $string['memory'] = 'メモリ';
 $string['memref'] = '{$a} を参照';
+$string['memshared'] = '行 {$a} は同じ 1 つのリストです。1 行を変更するとすべてが変わります。';
 $string['menuitem'] = 'CodeLabプログラム';
 $string['noassist'] = '入力支援なし（テスト用）';
 $string['nooutput'] = '（出力なし）';

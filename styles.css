@@ -615,7 +615,7 @@ pre.codelab.codelab-theme-vs-dark {
 pre.codelab.codelab-theme-vs-dark::before {
     background: #252526;
     border-bottom: 1px solid #3c3c3c;
-    color: #cccccc;
+    color: #ccc;
 }
 
 pre.codelab.codelab-theme-vs-dark.codelab-run::after {
@@ -761,6 +761,74 @@ tr.tiny_codelab-mem-changed td {
 .tiny_codelab-mem-more {
     font-size: .75rem;
     color: #6a737b;
+}
+
+/* A matrix (a list of lists, a DP table): one table, the numbers shaded from the smallest to the largest. */
+.tiny_codelab-mem-matrix {
+    border-collapse: separate;
+    border-spacing: 2px;
+}
+
+.tiny_codelab-mem-matrix th,
+.tiny_codelab-mem-matrix td {
+    border: 0;
+}
+
+.tiny_codelab-mem-matrix th {
+    padding: 0 .25rem;
+    font-weight: normal;
+    text-align: center;
+}
+
+.tiny_codelab-mem-matrix td[class*="tiny_codelab-mem-heat-"] {
+    min-width: 2rem;
+    padding: .1rem .35rem;
+    border: 1px solid #8f959e;
+    border-radius: 3px;
+    text-align: center;
+    font-family: monospace;
+}
+
+.tiny_codelab-mem-heat-0 {
+    background: #f8f9fa;
+}
+
+.tiny_codelab-mem-heat-1 {
+    background: #dbeafe;
+}
+
+.tiny_codelab-mem-heat-2 {
+    background: #bfdbfe;
+}
+
+.tiny_codelab-mem-heat-3 {
+    background: #93c5fd;
+}
+
+.tiny_codelab-mem-heat-4 {
+    background: #60a5fa;
+}
+
+.tiny_codelab-mem-matrix td.tiny_codelab-mem-changed {
+    outline: 2px solid #2e8540;
+    outline-offset: -2px;
+    font-weight: bold;
+}
+
+.tiny_codelab-mem-matrix td.tiny_codelab-mem-current {
+    border: 2px solid #b35c00;
+}
+
+.tiny_codelab-mem-matrix .tiny_codelab-mem-marker {
+    padding: 0 .25rem;
+    text-align: center;
+}
+
+.tiny_codelab-mem-shared {
+    max-width: 22rem;
+    margin-bottom: .25rem;
+    font-size: .8rem;
+    color: #a52a2a;
 }
 
 .tiny_codelab-mem-arrows {
@@ -955,6 +1023,14 @@ tr.tiny_codelab-mem-changed td {
     .tiny_codelab-mem-bar {
         outline: 2px solid currentcolor;
         outline-offset: -2px;
+    }
+
+    .tiny_codelab-mem-matrix td.tiny_codelab-mem-changed {
+        outline: 2px dashed currentcolor;
+    }
+
+    .tiny_codelab-mem-matrix td.tiny_codelab-mem-current {
+        border: 3px double currentcolor;
     }
 
     .tiny_codelab-console-past {

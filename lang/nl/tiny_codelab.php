@@ -331,6 +331,7 @@ $string['memleak_summary'] = 'Geheugenlek: {$a->count} heap-blok(ken) ({$a->byte
 $string['memmore'] = 'nog {$a}';
 $string['memory'] = 'Geheugen';
 $string['memref'] = 'wijst naar {$a}';
+$string['memshared'] = 'De rijen {$a} zijn één en dezelfde lijst: een wijziging in één verandert ze allemaal.';
 $string['menuitem'] = 'CodeLab-programma';
 $string['noassist'] = 'Geen typhulp (voor toetsen)';
 $string['nooutput'] = '(het programma gaf geen uitvoer)';

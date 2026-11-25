@@ -331,6 +331,7 @@ $string['memleak_summary'] = 'Fuite mémoire : {$a->count} bloc(s) sur le tas ({
 $string['memmore'] = '{$a} de plus';
 $string['memory'] = 'Mémoire';
 $string['memref'] = 'pointe vers {$a}';
+$string['memshared'] = 'Les lignes {$a} sont une seule et même liste : modifier l\'une les modifie toutes.';
 $string['menuitem'] = 'Programme CodeLab';
 $string['noassist'] = 'Sans aide à la saisie (pour les évaluations)';
 $string['nooutput'] = '(le programme n\'a rien affiché)';
