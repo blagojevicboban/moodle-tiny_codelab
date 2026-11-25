@@ -77,7 +77,8 @@ if ($ADMIN->fulltree) {
     $settings->add(new admin_setting_heading(
         'tiny_codelab/jobeheading',
         get_string('jobeheading', 'tiny_codelab'),
-        ''
+        // With a connection key the hosted runner runs everything: say so before the settings of the own servers.
+        \tiny_codelab\local\interactive::cloud_config() !== null ? get_string('jobeheading_cloud', 'tiny_codelab') : ''
     ));
     $settings->add(new admin_setting_configtext(
         'tiny_codelab/jobeserver',

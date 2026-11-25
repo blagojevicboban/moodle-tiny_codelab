@@ -143,8 +143,10 @@ final class interactive_test extends \advanced_testcase {
         \curl::mock_response(json_encode(['site' => 'site-1', 'plan' => 'school', 'status' => 'active', 'used' => 120,
             'quota' => 150000, 'expires' => '2027-01-15']));
         $html = interactive::usage_html();
-        $this->assertStringContainsString('school', $html);
-        $this->assertStringContainsString('120 / 150000', $html);
+        $this->assertStringContainsString('School', $html);
+        $this->assertStringContainsString('120 of 150,000', $html);
+        $this->assertStringContainsString('runner.example.org', $html);
+        $this->assertStringContainsString('progress-bar', $html);
 
         // A refused answer is shown with a connection key (it was an empty box), and nothing for a self-hosted runner.
         \curl::mock_response(json_encode(['error' => 'Unauthorized']));
@@ -155,6 +157,32 @@ final class interactive_test extends \advanced_testcase {
         set_config('runnersecret', 'my-secret-0123456789', 'tiny_codelab');
         \curl::mock_response(json_encode(['error' => 'Unauthorized']));
         $this->assertSame('', interactive::usage_html());
+    }
+
+    public function test_usage_context_warns_before_the_end(): void {
+        $this->resetAfterTest();
+        $now = strtotime('2026-11-25 12:00:00 UTC');
+        $data = ['plan' => 'trial', 'status' => 'active', 'used' => 240, 'quota' => 2000, 'sessions' => 220,
+            'batches' => 20, 'concurrent' => 10, 'expires' => '2026-12-25'];
+        $context = interactive::usage_context($data, $now);
+        $this->assertSame('info', $context['level']);
+        $this->assertSame(12, $context['percent']);
+        $this->assertStringContainsString('30', $context['expires']);
+        $this->assertStringContainsString(get_string('cloudusage_status_active', 'tiny_codelab'), $context['plan']);
+        $this->assertSame('', $context['server'], 'no connection key: no server');
+
+        // 80 % of the runs, or a week to the end: yellow. Over the quota or not active: red.
+        $this->assertSame('warning', interactive::usage_context(['used' => 1600] + $data, $now)['level']);
+        $this->assertSame('warning', interactive::usage_context(['expires' => '2026-11-30'] + $data, $now)['level']);
+        $this->assertSame('danger', interactive::usage_context(['used' => 2000] + $data, $now)['level']);
+        $this->assertSame(100, interactive::usage_context(['used' => 2500] + $data, $now)['percent']);
+        $expired = interactive::usage_context(['status' => 'expired', 'expires' => '2026-11-01'] + $data, $now);
+        $this->assertSame('danger', $expired['level']);
+        $this->assertStringContainsString(get_string('cloudusage_status_expired', 'tiny_codelab'), $expired['plan']);
+        $date = userdate(strtotime('2026-11-01 00:00:00 UTC'), get_string('strftimedate', 'langconfig'), 'UTC');
+        $this->assertSame(get_string('cloudusage_expired', 'tiny_codelab', $date), $expired['expires']);
+        // A status this version does not know is shown as it came.
+        $this->assertStringContainsString('paused', interactive::usage_context(['status' => 'paused'] + $data, $now)['plan']);
     }
 
     public function test_status_html_tells_when_the_connection_key_is_used(): void {

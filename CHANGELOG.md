@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.30.0 (2026-11-25)
+
+- Hosted runner settings: instead of one line, a box with the plan and its status, a bar of the runs of this month,
+  the editor sessions and the quiz grading apart, the programs allowed at once, the end date with the days left and
+  the site id and the server of the connection key. Numbers and dates follow the language of the site, and the plan
+  status is translated. The box is yellow from 80 % of the runs or 7 days before the end date, and red when the plan is
+  over its runs, suspended or expired (template tiny_codelab/cloud_usage).
+- The description of the section says more simply when quizzes are graded on the hosted runner, and the section of
+  the own Jobe server tells when a connection key is set above.
+
 ## 1.29.0 (2026-11-25)
 
 - Matrices in the memory view: a list of lists of values (Python) or an array of arrays (C, C++, std::vector of

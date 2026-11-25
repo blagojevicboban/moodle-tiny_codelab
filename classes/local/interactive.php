@@ -217,15 +217,73 @@ class interactive {
             }
             return $OUTPUT->notification(get_string('cloudusage_error', 'tiny_codelab', s($why)), 'warning', false);
         }
+        return $OUTPUT->render_from_template('tiny_codelab/cloud_usage', self::usage_context($data, time()));
+    }
+
+    /**
+     * What the template cloud_usage shows of an answer of GET /usage: the texts are made here, in the language of the
+     * admin, with the numbers and the date of that language (not escaped here: the template escapes them).
+     *
+     * @param array $data the answer of the hosted runner (plan, status, used, quota, sessions, batches, concurrent, expires)
+     * @param int $now the current time
+     * @return array context of tiny_codelab/cloud_usage
+     */
+    public static function usage_context(array $data, int $now): array {
+        $sep = get_string('thousandssep', 'langconfig');
+        $number = fn($n) => number_format((int) $n, 0, '', $sep);
         $used = (int) ($data['used'] ?? 0);
-        $quota = (int) $data['quota'];
-        $type = ($quota > 0 && $used >= $quota) || ($data['status'] ?? '') !== 'active' ? 'warning' : 'info';
-        return $OUTPUT->notification(get_string('cloudusage', 'tiny_codelab', (object) [
-            'plan' => s((string) ($data['plan'] ?? '')),
-            'used' => $used,
-            'quota' => $quota,
-            'status' => s((string) ($data['status'] ?? '')),
-            'expires' => s((string) ($data['expires'] ?? '')),
-        ]), $type, false);
+        $quota = (int) ($data['quota'] ?? 0);
+        $percent = $quota > 0 ? (int) min(100, floor(100 * $used / $quota)) : 0;
+        $status = (string) ($data['status'] ?? '');
+        $statustext = get_string_manager()->string_exists('cloudusage_status_' . $status, 'tiny_codelab')
+            ? get_string('cloudusage_status_' . $status, 'tiny_codelab') : $status;
+        $plan = (string) ($data['plan'] ?? '');
+
+        // The end date is a day (YYYY-MM-DD) of the hosted runner, in UTC.
+        $expires = '';
+        $days = null;
+        $end = preg_match('~^\d{4}-\d{2}-\d{2}$~', (string) ($data['expires'] ?? ''))
+            ? strtotime($data['expires'] . ' 00:00:00 UTC') : false;
+        if ($end) {
+            $date = userdate($end, get_string('strftimedate', 'langconfig'), 'UTC');
+            $days = (int) ceil(($end - $now) / DAYSECS);
+            $expires = $days < 0 ? get_string('cloudusage_expired', 'tiny_codelab', $date)
+                : get_string('cloudusage_expires', 'tiny_codelab', (object) ['date' => $date, 'days' => $days]);
+        }
+
+        // Red when nothing runs any more, yellow some time before.
+        if ($status !== 'active' || ($quota > 0 && $used >= $quota)) {
+            $level = 'danger';
+        } else if ($percent >= 80 || ($days !== null && $days <= 7)) {
+            $level = 'warning';
+        } else {
+            $level = 'info';
+        }
+        $cloud = self::cloud_config();
+        $server = $cloud ? (string) parse_url(preg_replace('~^ws~', 'http', $cloud['url']), PHP_URL_HOST) : '';
+        return [
+            'level' => $level,
+            'bar' => $level === 'info' ? 'success' : $level,
+            'percent' => $percent,
+            'plan' => get_string('cloudusage', 'tiny_codelab', (object) [
+                'plan' => ucfirst($plan),
+                'status' => $statustext,
+            ]),
+            'runs' => get_string('cloudusage_runs', 'tiny_codelab', (object) [
+                'used' => $number($used),
+                'quota' => $number($quota),
+                'percent' => $percent,
+            ]),
+            'detail' => get_string('cloudusage_detail', 'tiny_codelab', (object) [
+                'sessions' => $number($data['sessions'] ?? 0),
+                'batches' => $number($data['batches'] ?? 0),
+                'concurrent' => $number($data['concurrent'] ?? 0),
+            ]),
+            'expires' => $expires,
+            'server' => $cloud && $server !== '' ? get_string('cloudusage_server', 'tiny_codelab', (object) [
+                'site' => $cloud['site'],
+                'server' => $server,
+            ]) : '',
+        ];
     }
 }

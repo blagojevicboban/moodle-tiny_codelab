@@ -1,0 +1,59 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template tiny_codelab/cloud_usage
+
+    The plan and the usage of this month of a hosted runner, on the settings page (from GET /usage of the runner).
+
+    Context variables required for this template:
+    * level - info, warning (80 % of the runs or 7 days left) or danger (nothing runs any more)
+    * bar - colour of the bar: success, warning or danger
+    * percent - share of the runs of the month used, 0 to 100
+    * plan - the plan and its status
+    * runs - the runs of this month and the quota
+    * detail - editor sessions, quiz grading and programs at once
+    * expires - the end date and the days left (may be empty)
+    * server - the site id and the server of the connection key (may be empty)
+
+    @copyright  2026 Boban Blagojević
+    @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+
+    Example context (json):
+    {
+        "level": "info",
+        "bar": "success",
+        "percent": 12,
+        "plan": "Plan: Trial. Status: active.",
+        "runs": "Runs this month: 240 of 2,000 (12%).",
+        "detail": "Editor sessions: 220. Quiz grading: 20. Programs at once: up to 10.",
+        "expires": "Active until 25 December 2026, 30 days left.",
+        "server": "Site id book-proba on the server cloud.codelabedu.com."
+    }
+}}
+<div class="tiny_codelab-cloudusage alert alert-{{level}} mb-0">
+    <div class="d-flex flex-wrap justify-content-between">
+        <strong class="me-3">{{plan}}</strong>
+        <span>{{runs}}</span>
+    </div>
+    <div class="progress my-2" style="height: .5rem;">
+        <div class="progress-bar bg-{{bar}}" role="progressbar" style="width: {{percent}}%;" aria-valuenow="{{percent}}"
+            aria-valuemin="0" aria-valuemax="100" aria-label="{{runs}}"></div>
+    </div>
+    <div class="small">{{detail}}</div>
+    {{#expires}}<div class="small">{{expires}}</div>{{/expires}}
+    {{#server}}<div class="small text-muted">{{server}}</div>{{/server}}
+</div>
