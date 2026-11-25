@@ -110,7 +110,7 @@ An example is a `pre` element whose settings are class names, because Moodle's H
 | Address of the interactive server | (empty) | WebSocket address of a [CodeLab runner](https://github.com/blagojevicboban/codelab-runner), for example `wss://runner.example.org` |
 | Secret of the interactive server | (empty) | The secret shared with the runner (`CODELAB_SECRET`) |
 | State of the interactive server | | Shows whether the runner answers and its languages |
-| Hosted runner: connection key | (empty) | Key given by the provider of a hosted runner; sets the address, the secret and the site id instead of the two settings above. The settings page then shows the plan and the monthly usage |
+| Hosted runner: connection key | (empty) | Key given by the provider of a hosted runner; sets the address, the secret and the site id instead of the two settings above. The settings page then shows the plan and the monthly usage. Without a key, the button Get a free 30-day trial asks trial.codelabedu.com for one (the site address and the admin e-mail are sent only on that click) |
 
 C and C++ are compiled without warnings as errors (`-w`) and with the maths library (`-lm`). The Visual Studio functions
 `scanf_s`, `fscanf_s`, `sscanf_s`, `printf_s` and `fprintf_s` are mapped to the standard ones.

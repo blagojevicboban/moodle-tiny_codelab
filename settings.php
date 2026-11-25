@@ -72,6 +72,16 @@ if ($ADMIN->fulltree) {
         get_string('cloudstatus', 'tiny_codelab'),
         $refresh ? \tiny_codelab\local\interactive::usage_html() : ''
     ));
+    // A free trial with one click while no connection key is set (nothing is sent before the click).
+    if (\tiny_codelab\local\trial::offered()) {
+        $trialurl = new moodle_url('/lib/editor/tiny/plugins/codelab/trial.php', ['sesskey' => sesskey()]);
+        $settings->add(new admin_setting_description(
+            'tiny_codelab/cloudtrial',
+            get_string('trial', 'tiny_codelab'),
+            html_writer::tag('p', get_string('trial_desc', 'tiny_codelab')) .
+                html_writer::link($trialurl, get_string('trial_button', 'tiny_codelab'), ['class' => 'btn btn-primary'])
+        ));
+    }
 
     // Own Jobe server, the languages and the editor.
     $settings->add(new admin_setting_heading(

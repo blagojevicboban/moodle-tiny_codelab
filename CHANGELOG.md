@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.31.0 (2026-11-25)
+
+- Free 30-day trial of the hosted runner with one click: while no connection key is set, the Hosted runner section
+  of the settings has the button Get a free 30-day trial. Only on that click the address of the site and the e-mail
+  address of the administrator are sent to trial.codelabedu.com (CodeLab Cloud). The trial server checks that the
+  request comes from this site (it asks trialcheck.php about a random value the site made for ten minutes), and the
+  connection key it answers with is set by itself. One trial per site. The Privacy API lists the new data.
+
 ## 1.30.0 (2026-11-25)
 
 - Hosted runner settings: instead of one line, a box with the plan and its status, a bar of the runs of this month,

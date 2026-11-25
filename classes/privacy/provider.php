@@ -61,6 +61,11 @@ class provider implements
         $collection->add_external_location_link('pyodide', [
             'ipaddress' => 'privacy:metadata:pyodide:ipaddress',
         ], 'privacy:metadata:pyodide');
+        // A free trial of the hosted runner, only when the administrator clicks its button on the settings page.
+        $collection->add_external_location_link('trial', [
+            'wwwroot' => 'privacy:metadata:trial:wwwroot',
+            'email' => 'privacy:metadata:trial:email',
+        ], 'privacy:metadata:trial');
         return $collection;
     }
 
