@@ -34,6 +34,9 @@
 /** Most cells of a list read from a gdb value (gdb itself stops at 200 elements). */
 const MAX_CELLS = 200;
 
+/** A C# object of netcoredbg shown by its type only (runner 0.25): {Teacher}, {System.Collections.Generic.List<int>}. */
+const TYPE_ONLY = /^\{[A-Z][\w.]*(?:<[^{}]*>)?(?:\[[\d, ]*\])?\}$/;
+
 /**
  * Split the inside of a {...} value at the commas of its own level (not in nested braces or in quotes).
  *
@@ -108,12 +111,19 @@ const closing = (text, start) => {
  */
 export const parseValue = (text) => {
     const value = String(text ?? '').trim();
+    // A C# object shown by its type only ({Teacher}, {Node}, {int[40]} past the shown depth) is a plain value too.
+    return TYPE_ONLY.test(value) ? null : parseBraces(value);
+};
+
+/**
+ * A trimmed value of gdb with braces as an object, or null (see parseValue).
+ *
+ * @param {string} value
+ * @returns {?Object}
+ */
+const parseBraces = (value) => {
     let open = value.indexOf('{');
     if (open < 0) {
-        return null;
-    }
-    // A C# object shown by its type only ({Teacher}, {Node}, {int[40]} past the shown depth): a plain value.
-    if (/^\{[A-Z][\w.]*(?:<[^{}]*>)?(?:\[[\d, ]*\])?\}$/.test(value)) {
         return null;
     }
     // A pretty printer before the braces (std::vector of length 3, capacity 4 = {...}): its type name.
