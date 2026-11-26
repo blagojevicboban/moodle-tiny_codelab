@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.34.0 (2026-11-26)
+
+- Step for Java: with the CodeLab runner 0.26 or newer (and CodeLab Cloud), Java examples and answers run line by line
+  as C, C++ and C# do: breakpoints and conditional breakpoints, Step over and out, the call stack, the variables and
+  Watch expressions. Arrays, lists, maps, sets and objects are shown with their contents. The runner uses its own
+  debugger on the Java Debug Interface of the JDK; Run and grading stay as they were.
+
 ## 1.33.1 (2026-11-26)
 
 - Memory view of C#: an object shown by its type only ({Teacher}) is a value of its variable, no longer drawn as an
