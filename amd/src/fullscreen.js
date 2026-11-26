@@ -23,8 +23,18 @@
  */
 
 import {setIcon} from './icons';
+import {SIDE, CHANGE} from './layout';
 
 const ON = 'tiny_codelab-fullscreen';
+
+/**
+ * Height of the editor on the whole screen: most of the window, all of it when the panels are beside the code.
+ *
+ * @param {HTMLElement} root
+ * @returns {number} pixels
+ */
+const fullHeight = (root) => Math.max(200, Math.round(root.classList.contains(SIDE)
+    ? window.innerHeight - 90 : window.innerHeight * 0.6));
 
 /**
  * A button that shows an element (editor, buttons and console) on the whole screen.
@@ -50,8 +60,8 @@ export const fullscreenButton = ({root, editor, label, exitLabel, className = 'b
         document.documentElement.classList.toggle('tiny_codelab-noscroll', on);
         setIcon(button, on ? 'exitfullscreen' : 'fullscreen', on ? exitLabel : label);
         button.setAttribute('aria-pressed', on ? 'true' : 'false');
-        // On the whole screen the editor gets most of the height; the console stays below it.
-        editor.setFixedHeight(on ? Math.max(200, Math.round(window.innerHeight * 0.6)) : null);
+        // On the whole screen the editor gets most of the height; the console stays below or beside it.
+        editor.setFixedHeight(on ? fullHeight(root) : null);
         if (on) {
             editor.focus();
         }
@@ -77,10 +87,13 @@ export const fullscreenButton = ({root, editor, label, exitLabel, className = 'b
             apply(false);
         }
     });
-    window.addEventListener('resize', () => {
+    const refit = () => {
         if (root.classList.contains(ON)) {
-            editor.setFixedHeight(Math.max(200, Math.round(window.innerHeight * 0.6)));
+            editor.setFixedHeight(fullHeight(root));
         }
-    });
+    };
+    window.addEventListener('resize', refit);
+    // A wide screen puts the panels beside the code (tiny_codelab/layout): the editor then takes the whole height.
+    root.addEventListener(CHANGE, refit);
     return button;
 };

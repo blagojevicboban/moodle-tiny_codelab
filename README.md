@@ -29,6 +29,10 @@ Jobe client.
   Zoom with Ctrl + mouse wheel or Ctrl + plus / minus, word wrap with Alt+Z, sticky scroll and coloured bracket pairs.
 - **Tooltips** on the code: values of variables while stepping, help for beginners on keywords, operators and printf / scanf
   formats, and numbers in decimal, hexadecimal, binary and octal.
+- **Panels below or beside the code**, as in VS Code: on a block at least 960 pixels wide the debugger, the variables,
+  the input and the console of an example go to the right of the code by default. Two icon buttons in the toolbar choose
+  the place (kept in the browser for all examples), and a bar between the columns changes the widths with the mouse or
+  the arrow keys. Narrower blocks keep the panels below.
 - **VS Code Themes**: Light (`vs`), Dark (`vs-dark`), High Contrast Dark (`hc-black`), and Auto detection.
 - **Modern IDE Cards**: Clean card formatting in the TinyMCE editor with language badges and Run indicators.
 - **Typing help** for every language:
@@ -138,7 +142,7 @@ mysql client. Every run gets a fresh database with the same data. qtype_codelab 
 ## Step and the debugger
 
 **Step** runs a program line by line: Python in the browser, C and C++ on the CodeLab runner (gdb). The line that runs
-next is marked in the editor, and the debugger panel below the console shows:
+next is marked in the editor, and the debugger panel (below the console, or beside the code on a wide page) shows:
 
 - **Step over** (a call runs without stopping in it), **Step out** (to the end of the current function) and
   **Auto step** with a speed slider; **Run** while paused goes on to the next breakpoint or the end;

@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.32.0 (2026-11-26)
+
+- Panels below or beside the code, as in VS Code: two new icon buttons in the toolbar of an example that runs (Panels
+  below the code, Panels beside the code). On a block at least 960 pixels wide the panels (Step with the timeline and
+  the variables, Complexity, Flowchart, the input and the console) go beside the code by default; the reader's choice
+  is kept in the browser and applies to every example. On a narrower block (a page with side blocks, a phone) the
+  panels stay below the code and the buttons are hidden. A bar between the columns changes their widths with the
+  mouse or the arrow keys (kept too), and the code column stays in view while the panels scroll when it fits the
+  window. On the whole screen the editor then takes the whole height (module tiny_codelab/layout).
+
 ## 1.31.1 (2026-11-25)
 
 - Test the servers: with a connection key, the hosted runner is named CodeLab Cloud with the site id and the server of

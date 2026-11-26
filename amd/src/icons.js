@@ -29,13 +29,16 @@ const PATHS = {
     copy: 'M5.5 5.5h8v8h-8zM10.5 5.5v-3h-8v8h3',
     copied: 'M3 8.5l3 3 7-7',
     theme: 'M8 2a6 6 0 1 0 0 12A6 6 0 0 0 8 2zM8 2v12',
+    // Panels below or beside the code (tiny_codelab/layout), as the panel position of VS Code.
+    panelbottom: 'M2 3h12v10H2zM2 9.5h12',
+    panelside: 'M2 3h12v10H2zM9.5 3v10',
 };
 
 /**
  * Put an icon in a button and name the button.
  *
  * @param {HTMLButtonElement} button
- * @param {string} name fullscreen, exitfullscreen, reset, copy, copied or theme
+ * @param {string} name fullscreen, exitfullscreen, reset, copy, copied, theme, panelbottom or panelside
  * @param {string} label what the button does (title and aria-label)
  * @returns {HTMLButtonElement} the button
  */

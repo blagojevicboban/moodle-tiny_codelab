@@ -137,6 +137,64 @@ html.tiny_codelab-noscroll body {
     background: #fff;
 }
 
+/* Panels beside the code (tiny_codelab/layout): the code column on the left, the panels on the right. */
+.tiny_codelab-side {
+    display: grid;
+    grid-template-columns: minmax(0, var(--tiny-codelab-split, 58%)) minmax(0, 1fr);
+    align-items: start;
+}
+
+.tiny_codelab-side > * {
+    grid-column: 1 / -1;
+}
+
+.tiny_codelab-side > .tiny_codelab-layout-main {
+    grid-column: 1;
+    position: relative;
+}
+
+.tiny_codelab-side.tiny_codelab-sticky > .tiny_codelab-layout-main {
+    position: sticky;
+    top: 0;
+}
+
+.tiny_codelab-side > .tiny_codelab-layout-side {
+    grid-column: 2;
+    min-width: 0;
+    border-left: 1px solid #dee2e6;
+}
+
+.tiny_codelab-splitter {
+    display: none;
+}
+
+.tiny_codelab-side .tiny_codelab-splitter {
+    display: block;
+    position: absolute;
+    top: 0;
+    right: -4px;
+    z-index: 2;
+    width: 8px;
+    height: 100%;
+    cursor: col-resize;
+    touch-action: none;
+}
+
+.tiny_codelab-side .tiny_codelab-splitter:hover,
+.tiny_codelab-side .tiny_codelab-splitter:focus,
+.tiny_codelab-dragging .tiny_codelab-splitter {
+    background: rgba(15, 108, 191, .35);
+    outline: none;
+}
+
+.tiny_codelab-dragging iframe {
+    pointer-events: none;
+}
+
+.tiny_codelab-dragging {
+    user-select: none;
+}
+
 /* Debugger panel of Step (tiny_codelab/debugpanel). */
 .tiny_codelab-callstack li {
     line-height: 1.3;
