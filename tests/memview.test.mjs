@@ -37,6 +37,12 @@ test('gdb values: arrays, repeats, structs, vectors, strings and plain values', 
     assert.deepEqual(p.items.map((i) => refText(i[0])), ['x', 'name', 'pos']);
     assert.equal(refText(p.items[1][1]), '"a, b"');
     assert.equal(p.items[2][1].node.k, 'list');
+    // C# (netcoredbg, runner 0.25): an object by its type only is a plain value, its fields an object.
+    assert.equal(parseValue('{Teacher}'), null);
+    assert.equal(parseValue('{System.Collections.Generic.List<int>}'), null);
+    const node = parseValue('{Value = 1, Next = {Node}}');
+    assert.equal(node.k, 'object');
+    assert.equal(refText(node.items[1][1]), '{Node}');
     const v = parseValue('std::vector of length 3, capacity 4 = {7, 8, 9}');
     assert.equal(v.t, 'std::vector');
     assert.equal(v.n, 3);

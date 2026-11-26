@@ -112,6 +112,10 @@ export const parseValue = (text) => {
     if (open < 0) {
         return null;
     }
+    // A C# object shown by its type only ({Teacher}, {Node}, {int[40]} past the shown depth): a plain value.
+    if (/^\{[A-Z][\w.]*(?:<[^{}]*>)?(?:\[[\d, ]*\])?\}$/.test(value)) {
+        return null;
+    }
     // A pretty printer before the braces (std::vector of length 3, capacity 4 = {...}): its type name.
     const prefix = value.slice(0, open).trim();
     if (prefix !== '' && !prefix.endsWith('=')) {

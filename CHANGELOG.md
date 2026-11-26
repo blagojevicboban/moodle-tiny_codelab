@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.33.1 (2026-11-26)
+
+- Memory view of C#: an object shown by its type only ({Teacher}) is a value of its variable, no longer drawn as an
+  array of one element.
+
 ## 1.33.0 (2026-11-26)
 
 - Step for C#: with the CodeLab runner 0.25 or newer (and CodeLab Cloud), C# examples and answers run line by line as
