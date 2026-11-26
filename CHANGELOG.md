@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.33.0 (2026-11-26)
+
+- Step for C#: with the CodeLab runner 0.25 or newer (and CodeLab Cloud), C# examples and answers run line by line as
+  C and C++ do: breakpoints and conditional breakpoints, Step over and out, the call stack, the variables and Watch
+  expressions. Arrays, two-dimensional arrays, lists, dictionaries, sets and objects are shown with their contents
+  ({3, 1, 2}, {["Ana"] = 16}, {Value = 1, Next = {Node}}). The runner uses netcoredbg on .NET for Step; Run and
+  grading stay as they were. A runner without it runs C# without stopping.
+
 ## 1.32.0 (2026-11-26)
 
 - Panels below or beside the code, as in VS Code: two new icon buttons in the toolbar of an example that runs (Panels

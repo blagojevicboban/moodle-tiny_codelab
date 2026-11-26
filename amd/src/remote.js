@@ -17,7 +17,8 @@
  * A run on the interactive server (CodeLab runner) tied to a console: the program keeps running while the reader types
  * its input line by line, as in a terminal. Moodle gives a token for one session (tiny_codelab_session); the program
  * is sent over a WebSocket. Has the same state, start(), step(), resume() and stop() as tiny_codelab/session for Python:
- * C and C++ also run step by step (gdb on the server), with the line that runs next marked and the variables shown.
+ * C and C++ also run step by step (gdb on the server), and C# (netcoredbg, runner 0.25+), with the line that runs next
+ * marked and the variables shown.
  *
  * @module     tiny_codelab/remote
  * @copyright  2026 Boban Blagojević
@@ -39,7 +40,7 @@ const KEYS = ['compiling', 'running', 'running_server', 'inputline', 'inputok', 
     'san_index_oob', 'san_buffer_overflow', 'san_use_after_free', 'san_null_pointer', 'san_int_overflow', 'san_div_zero'];
 
 /** Languages that run step by step on the interactive server. */
-const STEP_LANGUAGES = ['c', 'cpp'];
+const STEP_LANGUAGES = ['c', 'cpp', 'csharp'];
 
 /** Languages that read no input (SQL): the script runs to its end. */
 const NO_INPUT = ['mysql'];
@@ -149,7 +150,7 @@ export class RemoteSession {
     /**
      * Compile and run the program.
      *
-     * @param {boolean} step stop before each line (C and C++)
+     * @param {boolean} step stop before each line (C, C++ and C#)
      * @param {string} [stdin] input given before the start (sent at once; the rest is typed)
      */
     async start(step, stdin = '') {

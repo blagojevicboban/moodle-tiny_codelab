@@ -141,7 +141,8 @@ mysql client. Every run gets a fresh database with the same data. qtype_codelab 
 
 ## Step and the debugger
 
-**Step** runs a program line by line: Python in the browser, C and C++ on the CodeLab runner (gdb). The line that runs
+**Step** runs a program line by line: Python in the browser, C and C++ on the CodeLab runner (gdb), and C# on the
+CodeLab runner 0.25 or newer (netcoredbg; arrays, lists, dictionaries and objects are shown with their contents). The line that runs
 next is marked in the editor, and the debugger panel (below the console, or beside the code on a wide page) shows:
 
 - **Step over** (a call runs without stopping in it), **Step out** (to the end of the current function) and
