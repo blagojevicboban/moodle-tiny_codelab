@@ -988,6 +988,194 @@ tr.tiny_codelab-mem-changed td {
     margin-top: .5rem;
 }
 
+/* Dark theme support for all CodeLab panels when the viewer uses vs-dark or hc-black. */
+.filter_codelab-dark.tiny_codelab-fullscreen {
+    background: #1e1e1e;
+    color: #d4d4d4;
+}
+
+.filter_codelab-dark .tiny_codelab-vars-empty,
+.filter_codelab-dark .tiny_codelab-calltree-summary,
+.filter_codelab-dark .tiny_codelab-aihint-note,
+.filter_codelab-dark .tiny_codelab-aihint-wait,
+.filter_codelab-dark .tiny_codelab-turtle-note,
+.filter_codelab-dark .tiny_codelab-mem-index,
+.filter_codelab-dark .tiny_codelab-mem-more {
+    color: #9d9d9d;
+}
+
+.filter_codelab-dark .tiny_codelab-vars-table tr.tiny_codelab-vars-changed td,
+.filter_codelab-dark .tiny_codelab-trace-table td.tiny_codelab-vars-changed {
+    background: #4b3d12;
+    color: #fef3c7;
+}
+
+.filter_codelab-dark .tiny_codelab-trace-table tr.tiny_codelab-trace-current td {
+    outline-color: #4fc1ff;
+}
+
+.filter_codelab-dark .tiny_codelab-calltree-edge {
+    stroke: #64748b;
+}
+
+.filter_codelab-dark .tiny_codelab-calltree-node rect {
+    fill: #252526;
+    stroke: #565656;
+}
+
+.filter_codelab-dark .tiny_codelab-calltree-node text {
+    fill: #e2e8f0;
+}
+
+.filter_codelab-dark .tiny_codelab-calltree-done rect {
+    fill: #1f2937;
+}
+
+.filter_codelab-dark .tiny_codelab-calltree-repeated rect {
+    fill: #451a03;
+    stroke: #f59e0b;
+}
+
+.filter_codelab-dark .tiny_codelab-calltree-waiting rect {
+    fill: #172554;
+    stroke: #60a5fa;
+}
+
+.filter_codelab-dark .tiny_codelab-calltree-current rect {
+    fill: #2563eb;
+    stroke: #93c5fd;
+}
+
+.filter_codelab-dark .tiny_codelab-calltree-svg .tiny_codelab-calltree-value {
+    fill: #6ee7b7;
+    stroke: #1e1e1e;
+}
+
+.filter_codelab-dark .tiny_codelab-webpreview,
+.filter_codelab-dark .tiny_codelab-webconsole {
+    border-color: #3c3c3c;
+}
+
+.filter_codelab-dark .tiny_codelab-code {
+    background: rgba(255, 255, 255, .1);
+}
+
+.filter_codelab-dark .tiny_codelab-aihint-box {
+    border-left-color: #a78bfa;
+    background: #231f33;
+    color: #e2e8f0;
+}
+
+.filter_codelab-dark .tiny_codelab-aihint-error {
+    color: #f48771;
+}
+
+.filter_codelab-dark .tiny_codelab-mem-frame,
+.filter_codelab-dark .tiny_codelab-mem-object {
+    border-color: #4b5563;
+    background: #252526;
+    color: #e2e8f0;
+}
+
+.filter_codelab-dark .tiny_codelab-mem-frame {
+    border-left-color: #4fc1ff;
+}
+
+.filter_codelab-dark .tiny_codelab-mem-title,
+.filter_codelab-dark .tiny_codelab-mem-type {
+    color: #cbd5e1;
+}
+
+.filter_codelab-dark .tiny_codelab-mem-ptr {
+    border-color: #4fc1ff;
+}
+
+.filter_codelab-dark .tiny_codelab-mem-content {
+    border-color: #4b5563;
+    background: #1e1e1e;
+    color: #e2e8f0;
+}
+
+.filter_codelab-dark .tiny_codelab-mem-changed .tiny_codelab-mem-content,
+.filter_codelab-dark tr.tiny_codelab-mem-changed td {
+    background: #14432a;
+    color: #d1fae5;
+}
+
+.filter_codelab-dark .tiny_codelab-mem-changed .tiny_codelab-mem-bar {
+    background: #34d399;
+}
+
+.filter_codelab-dark .tiny_codelab-mem-leaked {
+    border-color: #f87171;
+    background: #3b181b;
+}
+
+.filter_codelab-dark .tiny_codelab-mem-marker {
+    color: #fbbf24;
+}
+
+.filter_codelab-dark .tiny_codelab-mem-shared {
+    color: #fca5a5;
+}
+
+.filter_codelab-dark .tiny_codelab-mem-arrows {
+    color: #4fc1ff;
+}
+
+.filter_codelab-dark .tiny_codelab-mem-matrix td[class*="tiny_codelab-mem-heat-"] {
+    border-color: #4b5563;
+    color: #f8fafc;
+}
+
+.filter_codelab-dark .tiny_codelab-mem-heat-0 {
+    background: #1e293b;
+}
+
+.filter_codelab-dark .tiny_codelab-mem-heat-1 {
+    background: #1e3a5f;
+}
+
+.filter_codelab-dark .tiny_codelab-mem-heat-2 {
+    background: #1d4ed8;
+}
+
+.filter_codelab-dark .tiny_codelab-mem-heat-3 {
+    background: #2563eb;
+}
+
+.filter_codelab-dark .tiny_codelab-mem-heat-4 {
+    background: #0ea5e9;
+}
+
+.filter_codelab-dark .tiny_codelab-cx {
+    border-color: #3c3c3c;
+    background: #252526;
+    color: #e2e8f0;
+}
+
+.filter_codelab-dark .tiny_codelab-cx-chart {
+    background: #1e1e1e;
+}
+
+.filter_codelab-dark .tiny_codelab-cx-grid {
+    stroke: #334155;
+}
+
+.filter_codelab-dark .tiny_codelab-cx-tick,
+.filter_codelab-dark .tiny_codelab-cx-reflabel {
+    fill: #94a3b8;
+}
+
+.filter_codelab-dark .tiny_codelab-cx-axis,
+.filter_codelab-dark .tiny_codelab-cx-label {
+    fill: #e2e8f0;
+}
+
+.filter_codelab-dark .tiny_codelab-cx-dot {
+    stroke: #1e1e1e;
+}
+
 /* Scrolling regions take the keyboard focus (the console, the trace table, the call tree, the memory view). */
 .tiny_codelab-console:focus-visible,
 .tiny_codelab-trace-scroll:focus-visible,
