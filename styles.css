@@ -992,6 +992,26 @@ tr.tiny_codelab-mem-changed td {
 .filter_codelab-dark.tiny_codelab-fullscreen {
     background: #1e1e1e;
     color: #d4d4d4;
+    color-scheme: dark;
+}
+
+.filter_codelab-dark .tiny_codelab-vars-table,
+.filter_codelab-dark .tiny_codelab-trace-table,
+.filter_codelab-dark .tiny_codelab-cx-table {
+    --bs-table-bg: #252526;
+    --bs-table-color: #e2e8f0;
+    --bs-table-border-color: #3c3c3c;
+    border-color: #3c3c3c;
+    color: #e2e8f0;
+}
+
+.filter_codelab-dark .tiny_codelab-vars-table th,
+.filter_codelab-dark .tiny_codelab-vars-table td,
+.filter_codelab-dark .tiny_codelab-trace-table th,
+.filter_codelab-dark .tiny_codelab-trace-table td,
+.filter_codelab-dark .tiny_codelab-cx-table th,
+.filter_codelab-dark .tiny_codelab-cx-table td {
+    border-color: #3c3c3c;
 }
 
 .filter_codelab-dark .tiny_codelab-vars-empty,

@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.34.1 (2026-11-27)
+
+- Complete Dark mode styling for all CodeLab panels (Memory view, Call tree, Trace and Variables tables, Complexity
+  chart, AI error hints, Web preview, full screen and dark native scrollbars) when the viewer uses vs-dark or hc-black.
+
 ## 1.34.0 (2026-11-26)
 
 - Step for Java: with the CodeLab runner 0.26 or newer (and CodeLab Cloud), Java examples and answers run line by line
