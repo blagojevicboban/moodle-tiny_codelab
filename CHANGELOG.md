@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.35.0 (2026-11-28)
+
+- SQL Schema / Tables viewer (tiny_codelab/sqlschema): parses hidden CREATE TABLE and INSERT INTO setup scripts
+  client-side and renders table cards with columns, data types, PK/FK badges, foreign-key references and up to 5 sample
+  rows in Light and Dark mode.
+- Side-by-side Monaco diff editor helper (createDiffEditor in tiny_codelab/monaco) for comparing student code with
+  model solutions in quiz review.
+
 ## 1.34.1 (2026-11-27)
 
 - Complete Dark mode styling for all CodeLab panels (Memory view, Call tree, Trace and Variables tables, Complexity

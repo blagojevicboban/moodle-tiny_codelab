@@ -608,3 +608,68 @@ export const createEditor = async(container, options = {}) => {
         frame,
     };
 };
+
+/**
+ * Create a read-only Monaco side-by-side diff editor in its own frame (e.g. student answer vs model solution).
+ *
+ * @param {HTMLElement} container
+ * @param {Object} options
+ * @param {string} options.original left-hand code (student's answer)
+ * @param {string} options.modified right-hand code (model solution)
+ * @param {string} [options.lang]
+ * @param {string} [options.theme]
+ * @param {string} [options.label]
+ * @returns {Promise<{setTheme: function(string): void, dispose: function(): void, frame: HTMLIFrameElement}>}
+ */
+export const createDiffEditor = async(container, options = {}) => {
+    const lang = languages[options.lang] || languages[defaultLanguage];
+    const theme = resolveTheme(options.theme || 'auto');
+    const lineHeight = lineHeightFor(shared.fontSize);
+    const maxLines = Math.max(
+        String(options.original || '').split('\n').length,
+        String(options.modified || '').split('\n').length,
+        6
+    );
+    const height = Math.min(Math.max(maxLines * lineHeight + PADDING + 24, 160), 460);
+
+    const frame = document.createElement('iframe');
+    frame.className = 'tiny_codelab-frame';
+    frame.src = frameUrl();
+    frame.title = options.label || 'Code diff';
+    frame.style.height = `${height}px`;
+    container.replaceChildren(frame);
+
+    const win = await frameReady(frame);
+    const {monaco} = win;
+    win.document.body.className = `theme-${theme}`;
+    const originalModel = monaco.editor.createModel(String(options.original || ''), lang);
+    const modifiedModel = monaco.editor.createModel(String(options.modified || ''), lang);
+    const diffEditor = monaco.editor.createDiffEditor(win.document.getElementById('editor'), {
+        theme,
+        readOnly: true,
+        automaticLayout: true,
+        renderSideBySide: true,
+        useInlineViewWhenSpaceIsLimited: true,
+        minimap: {enabled: false},
+        scrollBeyondLastLine: false,
+        fontSize: shared.fontSize,
+        lineHeight,
+        wordWrap: shared.wrap ? 'on' : 'off',
+    });
+    diffEditor.setModel({original: originalModel, modified: modifiedModel});
+
+    return {
+        setTheme: (value) => {
+            const actual = resolveTheme(value);
+            win.document.body.className = `theme-${actual}`;
+            monaco.editor.setTheme(actual);
+        },
+        dispose: () => {
+            diffEditor.dispose();
+            originalModel.dispose();
+            modifiedModel.dispose();
+            frame.remove();
+        },
+        frame,
+    };
+};

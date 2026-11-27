@@ -988,6 +988,102 @@ tr.tiny_codelab-mem-changed td {
     margin-top: .5rem;
 }
 
+/* SQL schema and sample-rows panel (tiny_codelab/sqlschema). */
+.tiny_codelab-sqlschema {
+    margin-top: .5rem;
+    padding: .6rem .75rem;
+    border: 1px solid var(--bs-border-color, #dee2e6);
+    border-radius: .375rem;
+    background: var(--bs-tertiary-bg, #f8fafc);
+}
+
+.tiny_codelab-sqlschema-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr));
+    gap: .65rem;
+}
+
+.tiny_codelab-sqlschema-card {
+    display: flex;
+    flex-direction: column;
+    gap: .45rem;
+    min-width: 0;
+    padding: .55rem .65rem;
+    border: 1px solid var(--bs-border-color, #dee2e6);
+    border-radius: .375rem;
+    background: var(--bs-body-bg, #fff);
+}
+
+.tiny_codelab-sqlschema-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: .5rem;
+}
+
+.tiny_codelab-sqlschema-name {
+    font-weight: 700;
+    font-size: .9rem;
+}
+
+.tiny_codelab-sqlschema-count,
+.tiny_codelab-sqlschema-more,
+.tiny_codelab-sqlschema-fks {
+    color: var(--bs-secondary-color, #64748b);
+    font-size: .78rem;
+}
+
+.tiny_codelab-sqlschema-cols {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .3rem;
+}
+
+.tiny_codelab-sqlschema-col {
+    display: inline-flex;
+    align-items: center;
+    gap: .25rem;
+    padding: .12rem .4rem;
+    border: 1px solid var(--bs-border-color, #dee2e6);
+    border-radius: .25rem;
+    background: var(--bs-tertiary-bg, #f8fafc);
+    font-size: .78rem;
+}
+
+.tiny_codelab-sqlschema-colname {
+    font-weight: 600;
+}
+
+.tiny_codelab-sqlschema-coltype {
+    color: var(--bs-secondary-color, #64748b);
+    font-size: .72rem;
+}
+
+.tiny_codelab-sqlschema-badge {
+    padding: 0 .28rem;
+    border-radius: .2rem;
+    font-size: .68rem;
+    font-weight: 700;
+}
+
+.tiny_codelab-sqlschema-pk {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.tiny_codelab-sqlschema-fk {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+.tiny_codelab-sqlschema-scroll {
+    overflow-x: auto;
+}
+
+.tiny_codelab-sqlschema-table {
+    font-size: .78rem;
+}
+
 /* Dark theme support for all CodeLab panels when the viewer uses vs-dark or hc-black. */
 .filter_codelab-dark.tiny_codelab-fullscreen {
     background: #1e1e1e;
@@ -1194,6 +1290,52 @@ tr.tiny_codelab-mem-changed td {
 
 .filter_codelab-dark .tiny_codelab-cx-dot {
     stroke: #1e1e1e;
+}
+
+.filter_codelab-dark .tiny_codelab-sqlschema {
+    border-color: #3c3c3c;
+    background: #252526;
+    color: #e2e8f0;
+}
+
+.filter_codelab-dark .tiny_codelab-sqlschema-card {
+    border-color: #3c3c3c;
+    background: #1e1e1e;
+}
+
+.filter_codelab-dark .tiny_codelab-sqlschema-col {
+    border-color: #3c3c3c;
+    background: #252526;
+}
+
+.filter_codelab-dark .tiny_codelab-sqlschema-count,
+.filter_codelab-dark .tiny_codelab-sqlschema-more,
+.filter_codelab-dark .tiny_codelab-sqlschema-fks,
+.filter_codelab-dark .tiny_codelab-sqlschema-coltype {
+    color: #9d9d9d;
+}
+
+.filter_codelab-dark .tiny_codelab-sqlschema-pk {
+    background: #4b3d12;
+    color: #fef3c7;
+}
+
+.filter_codelab-dark .tiny_codelab-sqlschema-fk {
+    background: #1e3a5f;
+    color: #bfdbfe;
+}
+
+.filter_codelab-dark .tiny_codelab-sqlschema-table {
+    --bs-table-bg: #1e1e1e;
+    --bs-table-color: #e2e8f0;
+    --bs-table-border-color: #3c3c3c;
+    border-color: #3c3c3c;
+    color: #e2e8f0;
+}
+
+.filter_codelab-dark .tiny_codelab-sqlschema-table th,
+.filter_codelab-dark .tiny_codelab-sqlschema-table td {
+    border-color: #3c3c3c;
 }
 
 /* Scrolling regions take the keyboard focus (the console, the trace table, the call tree, the memory view). */
