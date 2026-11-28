@@ -26,7 +26,7 @@ namespace tiny_codelab\local;
  */
 class interactive {
     /** Languages the interactive server runs (Python runs in the browser). */
-    const LANGUAGES = ['c', 'cpp', 'java', 'csharp', 'mysql', 'typescript', 'bash', 'go', 'rust', 'r',
+    const LANGUAGES = ['c', 'cpp', 'java', 'csharp', 'javascript', 'mysql', 'typescript', 'bash', 'go', 'rust', 'r',
         'ruby', 'lua', 'kotlin', 'perl', 'octave', 'julia', 'scheme', 'dart', 'scala', 'elixir', 'swift', 'haskell'];
 
     /** Languages that run only on the interactive server, not on Jobe. */
