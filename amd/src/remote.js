@@ -40,7 +40,7 @@ const KEYS = ['compiling', 'running', 'running_server', 'inputline', 'inputok', 
     'san_index_oob', 'san_buffer_overflow', 'san_use_after_free', 'san_null_pointer', 'san_int_overflow', 'san_div_zero'];
 
 /** Languages that run step by step on the interactive server. */
-const STEP_LANGUAGES = ['c', 'cpp', 'csharp', 'java', 'javascript'];
+const STEP_LANGUAGES = ['c', 'cpp', 'csharp', 'java', 'javascript', 'typescript'];
 
 /** Languages that read no input (SQL): the script runs to its end. */
 const NO_INPUT = ['mysql'];

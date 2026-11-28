@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.35.1 (2026-11-28)
+
+- Step debugger enabled for JavaScript (Node.js) and TypeScript on CodeLab runner 0.27+ and CodeLab Cloud (breakpoints,
+  Step into/over/out, Call stack, Variables and Watch expressions).
+- Fixed alphabetical order of the `hidediff` language key across all 29 languages.
+
 ## 1.35.0 (2026-11-28)
 
 - SQL Schema / Tables viewer (tiny_codelab/sqlschema): parses hidden CREATE TABLE and INSERT INTO setup scripts
